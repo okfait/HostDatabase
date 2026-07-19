@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- Apply saved theme immediately, before first paint, so there's no flash -->
+<script>(function(){ try{ var t = localStorage.getItem('sgr-theme'); if(t === 'light') document.documentElement.setAttribute('data-theme','light'); }catch(e){} })();</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SGR Host Database</title>
 <link rel="icon" href="https://github.com/okfait/okgarage-mini/blob/main/01%20(81).png?raw=true">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/4.4.4/chart.umd.min.js"></script>
-<script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" onerror="this.onerror=null;document.write('<script src=\'https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js\'><\/script>')"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/4.4.4/chart.umd.min.js" onerror="this.onerror=null;document.write('<script src=\'https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js\'><\/script>')"></script>
+<script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js" onerror="this.onerror=null;document.write('<script src=\'https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js\'><\/script>')"></script>
 </head>
 <body>
 <script>
@@ -62,6 +64,26 @@ const ASSIGN = {
   --text-dim:#5c6f68;
   --font-display:'Poppins',sans-serif;
   --font-body:'Inter',sans-serif;
+}
+[data-theme="light"]{
+  --bg:#f3f6f4;
+  --bg-elevated:#ffffff;
+  --bg-card:#ffffff;
+  --line:#dfe7e2;
+  --line-bright:#c7d5cd;
+  --text:#0f1a16;
+  --text-muted:#5c6f68;
+  --text-dim:#8a998f;
+}
+[data-theme="light"] body{
+  background:
+    radial-gradient(ellipse at top, rgba(37,129,98,0.08), transparent 55%),
+    var(--bg);
+}
+[data-theme="light"] #login-screen{
+  background:
+    repeating-linear-gradient(0deg, rgba(37,129,98,0.05) 0px, rgba(37,129,98,0.05) 1px, transparent 1px, transparent 3px),
+    var(--bg);
 }
 *{box-sizing:border-box;}
 html{ scrollbar-width:none; -ms-overflow-style:none; }
@@ -152,14 +174,14 @@ header.top .top-inner{ max-width:1180px; width:100%; margin:0 auto; display:flex
 #logout-btn:hover{ border-color:var(--accent-danger); color:var(--accent-danger); }
 
 /* Quick-nav "add new" dropdown in the top bar */
-.quicknav{ position:relative; }
-#quicknav-btn{ display:inline-flex; align-items:center; gap:7px; background:var(--accent); border:1px solid var(--accent-bright); color:#04140d; font-size:11.5px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; padding:9px 15px 9px 12px; border-radius:10px; cursor:pointer; font-family:var(--font-body); transition:.15s; }
-#quicknav-btn:hover{ transform:translateY(-1px); box-shadow:0 8px 20px rgba(61,220,151,0.25); }
-#quicknav-btn .plus{ font-size:15px; font-weight:800; line-height:1; }
-.quicknav-menu{ position:absolute; top:calc(100% + 8px); right:0; min-width:190px; background:var(--bg-card); border:1px solid var(--line-bright); border-radius:14px; padding:6px; box-shadow:0 20px 50px rgba(0,0,0,0.45); opacity:0; pointer-events:none; transform:translateY(-6px); transition:opacity .15s, transform .15s; z-index:10; }
-.quicknav.open .quicknav-menu{ opacity:1; pointer-events:auto; transform:translateY(0); }
-.quicknav-item{ display:block; padding:10px 12px; border-radius:9px; font-size:12.5px; font-weight:600; color:var(--text-muted); cursor:pointer; text-decoration:none; transition:.1s; }
-.quicknav-item:hover{ background:var(--bg-elevated); color:var(--accent-bright); }
+/* Top-bar nav links (Log Graph / Roster / Host Of The Month) */
+.topnav{ display:flex; align-items:center; gap:4px; }
+.topnav a{ font-size:12.5px; font-weight:600; color:var(--text-muted); text-decoration:none; padding:8px 12px; border-radius:9px; transition:.15s; font-family:var(--font-body); }
+.topnav a:hover{ color:var(--accent-bright); background:var(--bg-elevated); }
+
+/* Light/dark theme toggle */
+#theme-toggle{ display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; background:var(--bg-elevated); border:1px solid var(--line-bright); color:var(--text-muted); border-radius:10px; cursor:pointer; font-size:15px; transition:.15s; flex-shrink:0; }
+#theme-toggle:hover{ border-color:var(--accent-bright); color:var(--accent-bright); }
 
 section.section{ margin-bottom:40px; }
 .section-head{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:18px; flex-wrap:wrap; gap:10px; }
@@ -254,10 +276,12 @@ footer{ margin-top:20px; padding-top:26px; border-top:1px solid var(--line); dis
 .footer-text{ font-size:12px; color:var(--text-dim); line-height:1.6; }
 .logo-box{ background:#fff; border-radius:12px; padding:8px 10px; display:flex; align-items:center; box-shadow:0 6px 20px rgba(0,0,0,0.3); }
 .logo-box img{ height:26px; display:block; }
+.footer-logos{ display:flex; align-items:center; gap:10px; }
 
 @media (max-width:640px){
   header.top .top-inner{ flex-direction:column; align-items:flex-start; gap:12px; }
-  .app-content{ padding-top:210px; }
+  .topnav{ flex-wrap:wrap; }
+  .app-content{ padding-top:270px; }
 }
 </style>
 
@@ -285,17 +309,15 @@ footer{ margin-top:20px; padding-top:26px; border-top:1px solid var(--line); dis
           <div class="name" id="team-name-display">Shadow Greenville Roleplay</div>
         </div>
       </div>
+      <nav class="topnav">
+        <a href="#graph-section">Log Graph</a>
+        <a href="#roster-section">Roster</a>
+        <a href="#motm-section">Host Of The Month</a>
+      </nav>
       <div class="who">
         <div class="name">Signed in as <b id="who-name">—</b></div>
         <button id="logout-btn">Sign Out</button>
-        <div class="quicknav" id="quicknav">
-          <button id="quicknav-btn" type="button"><span class="plus">+</span> Add New</button>
-          <div class="quicknav-menu" id="quicknav-menu">
-            <a class="quicknav-item" href="#graph-section">Hosts Graph</a>
-            <a class="quicknav-item" href="#roster-section">Roster</a>
-            <a class="quicknav-item" href="#motm-section">Host Of The Month</a>
-          </div>
-        </div>
+        <button id="theme-toggle" type="button" title="Toggle light/dark mode">🌙</button>
       </div>
     </div>
   </header>
@@ -308,7 +330,7 @@ footer{ margin-top:20px; padding-top:26px; border-top:1px solid var(--line); dis
 
     <section class="section" id="graph-section">
       <div class="section-head">
-        <div class="section-title">Hosts Graph</div>
+        <div class="section-title">Log Graph</div>
         <div class="graph-controls">
           <button class="toggle-pill" id="only-me-btn"><span class="dot"></span>Show only me</button>
           <div class="dropdown" id="player-dropdown">
@@ -335,7 +357,10 @@ footer{ margin-top:20px; padding-top:26px; border-top:1px solid var(--line); dis
 
     <footer>
       <div class="footer-text">Website made by Geo to be used in the Shadow GVRP community.<br>© <span id="year"></span> Shadow Greenville Roleplay.</div>
-      <div class="logo-box"><img src="https://github.com/okfait/okgarage-mini/blob/main/01%20(80).png?raw=true" alt="OK Fait Club logo"></div>
+      <div class="footer-logos">
+        <div class="logo-box"><img src="" id="footer-server-logo" alt="Server logo"></div>
+        <div class="logo-box"><img src="https://github.com/okfait/okgarage-mini/blob/main/01%20(80).png?raw=true" alt="OK Fait Club logo"></div>
+      </div>
     </footer>
   </div>
 </div>
@@ -354,6 +379,7 @@ document.getElementById('login-team-name').textContent = CONFIG.TEAM_NAME;
 document.getElementById('team-name-display').textContent = CONFIG.TEAM_NAME;
 document.getElementById('login-logo-img').src = CONFIG.LOGO_URL;
 document.getElementById('brand-logo-img').src = CONFIG.LOGO_URL;
+document.getElementById('footer-server-logo').src = CONFIG.LOGO_URL;
 document.documentElement.style.setProperty('--accent', CONFIG.BRAND_COLOR);
 
 /* =====================================================================
@@ -513,13 +539,15 @@ function renderPill(){
   const sr = SHEET.sameRankQuota, pr = SHEET.promoQuota;
 
   if(sr===null || pr===null){
+    const targetPct = Math.min(total*8,100);
     region.innerHTML = `
       <div class="pill-wrap">
-        <div class="pill-track"><div class="pill-fill" style="width:${Math.min(total*8,100)}%"></div>
+        <div class="pill-track"><div class="pill-fill" id="pill-fill-el" style="width:0%"></div>
           <div class="pill-value on-track">${total}</div>
         </div>
         <div class="quota-soon">Quota <div class="dots"><span></span><span></span><span></span></div> soon</div>
       </div>`;
+    animatePillFill(targetPct);
     return;
   }
   const pct = Math.min((total/pr)*100, 100);
@@ -527,7 +555,7 @@ function renderPill(){
   region.innerHTML = `
     <div class="pill-wrap">
       <div class="pill-track">
-        <div class="pill-fill" style="width:${pct}%"></div>
+        <div class="pill-fill" id="pill-fill-el" style="width:0%"></div>
         <div class="pill-marker" style="left:${markerPct}%">
           <div class="marker-num">${sr}</div>
           <div class="tip-box">You need ${sr}+ logs to keep your rank</div>
@@ -537,6 +565,16 @@ function renderPill(){
       </div>
       <div class="pill-caption">${total>=pr ? 'Promoted this cycle' : total>=sr ? 'Rank held' : `${(pr-total).toFixed(1)} logs to promotion`}</div>
     </div>`;
+  animatePillFill(pct);
+}
+function animatePillFill(targetPct){
+  // Render at 0% first, then set the real width a frame later so the
+  // existing CSS width-transition actually has something to animate —
+  // otherwise the bar just appears already-full with no motion.
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    const el = document.getElementById('pill-fill-el');
+    if(el) el.style.width = targetPct + '%';
+  }));
 }
 
 /* ---------------- RENDER: GRAPH ---------------- */
@@ -553,6 +591,24 @@ function cumulativeSeries(user, dates){
 const PALETTE = ['#3ddc97','#e8b84b','#7db8ff','#e88ac0','#c99bff','#ff9d6c','#6cd4d9','#d9d96c'];
 
 function renderChart(){
+  const box = document.querySelector('#graph-section .chart-box');
+  if(typeof Chart === 'undefined'){
+    // Chart.js failed to load from both CDNs (probably a browser
+    // extension or network policy blocking script requests). Fail
+    // soft instead of throwing, and let the user know why.
+    box.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-dim);font-size:13px;text-align:center;padding:20px;">Chart library failed to load — check your ad blocker / extensions, or your connection, then refresh.</div>';
+    console.error('SGR Host Database: Chart.js is not defined — both CDN sources failed to load.');
+    return;
+  }
+  if(!document.getElementById('logs-chart')){
+    box.innerHTML = '<canvas id="logs-chart"></canvas>';
+  }
+  const cs = getComputedStyle(document.documentElement);
+  const cText = cs.getPropertyValue('--text-muted').trim() || '#93a89f';
+  const cDim = cs.getPropertyValue('--text-dim').trim() || '#5c6f68';
+  const cCard = cs.getPropertyValue('--bg-card').trim() || '#111c18';
+  const cLine = cs.getPropertyValue('--line').trim() || '#1e2d27';
+  const cLineBright = cs.getPropertyValue('--line-bright').trim() || '#2c443a';
   const dates = allDatesSorted();
   const labels = dates.map(shortLabel);
   const datasets = SHEET.users.map((u,i)=>({
@@ -571,16 +627,16 @@ function renderChart(){
       responsive:true, maintainAspectRatio:false,
       interaction:{ mode:'nearest', intersect:false },
       plugins:{
-        legend:{ labels:{ color:'#93a89f', font:{ family:"'Inter'", size:11, weight:600 } } },
+        legend:{ labels:{ color:cText, font:{ family:"'Inter'", size:11, weight:600 } } },
         tooltip:{
-          backgroundColor:'#111c18', borderColor:'#2c443a', borderWidth:1, padding:10,
+          backgroundColor:cCard, borderColor:cLineBright, borderWidth:1, padding:10,
           titleFont:{ family:"'Inter'", size:11.5, weight:'600' }, bodyFont:{ family:"'Inter'", size:11.5 },
           callbacks:{ label:(ctx)=>` ${ctx.dataset.label}: ${ctx.formattedValue} logs` }
         }
       },
       scales:{
-        y:{ beginAtZero:true, ticks:{ stepSize:2, color:'#5c6f68', font:{ family:"'Inter'", size:10.5 } }, grid:{ color:'#1e2d27' } },
-        x:{ ticks:{ color:'#5c6f68', font:{ family:"'Inter'", size:10.5 } }, grid:{ display:false } }
+        y:{ beginAtZero:true, ticks:{ stepSize:2, color:cDim, font:{ family:"'Inter'", size:10.5 } }, grid:{ color:cLine } },
+        x:{ ticks:{ color:cDim, font:{ family:"'Inter'", size:10.5 } }, grid:{ display:false } }
       },
       onHover:(evt, active)=>{
         if(!active.length){ resetOpacity(); return; }
@@ -624,17 +680,21 @@ document.getElementById('dropdown-toggle').addEventListener('click', (e)=>{
 });
 document.addEventListener('click', ()=>{
   document.getElementById('player-dropdown').classList.remove('open');
-  document.getElementById('quicknav').classList.remove('open');
 });
 
-/* ---------------- QUICK NAV (top bar "Add New") ---------------- */
-document.getElementById('quicknav-btn').addEventListener('click', (e)=>{
-  e.stopPropagation();
-  document.getElementById('quicknav').classList.toggle('open');
+/* ---------------- THEME (persisted light/dark) ---------------- */
+const THEME_KEY = 'sgr-theme';
+function setTheme(t){
+  document.documentElement.setAttribute('data-theme', t);
+  try{ localStorage.setItem(THEME_KEY, t); }catch(e){}
+  document.getElementById('theme-toggle').textContent = t === 'light' ? '☀️' : '🌙';
+  if(CURRENT_USER) renderChart(); // chart tick/grid colors are theme-aware
+}
+document.getElementById('theme-toggle').addEventListener('click', ()=>{
+  const current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+  setTheme(current === 'light' ? 'dark' : 'light');
 });
-document.querySelectorAll('.quicknav-item').forEach(item=>{
-  item.addEventListener('click', ()=>{ document.getElementById('quicknav').classList.remove('open'); });
-});
+setTheme(document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark');
 
 /* ---------------- RENDER: CARDS ---------------- */
 function renderCards(){
