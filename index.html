@@ -71,6 +71,8 @@ const ICONS = {
   --text:#f2f5f3;
   --text-muted:#93a89f;
   --text-dim:#5c6f68;
+  --header-bg:rgba(11,18,16,0.55);
+  --header-border:rgba(44,68,58,0.5);
   --font-display:'Poppins',sans-serif;
   --font-body:'Inter',sans-serif;
 }
@@ -83,6 +85,8 @@ const ICONS = {
   --text:#0f1a16;
   --text-muted:#5c6f68;
   --text-dim:#8a998f;
+  --header-bg:rgba(255,255,255,0.7);
+  --header-border:rgba(199,213,205,0.7);
 }
 [data-theme="light"] body{
   background:
@@ -179,10 +183,11 @@ header.top{
   position:fixed; top:0; left:0; right:0; z-index:40;
   display:flex; align-items:center; justify-content:space-between;
   padding:14px 24px; gap:16px;
-  background:rgba(11,18,16,0.55);
+  background:var(--header-bg);
   -webkit-backdrop-filter:blur(18px) saturate(140%);
   backdrop-filter:blur(18px) saturate(140%);
-  border-bottom:1px solid rgba(44,68,58,0.5);
+  border-bottom:1px solid var(--header-border);
+  box-shadow:0 4px 24px rgba(15,26,22,0.06);
 }
 header.top .top-inner{ max-width:1180px; width:100%; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
 .brand{ display:flex; align-items:center; gap:13px; }
@@ -479,7 +484,7 @@ document.getElementById('footer-server-logo').src = CONFIG.LOGO_URL;
 document.documentElement.style.setProperty('--accent', CONFIG.BRAND_COLOR);
 
 /* ---------------- ported ElectricBorder (canvas noise outline) ---------------- */
-function attachElectricBorder(target, { color = '#3ddc97', speed = 1, chaos = 0.06, borderRadius = 16 } = {}){
+function attachElectricBorder(target, { color = '#3ddc97', speed = 1, chaos = 0.06, borderRadius = 16, opacity = 1 } = {}){
   const borderOffset = 14;
   const wrap = document.createElement('div');
   wrap.className = 'electric-wrap';
@@ -539,8 +544,9 @@ function attachElectricBorder(target, { color = '#3ddc97', speed = 1, chaos = 0.
     const dt = (now - lastTime) / 1000; lastTime = now;
     timeVal += dt * speed;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.globalAlpha = opacity;
     ctx.strokeStyle = color; ctx.lineWidth = 1.4; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    ctx.shadowColor = color; ctx.shadowBlur = 7;
+    ctx.shadowColor = color; ctx.shadowBlur = 7 * opacity;
     const left = borderOffset, top = borderOffset, bw = width - 2 * borderOffset, bh = height - 2 * borderOffset;
     if(bw <= 0 || bh <= 0) return;
     const maxR = Math.min(bw, bh) / 2, r = Math.min(borderRadius, maxR);
@@ -979,7 +985,7 @@ function setTheme(t){
   document.getElementById('theme-toggle').innerHTML = t === 'light'
     ? `<span class="icon">${ICONS.sun}</span>`
     : `<span class="icon">${ICONS.moon}</span>`;
-  if(CURRENT_USER) renderChart();
+  if(CURRENT_USER){ renderChart(); renderCards(); renderMotm(); }
 }
 document.getElementById('theme-toggle').addEventListener('click', ()=>{
   const current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
@@ -1018,14 +1024,16 @@ function renderCards(){
       </div>`;
   }).join('');
 
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
   const brand = CONFIG.BRAND_COLOR;
-  const brandDark = shadeColor(brand, -35);
+  const brandDark = shadeColor(brand, isLight ? 22 : -35);
+  const glowOpacity = isLight ? 0.5 : 1;
   grid.querySelectorAll('.card').forEach(card=>{
     const rankName = card.dataset.rank;
     if(rankName === 'Host Manager'){
-      ELECTRIC_INSTANCES.push(attachElectricBorder(card, { color: brand, chaos:0.06, borderRadius:16 }));
+      ELECTRIC_INSTANCES.push(attachElectricBorder(card, { color: brand, chaos:0.06, borderRadius:16, opacity: glowOpacity }));
     } else if(rankName === 'Host Lead'){
-      ELECTRIC_INSTANCES.push(attachElectricBorder(card, { color: brandDark, chaos:0.06, borderRadius:16 }));
+      ELECTRIC_INSTANCES.push(attachElectricBorder(card, { color: brandDark, chaos:0.06, borderRadius:16, opacity: glowOpacity }));
     }
   });
 }
@@ -1036,6 +1044,7 @@ function renderMotm(){
   if(!SHEET.motm.length){ el.innerHTML = `<div class="eyebrow">No entries yet.</div>`; return; }
   const cs = getComputedStyle(document.documentElement);
   const gold = cs.getPropertyValue('--accent-gold').trim() || '#e8b84b';
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
   el.innerHTML = SHEET.motm.map((m,i)=>`
     <div class="motm-card">
       <div class="motm-card-top">
@@ -1046,7 +1055,7 @@ function renderMotm(){
       <div class="motm-card-logs">${m.logs ?? '—'}<span class="unit">logs</span></div>
     </div>`).join('');
   el.querySelectorAll('.motm-card').forEach(card=>{
-    ELECTRIC_INSTANCES.push(attachElectricBorder(card, { color: gold, chaos:0.06, borderRadius:16 }));
+    ELECTRIC_INSTANCES.push(attachElectricBorder(card, { color: gold, chaos:0.06, borderRadius:16, opacity: isLight ? 0.5 : 1 }));
   });
 }
 
