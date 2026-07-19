@@ -251,6 +251,13 @@ section.section{ margin-bottom:40px; scroll-margin-top:100px; }
 .dropdown-item:hover{ background:var(--bg-elevated); color:var(--text); }
 .dropdown-item.selected{ color:var(--accent-bright); font-weight:600; }
 
+.chart-legend{ display:flex; flex-wrap:wrap; gap:7px 16px; margin:14px 0 4px; }
+.chart-legend-item{ display:inline-flex; align-items:center; gap:7px; font-size:11.5px; font-weight:600; color:var(--text-muted); cursor:pointer; user-select:none; transition:opacity .15s, color .15s; }
+.chart-legend-item:hover{ color:var(--text); }
+.chart-legend-item .dot{ width:10px; height:10px; min-width:10px; min-height:10px; border-radius:50%; flex-shrink:0; }
+.chart-legend-item.dimmed{ opacity:0.32; }
+.chart-legend-item.hidden-ds{ opacity:0.32; text-decoration:line-through; }
+
 .chart-box{ position:relative; height:340px; margin-top:20px; padding-bottom:16px; }
 .chart-resize-handle{ position:absolute; left:0; right:0; bottom:0; height:16px; cursor:ns-resize; display:flex; align-items:center; justify-content:center; touch-action:none; }
 .chart-resize-handle::before{ content:""; width:44px; height:4px; border-radius:3px; background:var(--line-bright); transition:background .15s, width .15s; }
@@ -360,6 +367,7 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
           </div>
         </div>
       </div>
+      <div class="chart-legend" id="chart-legend"></div>
       <div class="chart-box" id="chart-box"><canvas id="logs-chart"></canvas><div class="chart-resize-handle" id="chart-resize"></div></div>
     </section>
 
@@ -700,13 +708,26 @@ document.getElementById('login-form').addEventListener('submit', function(e){
   attemptLogin();
 });
 
-function attemptLogin(){
+// Remember-me — stored ourselves in localStorage instead of relying on
+// the browser's native password manager, since that's inconsistent or
+// missing entirely on phones and in-app browsers (Discord's built-in
+// browser, for example). localStorage works the same everywhere.
+const REMEMBER_KEY = 'sgr_remember_v1';
+function saveRemembered(u, p){ try{ localStorage.setItem(REMEMBER_KEY, JSON.stringify({ u, p })); }catch(e){} }
+function clearRemembered(){ try{ localStorage.removeItem(REMEMBER_KEY); }catch(e){} }
+function loadRemembered(){
+  try{ const raw = localStorage.getItem(REMEMBER_KEY); return raw ? JSON.parse(raw) : null; }
+  catch(e){ return null; }
+}
+
+function attemptLogin(silent){
   const u = document.getElementById('login-user').value.trim();
   const p = document.getElementById('login-pass').value;
   const errEl = document.getElementById('login-error');
   const match = SHEET.users.find(x => x.username.toLowerCase()===u.toLowerCase() && x.password===p);
-  if(!match){ errEl.textContent = 'Username or password not recognized.'; return; }
+  if(!match){ if(!silent) errEl.textContent = 'Username or password not recognized.'; return; }
   errEl.textContent = '';
+  saveRemembered(u, p);
   CURRENT_USER = match;
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
@@ -735,6 +756,7 @@ function attemptLogin(){
 })();
 document.getElementById('logout-btn').addEventListener('click', ()=>{
   CURRENT_USER = null; ONLY_ME = false; SELECTED_PLAYER='';
+  clearRemembered();
   document.getElementById('login-user').value=''; document.getElementById('login-pass').value='';
   document.getElementById('app').style.display='none';
   document.getElementById('login-screen').style.display='flex';
@@ -832,7 +854,6 @@ function renderChart(){
     box.innerHTML = '<canvas id="logs-chart"></canvas>';
   }
   const cs = getComputedStyle(document.documentElement);
-  const cText = cs.getPropertyValue('--text-muted').trim() || '#93a89f';
   const cDim = cs.getPropertyValue('--text-dim').trim() || '#5c6f68';
   const cCard = cs.getPropertyValue('--bg-card').trim() || '#111c18';
   const cLine = cs.getPropertyValue('--line').trim() || '#1e2d27';
@@ -859,7 +880,7 @@ function renderChart(){
       responsive:true, maintainAspectRatio:false,
       interaction:{ mode:'nearest', intersect:false },
       plugins:{
-        legend:{ labels:{ color:cText, usePointStyle:true, pointStyle:'circle', pointStyleWidth:10, boxHeight:10, boxWidth:10, font:{ family:"'Inter'", size:11, weight:600 } } },
+        legend:{ display:false },
         tooltip:{
           backgroundColor:cCard, borderColor:cLineBright, borderWidth:1, padding:10,
           titleFont:{ family:"'Inter'", size:11.5, weight:'600' }, bodyFont:{ family:"'Inter'", size:11.5 },
@@ -872,16 +893,29 @@ function renderChart(){
       },
       onHover:(evt, active)=>{
         if(!active.length){ resetOpacity(); return; }
-        const idx = active[0].datasetIndex;
-        CHART.data.datasets.forEach((ds,i)=>{
-          const c = i===idx ? ds._baseColor : withAlpha(ds._baseColor, 0.2);
-          ds.borderColor = c; ds.backgroundColor = c;
-        });
-        CHART.update('none');
+        highlightDataset(active[0].datasetIndex);
       }
     }
   });
   document.getElementById('logs-chart').addEventListener('mouseleave', resetOpacity);
+
+  // Custom HTML legend — the canvas-drawn one couldn't guarantee perfectly
+  // round swatches at every zoom/DPR, so this is plain CSS circles instead.
+  const legendEl = document.getElementById('chart-legend');
+  legendEl.innerHTML = datasets.map((ds,i)=>
+    `<span class="chart-legend-item" data-idx="${i}"><span class="dot" style="background:${ds._baseColor}"></span>${ds.label}</span>`
+  ).join('');
+  legendEl.querySelectorAll('.chart-legend-item').forEach(item=>{
+    const idx = +item.dataset.idx;
+    item.addEventListener('mouseenter', ()=> highlightDataset(idx));
+    item.addEventListener('mouseleave', resetOpacity);
+    item.addEventListener('click', ()=>{
+      const ds = CHART.data.datasets[idx];
+      ds.hidden = !ds.hidden;
+      item.classList.toggle('hidden-ds', ds.hidden);
+      CHART.update();
+    });
+  });
 
   const menu = document.getElementById('dropdown-menu');
   menu.innerHTML = `<div class="dropdown-item ${SELECTED_PLAYER===''?'selected':''}" data-val="">All players</div>` +
@@ -896,11 +930,31 @@ function renderChart(){
     });
   });
 }
-function resetOpacity(){ if(!CHART) return; CHART.data.datasets.forEach(ds=>{ ds.borderColor = ds._baseColor; ds.backgroundColor = ds._baseColor; }); CHART.update('none'); }
+function highlightDataset(idx){
+  if(!CHART) return;
+  CHART.data.datasets.forEach((ds,i)=>{
+    const c = i===idx ? ds._baseColor : withAlpha(ds._baseColor, 0.2);
+    ds.borderColor = c; ds.backgroundColor = c;
+  });
+  CHART.update('none');
+  document.querySelectorAll('.chart-legend-item').forEach((el,i)=>{
+    el.classList.toggle('dimmed', i!==idx);
+  });
+}
+function resetOpacity(){
+  if(!CHART) return;
+  CHART.data.datasets.forEach(ds=>{ ds.borderColor = ds._baseColor; ds.backgroundColor = ds._baseColor; });
+  CHART.update('none');
+  document.querySelectorAll('.chart-legend-item').forEach(el=>el.classList.remove('dimmed'));
+}
 function applyFilter(){
   if(!CHART) return;
   const onlyName = ONLY_ME ? CURRENT_USER.username : SELECTED_PLAYER;
-  CHART.data.datasets.forEach(ds=>{ ds.hidden = onlyName ? ds.label !== onlyName : false; });
+  CHART.data.datasets.forEach((ds,i)=>{
+    ds.hidden = onlyName ? ds.label !== onlyName : false;
+    const item = document.querySelector(`.chart-legend-item[data-idx="${i}"]`);
+    if(item) item.classList.toggle('hidden-ds', ds.hidden);
+  });
   CHART.update();
 }
 document.getElementById('only-me-btn').addEventListener('click', function(){
@@ -1003,6 +1057,12 @@ function boot(rows, isDemo){
   SHEET = parseSheetRows(rows);
   if(isDemo){
     console.warn('SGR Host Database: live sheet fetch failed, showing demo data. Check CONFIG.SHEET_CSV_URL.');
+  }
+  const remembered = loadRemembered();
+  if(remembered && remembered.u && remembered.p){
+    document.getElementById('login-user').value = remembered.u;
+    document.getElementById('login-pass').value = remembered.p;
+    attemptLogin(true); // silent — a stale/failed save shouldn't flash an error at someone who hasn't touched the form
   }
 }
 
