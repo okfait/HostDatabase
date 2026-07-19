@@ -9,6 +9,8 @@
 <link rel="icon" href="https://github.com/okfait/okgarage-mini/blob/main/01%20(81).png?raw=true">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=bedtime,sunny,bar_chart,group,crown" />
+<style>.material-symbols-outlined{ font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; font-size:18px; line-height:1; vertical-align:middle; }</style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" onerror="this.onerror=null;document.write('<script src=\'https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js\'><\/script>')"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/4.4.4/chart.umd.min.js" onerror="this.onerror=null;document.write('<script src=\'https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js\'><\/script>')"></script>
 <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js" onerror="this.onerror=null;document.write('<script src=\'https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js\'><\/script>')"></script>
@@ -30,22 +32,21 @@ const CONFIG = {
   LOGO_URL: "https://github.com/okfait/okgarage-mini/blob/main/01%20(81).png?raw=true"
 };
 
-/* Rank ladder — highest to lowest. Edit ASSIGN below when someone is
-   promoted/demoted; the sheet itself has no rank column. */
+/* Rank ladder — highest to lowest. Your sheet now has a "Rank" row
+   (row 4) per host — put one of these exact names in that cell and the
+   card picks it up automatically. ASSIGN below is only a fallback for
+   any host whose Rank cell is still blank. */
 const RANKS = [
-  { name:"Host Manager",   group:"Management",       info:["Oversees and manages the Server Host department.","Reviews applications.","Handles reports."] },
-  { name:"Host Lead",      group:"Management",       info:["Assists the Host Manager in department management.","Handles reports."] },
-  { name:"Host Supervisor",group:"Management",       info:["Issues warnings to Hosts.","Assists Host Team members in everyday situations.","Handpicked by the Host Manager."] },
-  { name:"Senior Host",    group:"Host Operations",  info:["Gains GIF permissions in citizen chat.","Attains BVE Level 2.","Gains image permissions in citizen chat."] },
-  { name:"Host",           group:"Host Operations",  info:["Drives a dark blue undercover vehicle with a \"HOST\" plate.","Manages messages and is exempt from channel cooldowns.","Attains BVE Level 1.","Obtains advanced session permissions (requires Advanced Citizenship)."] },
-  { name:"Junior Host",    group:"Host Operations",  info:["Has passed Trial Host training and progressed to the next stage.","Begins learning session hosting and management skills.","Drives a dark blue undercover vehicle with a \"J-HOST\" plate.","Obtains independent hosting permissions."] },
+  { name:"Host Manager",   group:"Management",        info:["Oversees and manages the Server Host department.","Reviews applications.","Handles reports."] },
+  { name:"Host Lead",      group:"Management",        info:["Assists the Host Manager in department management.","Handles reports."] },
+  { name:"Host Supervisor",group:"Management",        info:["Issues warnings to Hosts.","Assists Host Team members in everyday situations.","Handpicked by the Host Manager."] },
+  { name:"Senior Host",    group:"Host Operations",   info:["Gains GIF permissions in citizen chat.","Attains BVE Level 2.","Gains image permissions in citizen chat."] },
+  { name:"Host",           group:"Host Operations",   info:["Drives a dark blue undercover vehicle with a \"HOST\" plate.","Manages messages and is exempt from channel cooldowns.","Attains BVE Level 1.","Obtains advanced session permissions (requires Advanced Citizenship)."] },
+  { name:"Junior Host",    group:"Host Operations",   info:["Has passed Trial Host training and progressed to the next stage.","Begins learning session hosting and management skills.","Drives a dark blue undercover vehicle with a \"J-HOST\" plate.","Obtains independent hosting permissions."] },
   { name:"Trial Host",     group:"Probationary Hosts",info:["The first stage of becoming a host.","Undergoes basic training in hosting fundamentals.","Takes grammar and spelling tests.","Assigned a Server Host Trainer for guidance.","Hosts a supervised session upon completing fundamental training.","Drives a dark blue undercover vehicle with a \"T-HOST\" plate.","Can co-host sessions once 2 steps of training are complete."] }
 ];
-// Map each username (case-insensitive) to a rank name from the list above.
-const ASSIGN = {
-  "GeoYT2010": "Host Manager",
-  "971_isbald": "Trial Host"
-};
+// Fallback only — used if a host's Rank cell in the sheet is blank.
+const ASSIGN = { "GeoYT2010": "Host Manager" };
 </script>
 
 <style>
@@ -106,6 +107,29 @@ body::-webkit-scrollbar{ display:none; width:0; height:0; }
 
 .eyebrow{ font-family:var(--font-body); font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-dim); }
 
+/* ---------- shine sweep, used on a few key headings ---------- */
+.shiny-text{
+  background-image:linear-gradient(120deg, currentColor 0%, currentColor 35%, #ffffff 50%, currentColor 65%, currentColor 100%);
+  background-size:220% auto;
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+  animation:shineSweep 3.4s linear infinite;
+}
+@keyframes shineSweep{ 0%{ background-position:150% center; } 100%{ background-position:-50% center; } }
+
+/* ---------- cursor-follow glow, used on a few utility buttons ---------- */
+.spec-btn{ position:relative; overflow:hidden; isolation:isolate; }
+.spec-btn::before{
+  content:""; position:absolute; inset:0; border-radius:inherit; z-index:0;
+  background:radial-gradient(90px circle at var(--mx,50%) var(--my,50%), rgba(255,255,255,0.30), transparent 65%);
+  opacity:0; transition:opacity .25s; pointer-events:none;
+}
+.spec-btn:hover::before{ opacity:1; }
+.spec-btn > *{ position:relative; z-index:1; }
+
+/* ---------- ported ElectricBorder canvas effect ---------- */
+.electric-wrap{ position:relative; }
+.electric-canvas{ position:absolute; pointer-events:none; z-index:0; }
+
 /* ---------- LOGIN ---------- */
 #login-screen{
   position:fixed; inset:0; z-index:50; display:flex; align-items:center; justify-content:center;
@@ -114,8 +138,6 @@ body::-webkit-scrollbar{ display:none; width:0; height:0; }
     var(--bg);
   overflow:hidden;
 }
-/* Ambient drifting fade — sized in vmax well past any viewport diagonal so
-   it never shows a hard, cut-off edge on wide/tall screens. */
 #login-screen::before, #login-screen::after{
   content:""; position:absolute; width:170vmax; height:170vmax; border-radius:50%;
   filter:blur(90px); pointer-events:none; will-change:transform;
@@ -152,7 +174,6 @@ body::-webkit-scrollbar{ display:none; width:0; height:0; }
 #app{ display:none; }
 .app-content{ max-width:1180px; margin:0 auto; padding:112px 24px 60px; }
 
-/* Fixed, transparent, blurred top bar spanning the full viewport width */
 header.top{
   position:fixed; top:0; left:0; right:0; z-index:40;
   display:flex; align-items:center; justify-content:space-between;
@@ -173,17 +194,14 @@ header.top .top-inner{ max-width:1180px; width:100%; margin:0 auto; display:flex
 #logout-btn{ background:transparent; border:1px solid var(--line-bright); color:var(--text-muted); font-size:11.5px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; padding:9px 14px; border-radius:10px; cursor:pointer; transition:.15s; font-family:var(--font-body); }
 #logout-btn:hover{ border-color:var(--accent-danger); color:var(--accent-danger); }
 
-/* Quick-nav "add new" dropdown in the top bar */
-/* Top-bar nav links (Log Graph / Roster / Host Of The Month) */
 .topnav{ display:flex; align-items:center; gap:4px; }
-.topnav a{ font-size:12.5px; font-weight:600; color:var(--text-muted); text-decoration:none; padding:8px 12px; border-radius:9px; transition:.15s; font-family:var(--font-body); }
+.topnav a{ display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:600; color:var(--text-muted); text-decoration:none; padding:8px 12px; border-radius:9px; transition:.15s; font-family:var(--font-body); }
 .topnav a:hover{ color:var(--accent-bright); background:var(--bg-elevated); }
 
-/* Light/dark theme toggle */
-#theme-toggle{ display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; background:var(--bg-elevated); border:1px solid var(--line-bright); color:var(--text-muted); border-radius:10px; cursor:pointer; font-size:15px; transition:.15s; flex-shrink:0; }
+#theme-toggle{ display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; background:var(--bg-elevated); border:1px solid var(--line-bright); color:var(--text-muted); border-radius:10px; cursor:pointer; transition:.15s; flex-shrink:0; }
 #theme-toggle:hover{ border-color:var(--accent-bright); color:var(--accent-bright); }
 
-section.section{ margin-bottom:40px; }
+section.section{ margin-bottom:40px; scroll-margin-top:100px; }
 .section-head{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:18px; flex-wrap:wrap; gap:10px; }
 .section-title{ font-family:var(--font-display); font-weight:700; font-size:14px; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent-bright); }
 
@@ -195,9 +213,6 @@ section.section{ margin-bottom:40px; }
 .pill-value{ position:absolute; left:16px; top:0; bottom:0; display:flex; align-items:center; font-family:var(--font-display); font-weight:700; font-size:16px; color:#04140d; z-index:2; }
 .pill-value.on-track{ color:var(--text); }
 .pill-promo .tip{ color:var(--accent-bright); }
-/* Marker's own box is a wide, centered, invisible hover hitbox; the thin
-   gold line and label live on a pseudo-element so the visual stays 2px
-   while the hoverable area is much larger and easier to hit. */
 .pill-marker{ position:absolute; top:-20px; bottom:-20px; width:34px; margin-left:-17px; z-index:3; cursor:pointer; }
 .pill-marker::before{ content:""; position:absolute; top:20px; bottom:20px; left:50%; width:2px; transform:translateX(-50%); background:var(--accent-gold); box-shadow:0 0 8px rgba(232,184,75,0.7); }
 .pill-marker .marker-num{ position:absolute; top:0; left:50%; transform:translateX(-50%); font-size:12px; font-weight:700; color:var(--accent-gold); white-space:nowrap; }
@@ -205,8 +220,6 @@ section.section{ margin-bottom:40px; }
 .tip-box::after{ content:""; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:6px solid transparent; border-top-color:var(--bg-card); }
 .pill-marker:hover .tip-box, .pill-promo:hover .tip-box{ opacity:1; transform:translateX(-50%) translateY(-3px); }
 .pill-marker .tip-box{ color:var(--accent-gold); }
-/* Promo hitbox: generous invisible padding around the label/number so the
-   whole corner of the pill is hoverable, not just the tiny digits. */
 .pill-promo{ position:absolute; right:0; top:-20px; bottom:-20px; display:flex; align-items:center; padding:0 16px 0 24px; font-family:var(--font-display); font-weight:700; font-size:16px; color:var(--text-muted); z-index:2; cursor:pointer; }
 .pill-promo .tip-box{ color:var(--accent-bright); left:auto; right:0; transform:none; }
 .pill-promo:hover .tip-box{ transform:translateY(-3px); }
@@ -241,7 +254,7 @@ section.section{ margin-bottom:40px; }
 /* ---------- ROSTER CARDS ---------- */
 .cards-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr)); gap:14px; }
 .card{
-  background:var(--bg-card); border:1px solid var(--line); border-radius:16px;
+  position:relative; z-index:1; background:var(--bg-card); border:1px solid var(--line); border-radius:16px;
   padding:17px; cursor:default;
   transition:border-color .2s, transform .2s, box-shadow .2s;
 }
@@ -252,31 +265,33 @@ section.section{ margin-bottom:40px; }
 .card-name{ font-weight:700; font-size:14.5px; }
 .card-rank{ font-size:11.5px; font-weight:600; color:var(--text-muted); margin-top:1px; }
 .card-hr{ height:1px; background:var(--line); margin:13px 0; }
-.card-info{ max-height:0; opacity:0; overflow:hidden; transition:max-height .35s cubic-bezier(.2,.8,.2,1), opacity .25s, margin .35s; }
-.card:hover .card-info{ max-height:320px; opacity:1; margin-bottom:13px; }
-.card-info ul{ margin:0; padding-left:16px; font-size:11.5px; color:var(--text-muted); line-height:1.6; }
+.card-info{ max-height:0; opacity:0; overflow:hidden; transition:max-height .7s cubic-bezier(.2,.8,.2,1), opacity .5s, margin .7s; }
+.card:hover .card-info{ max-height:320px; opacity:1; }
+.card-info ul{ margin:0 0 13px; padding-left:16px; font-size:11.5px; color:var(--text-muted); line-height:1.6; }
 .card-info li{ margin-bottom:3px; }
-.card-logs{ font-family:var(--font-display); font-weight:700; font-size:24px; }
+.card-info .card-hr{ margin:0 0 13px; }
+.card-logs{ font-family:var(--font-display); font-weight:700; font-size:24px; text-align:center; }
 .card-logs .unit{ font-size:11px; color:var(--text-dim); font-weight:500; margin-left:6px; }
 .status-danger .card-logs{ color:var(--accent-danger); }
 .status-hold .card-logs{ color:var(--text); }
 .status-promo .card-logs{ color:var(--accent-gold); }
 
-/* ---------- HOST OF THE MONTH ---------- */
-.motm-row{ display:flex; align-items:center; justify-content:space-between; padding:15px 4px; border-bottom:1px solid var(--line); }
-.motm-row:last-child{ border-bottom:none; }
-.motm-left{ display:flex; align-items:center; gap:13px; }
-.motm-rank{ font-family:var(--font-display); font-weight:700; font-size:13px; color:var(--accent-gold); width:28px; height:28px; border-radius:50%; border:1px solid var(--accent-gold); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-.motm-name{ font-weight:700; font-size:14.5px; }
-.motm-date{ font-size:11.5px; color:var(--text-dim); margin-top:1px; }
-.motm-logs{ font-family:var(--font-display); font-weight:700; color:var(--accent-gold); font-size:16px; }
+/* ---------- HOST OF THE MONTH (card grid, same language as roster) ---------- */
+.motm-card{ position:relative; z-index:1; background:var(--bg-card); border:1px solid var(--line); border-radius:16px; padding:17px; transition:border-color .2s, transform .2s, box-shadow .2s; }
+.motm-card:hover{ border-color:var(--accent-gold); transform:translateY(-3px); box-shadow:0 16px 40px rgba(0,0,0,0.35); }
+.motm-card-top{ display:flex; align-items:center; gap:11px; }
+.motm-badge{ font-family:var(--font-display); font-weight:700; font-size:13px; color:var(--accent-gold); width:32px; height:32px; border-radius:50%; border:1px solid var(--accent-gold); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.motm-card-name{ font-weight:700; font-size:14.5px; }
+.motm-card-date{ font-size:11.5px; color:var(--text-dim); margin-top:1px; }
+.motm-card .card-hr{ margin:13px 0; }
+.motm-card-logs{ font-family:var(--font-display); font-weight:700; font-size:24px; text-align:center; color:var(--accent-gold); }
+.motm-card-logs .unit{ font-size:11px; color:var(--text-dim); font-weight:500; margin-left:6px; }
 
-/* ---------- FOOTER ---------- */
-footer{ margin-top:20px; padding-top:26px; border-top:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px; }
+footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px; }
 .footer-text{ font-size:12px; color:var(--text-dim); line-height:1.6; }
+.footer-logos{ display:flex; align-items:center; gap:10px; }
 .logo-box{ background:#fff; border-radius:12px; padding:8px 10px; display:flex; align-items:center; box-shadow:0 6px 20px rgba(0,0,0,0.3); }
 .logo-box img{ height:26px; display:block; }
-.footer-logos{ display:flex; align-items:center; gap:10px; }
 
 @media (max-width:640px){
   header.top .top-inner{ flex-direction:column; align-items:flex-start; gap:12px; }
@@ -310,31 +325,31 @@ footer{ margin-top:20px; padding-top:26px; border-top:1px solid var(--line); dis
         </div>
       </div>
       <nav class="topnav">
-        <a href="#graph-section">Log Graph</a>
-        <a href="#roster-section">Roster</a>
-        <a href="#motm-section">Host Of The Month</a>
+        <a href="#graph-section"><span class="material-symbols-outlined">bar_chart</span>Logs Graph</a>
+        <a href="#roster-section"><span class="material-symbols-outlined">group</span>Roster</a>
+        <a href="#motm-section"><span class="material-symbols-outlined">crown</span>Host Of The Month</a>
       </nav>
       <div class="who">
-        <div class="name">Signed in as <b id="who-name">—</b></div>
-        <button id="logout-btn">Sign Out</button>
-        <button id="theme-toggle" type="button" title="Toggle light/dark mode">🌙</button>
+        <div class="name">Signed in as <b id="who-name" class="shiny-text">—</b></div>
+        <button id="logout-btn" class="spec-btn"><span>Sign Out</span></button>
+        <button id="theme-toggle" class="spec-btn" type="button" title="Toggle light/dark mode"><span class="material-symbols-outlined">bedtime</span></button>
       </div>
     </div>
   </header>
 
   <div class="app-content">
     <section class="section" id="pill-section">
-      <div class="logs-label">LOGS</div>
+      <div class="logs-label shiny-text">LOGS</div>
       <div id="pill-region"></div>
     </section>
 
     <section class="section" id="graph-section">
       <div class="section-head">
-        <div class="section-title">Log Graph</div>
+        <div class="section-title shiny-text"><span class="material-symbols-outlined">bar_chart</span> Logs Graph</div>
         <div class="graph-controls">
-          <button class="toggle-pill" id="only-me-btn"><span class="dot"></span>Show only me</button>
+          <button class="toggle-pill spec-btn" id="only-me-btn"><span class="dot"></span><span>Show only me</span></button>
           <div class="dropdown" id="player-dropdown">
-            <button class="dropdown-toggle" id="dropdown-toggle" type="button">All players <span class="chev">▾</span></button>
+            <button class="dropdown-toggle spec-btn" id="dropdown-toggle" type="button"><span>All players <span class="chev">▾</span></span></button>
             <div class="dropdown-menu" id="dropdown-menu"></div>
           </div>
         </div>
@@ -344,15 +359,15 @@ footer{ margin-top:20px; padding-top:26px; border-top:1px solid var(--line); dis
 
     <section class="section" id="roster-section">
       <div class="section-head">
-        <div class="section-title">Roster</div>
+        <div class="section-title shiny-text"><span class="material-symbols-outlined">group</span> Roster</div>
         <div class="eyebrow" id="roster-caption"></div>
       </div>
       <div class="cards-grid" id="cards-grid"></div>
     </section>
 
     <section class="section" id="motm-section">
-      <div class="section-head"><div class="section-title">Host Of The Month</div></div>
-      <div id="motm-list"></div>
+      <div class="section-head"><div class="section-title shiny-text"><span class="material-symbols-outlined">crown</span> Host Of The Month</div></div>
+      <div class="cards-grid" id="motm-list"></div>
     </section>
 
     <footer>
@@ -366,13 +381,24 @@ footer{ margin-top:20px; padding-top:26px; border-top:1px solid var(--line); dis
 </div>
 
 <script>
-/* Smooth scrolling (also makes the quick-nav "Add New" anchor links glide
-   instead of jumping straight to the section). */
+/* ---------------- Smooth scroll (Lenis) ---------------- */
+let LENIS = null;
 if(window.Lenis){
-  const lenis = new Lenis({ duration: 1.1, smoothWheel: true, anchors: true });
-  function raf(time){ lenis.raf(time); requestAnimationFrame(raf); }
+  LENIS = new Lenis({ duration: 1.1, smoothWheel: true, anchors: true });
+  function raf(time){ LENIS.raf(time); requestAnimationFrame(raf); }
   requestAnimationFrame(raf);
 }
+// Explicit handling too, so the nav always glides even if the browser's
+// native anchor jump would otherwise beat Lenis to it.
+document.querySelectorAll('.topnav a[href^="#"]').forEach(a=>{
+  a.addEventListener('click', (e)=>{
+    e.preventDefault();
+    const el = document.querySelector(a.getAttribute('href'));
+    if(!el) return;
+    if(LENIS) LENIS.scrollTo(el, { offset:-90 });
+    else el.scrollIntoView({ behavior:'smooth', block:'start' });
+  });
+});
 
 document.getElementById('year').textContent = new Date().getFullYear();
 document.getElementById('login-team-name').textContent = CONFIG.TEAM_NAME;
@@ -382,6 +408,132 @@ document.getElementById('brand-logo-img').src = CONFIG.LOGO_URL;
 document.getElementById('footer-server-logo').src = CONFIG.LOGO_URL;
 document.documentElement.style.setProperty('--accent', CONFIG.BRAND_COLOR);
 
+/* ---------------- cursor-follow glow on .spec-btn ---------------- */
+document.addEventListener('mousemove', (e)=>{
+  const btn = e.target.closest && e.target.closest('.spec-btn');
+  if(!btn) return;
+  const r = btn.getBoundingClientRect();
+  btn.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+  btn.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
+});
+
+/* ---------------- ported ElectricBorder (canvas noise outline) ---------------- */
+function attachElectricBorder(target, { color = '#3ddc97', speed = 1, chaos = 0.06, borderRadius = 16 } = {}){
+  const borderOffset = 14;
+  const wrap = document.createElement('div');
+  wrap.className = 'electric-wrap';
+  target.parentNode.insertBefore(wrap, target);
+  const canvas = document.createElement('canvas');
+  canvas.className = 'electric-canvas';
+  wrap.appendChild(canvas);
+  wrap.appendChild(target);
+
+  const ctx = canvas.getContext('2d');
+  let width = 0, height = 0, timeVal = 0, lastTime = 0, rafId = 0;
+
+  function random(x){ return (Math.sin(x * 12.9898) * 43758.5453) % 1; }
+  function noise2D(x, y){
+    const i = Math.floor(x), j = Math.floor(y), fx = x - i, fy = y - j;
+    const a = random(i + j * 57), b = random(i + 1 + j * 57), c = random(i + (j + 1) * 57), d = random(i + 1 + (j + 1) * 57);
+    const ux = fx * fx * (3 - 2 * fx), uy = fy * fy * (3 - 2 * fy);
+    return a * (1 - ux) * (1 - uy) + b * ux * (1 - uy) + c * (1 - ux) * uy + d * ux * uy;
+  }
+  function octavedNoise(x, octaves, lacunarity, gain, baseAmp, baseFreq, t, seed){
+    let y = 0, amp = baseAmp, freq = baseFreq;
+    for(let i = 0; i < octaves; i++){
+      y += amp * noise2D(freq * x + seed * 100, t * freq * 0.3);
+      freq *= lacunarity; amp *= gain;
+    }
+    return y;
+  }
+  function cornerPt(cx, cy, r, startA, arc, p){ const a = startA + p * arc; return { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) }; }
+  function roundRectPt(t, left, top, w, h, r){
+    const sw = w - 2 * r, sh = h - 2 * r, arc = (Math.PI * r) / 2, total = 2 * sw + 2 * sh + 4 * arc;
+    let dist = t * total, acc = 0;
+    if(dist <= acc + sw){ const p = (dist - acc) / sw; return { x: left + r + p * sw, y: top }; } acc += sw;
+    if(dist <= acc + arc){ const p = (dist - acc) / arc; return cornerPt(left + w - r, top + r, r, -Math.PI/2, Math.PI/2, p); } acc += arc;
+    if(dist <= acc + sh){ const p = (dist - acc) / sh; return { x: left + w, y: top + r + p * sh }; } acc += sh;
+    if(dist <= acc + arc){ const p = (dist - acc) / arc; return cornerPt(left + w - r, top + h - r, r, 0, Math.PI/2, p); } acc += arc;
+    if(dist <= acc + sw){ const p = (dist - acc) / sw; return { x: left + w - r - p * sw, y: top + h }; } acc += sw;
+    if(dist <= acc + arc){ const p = (dist - acc) / arc; return cornerPt(left + r, top + h - r, r, Math.PI/2, Math.PI/2, p); } acc += arc;
+    if(dist <= acc + sh){ const p = (dist - acc) / sh; return { x: left, y: top + h - r - p * sh }; } acc += sh;
+    const p = (dist - acc) / arc; return cornerPt(left + r, top + r, r, Math.PI, Math.PI/2, p);
+  }
+
+  function updateSize(){
+    const rect = target.getBoundingClientRect();
+    width = rect.width + borderOffset * 2;
+    height = rect.height + borderOffset * 2;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = width * dpr; canvas.height = height * dpr;
+    canvas.style.width = width + 'px'; canvas.style.height = height + 'px';
+    canvas.style.left = (-borderOffset) + 'px'; canvas.style.top = (-borderOffset) + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  updateSize();
+
+  function draw(now){
+    rafId = requestAnimationFrame(draw);
+    if(!lastTime) lastTime = now;
+    const dt = (now - lastTime) / 1000; lastTime = now;
+    timeVal += dt * speed;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = color; ctx.lineWidth = 1.4; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.shadowColor = color; ctx.shadowBlur = 7;
+    const left = borderOffset, top = borderOffset, bw = width - 2 * borderOffset, bh = height - 2 * borderOffset;
+    if(bw <= 0 || bh <= 0) return;
+    const maxR = Math.min(bw, bh) / 2, r = Math.min(borderRadius, maxR);
+    const perim = 2 * (bw + bh) + 2 * Math.PI * r;
+    const samples = Math.max(24, Math.floor(perim / 3));
+    ctx.beginPath();
+    for(let i = 0; i <= samples; i++){
+      const p = i / samples;
+      const pt = roundRectPt(p, left, top, bw, bh, r);
+      const xn = octavedNoise(p * 8, 6, 1.6, 0.7, chaos, 10, timeVal, 0);
+      const yn = octavedNoise(p * 8, 6, 1.6, 0.7, chaos, 10, timeVal, 1);
+      const dx = pt.x + xn * 60, dy = pt.y + yn * 60;
+      if(i === 0) ctx.moveTo(dx, dy); else ctx.lineTo(dx, dy);
+    }
+    ctx.closePath(); ctx.stroke();
+  }
+  rafId = requestAnimationFrame(draw);
+  const ro = new ResizeObserver(updateSize);
+  ro.observe(target);
+
+  return {
+    destroy(){
+      cancelAnimationFrame(rafId); ro.disconnect();
+      if(wrap.parentNode){ wrap.parentNode.insertBefore(target, wrap); wrap.remove(); }
+    }
+  };
+}
+function shadeColor(hex, percent){
+  // percent negative = darker, positive = lighter
+  const n = parseInt(hex.replace('#',''), 16);
+  let r = (n >> 16) + Math.round(255 * percent / 100);
+  let g = ((n >> 8) & 0xff) + Math.round(255 * percent / 100);
+  let b = (n & 0xff) + Math.round(255 * percent / 100);
+  r = Math.max(0, Math.min(255, r)); g = Math.max(0, Math.min(255, g)); b = Math.max(0, Math.min(255, b));
+  return '#' + (0x1000000 + r*0x10000 + g*0x100 + b).toString(16).slice(1);
+}
+let ELECTRIC_INSTANCES = [];
+function clearElectricBorders(){ ELECTRIC_INSTANCES.forEach(i=>i.destroy()); ELECTRIC_INSTANCES = []; }
+
+/* ---------------- count-up numbers ---------------- */
+function countUp(el, target, duration = 900){
+  if(!el) return;
+  const startTime = performance.now();
+  const isInt = Number.isInteger(target);
+  function tick(now){
+    const p = Math.min((now - startTime) / duration, 1);
+    const eased = 1 - Math.pow(1 - p, 3);
+    const val = target * eased;
+    el.textContent = isInt ? Math.round(val) : val.toFixed(1);
+    if(p < 1) requestAnimationFrame(tick); else el.textContent = isInt ? target : target.toFixed(1);
+  }
+  requestAnimationFrame(tick);
+}
+
 /* =====================================================================
    DEMO DATA — mirrors the real sheet layout, used only as a fallback
    ===================================================================== */
@@ -389,13 +541,13 @@ const DEMO_CSV = `
 ,Qota Of the Month,,,,GeoYT2010,971_isbald
 Logs for same rank,11,,,Password,AlGHqwPPsv,ksdgYjsGJH
 Logs for promotion,14+,,,RobloxProfilePic,,
-,,,,,,
-Host Of The Month,,,,1/7/2026,1,0
+,,,,Rank,Host Manager,Trial Host
+,Host Of The Month,,,1/7/2026,1,0
 Username,Amount Of Logs,Date,,2/7/2026,0,0
 GeoYT2010,15,July of 2026,,3/7/2026,2,1
-,,,,4/7/2026,1,0
-,,,,5/7/2026,0,1
-,,,,6/7/2026,2,0
+,,,,4/7/2026,,
+,,,,5/7/2026,,
+,,,,6/7/2026,,
 `.trim();
 
 let SHEET = { sameRankQuota:null, promoQuota:null, motm:[], users:[] };
@@ -443,7 +595,7 @@ function parseSheetRows(rows){
 
   // Shared date column = E (index 4). Collect every row where E parses as a date.
   const dateRows = [];
-  for(let r=3; r<rows.length; r++){
+  for(let r=0; r<rows.length; r++){
     const row = rows[r];
     if(!row) continue;
     const dstr = (row[4]||'').trim();
@@ -452,16 +604,21 @@ function parseSheetRows(rows){
   }
   dateRows.sort((a,b)=>a.d-b.d);
 
-  // Each user occupies one column starting at F (index 5): row0=username, row1=password, row2=pfp, then log values aligned to dateRows.
+  // Each user occupies one column starting at F (index 5):
+  // row0=username, row1=password, row2=pfp, row3=rank, then log values aligned to dateRows.
   const header = rows[0] || [];
-  const maxCols = Math.max(header.length, (rows[1]||[]).length, (rows[2]||[]).length);
+  const maxCols = Math.max(header.length, (rows[1]||[]).length, (rows[2]||[]).length, (rows[3]||[]).length);
   for(let c=5; c<maxCols; c++){
     const username = ((rows[0]||[])[c] || '').trim();
     if(!username) continue;
     const password = ((rows[1]||[])[c] || '').trim();
     const pfp = ((rows[2]||[])[c] || '').trim();
-    const entries = dateRows.map(dr => ({ date:dr.d, dstr:dr.dstr, value: num((rows[dr.r]||[])[c]) || 0 }));
-    out.users.push({ username, password, pfp, entries });
+    const rankName = ((rows[3]||[])[c] || '').trim();
+    const entries = dateRows.map(dr => {
+      const raw = num((rows[dr.r]||[])[c]);
+      return { date:dr.d, dstr:dr.dstr, value: raw===null ? 0 : raw, has: raw!==null };
+    });
+    out.users.push({ username, password, pfp, rankName, entries });
   }
   return out;
 }
@@ -474,9 +631,13 @@ function statusFor(total){
   if(total < pr) return { cls:'status-hold', label:'Same rank' };
   return { cls:'status-promo', label:'Promotion' };
 }
-function rankFor(username){
-  const rankName = ASSIGN[username] || Object.keys(ASSIGN).find(k=>k.toLowerCase()===username.toLowerCase()) && ASSIGN[Object.keys(ASSIGN).find(k=>k.toLowerCase()===username.toLowerCase())];
-  const idx = RANKS.findIndex(r=>r.name===rankName);
+function rankFor(user){
+  let name = user.rankName;
+  if(!name){
+    const key = Object.keys(ASSIGN).find(k=>k.toLowerCase()===user.username.toLowerCase());
+    name = key ? ASSIGN[key] : '';
+  }
+  const idx = RANKS.findIndex(r=>r.name.toLowerCase()===String(name).toLowerCase());
   return idx===-1 ? { order:RANKS.length, rank:null } : { order:idx, rank:RANKS[idx] };
 }
 
@@ -500,13 +661,7 @@ function attemptLogin(){
   renderAll();
 }
 
-/* ---- Browser "save password" + return-visit autofill autologin ----
-   Real <form> + autocomplete="username"/"current-password" above is what
-   makes Chrome/Edge/etc offer to save the credentials after a successful
-   sign-in. This part detects when the browser (not this script) has
-   silently filled the fields back in on a later visit — Chrome adds a
-   special animation to autofilled inputs, so we listen for that instead
-   of guessing — and auto-submits once both fields are populated. */
+/* ---- Browser "save password" + return-visit autofill autologin ---- */
 (function(){
   const userEl = document.getElementById('login-user');
   const passEl = document.getElementById('login-pass');
@@ -543,11 +698,12 @@ function renderPill(){
     region.innerHTML = `
       <div class="pill-wrap">
         <div class="pill-track"><div class="pill-fill" id="pill-fill-el" style="width:0%"></div>
-          <div class="pill-value on-track">${total}</div>
+          <div class="pill-value on-track" id="pill-current-num">0</div>
         </div>
         <div class="quota-soon">Quota <div class="dots"><span></span><span></span><span></span></div> soon</div>
       </div>`;
     animatePillFill(targetPct);
+    countUp(document.getElementById('pill-current-num'), total);
     return;
   }
   const pct = Math.min((total/pr)*100, 100);
@@ -557,20 +713,20 @@ function renderPill(){
       <div class="pill-track">
         <div class="pill-fill" id="pill-fill-el" style="width:0%"></div>
         <div class="pill-marker" style="left:${markerPct}%">
-          <div class="marker-num">${sr}</div>
+          <div class="marker-num" id="pill-marker-num">0</div>
           <div class="tip-box">You need ${sr}+ logs to keep your rank</div>
         </div>
-        <div class="pill-value ${pct>16?'':'on-track'}">${total}</div>
-        <div class="pill-promo"><span class="tip">${pr}</span><div class="tip-box">You need ${pr} logs to get promoted</div></div>
+        <div class="pill-value ${pct>16?'':'on-track'}" id="pill-current-num">0</div>
+        <div class="pill-promo"><span class="tip" id="pill-promo-num">0</span><div class="tip-box">You need ${pr} logs to get promoted</div></div>
       </div>
       <div class="pill-caption">${total>=pr ? 'Promoted this cycle' : total>=sr ? 'Rank held' : `${(pr-total).toFixed(1)} logs to promotion`}</div>
     </div>`;
   animatePillFill(pct);
+  countUp(document.getElementById('pill-current-num'), total);
+  countUp(document.getElementById('pill-marker-num'), sr);
+  countUp(document.getElementById('pill-promo-num'), pr);
 }
 function animatePillFill(targetPct){
-  // Render at 0% first, then set the real width a frame later so the
-  // existing CSS width-transition actually has something to animate —
-  // otherwise the bar just appears already-full with no motion.
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
     const el = document.getElementById('pill-fill-el');
     if(el) el.style.width = targetPct + '%';
@@ -583,6 +739,13 @@ function allDatesSorted(){
   SHEET.users.forEach(u=>u.entries.forEach(e=>set.set(e.dstr, e.date)));
   return [...set.entries()].sort((a,b)=>a[1]-b[1]).map(x=>x[0]);
 }
+function lastActiveDateIndex(dates){
+  for(let i=dates.length-1;i>=0;i--){
+    const dstr = dates[i];
+    if(SHEET.users.some(u=>u.entries.some(e=>e.dstr===dstr && e.has))) return i;
+  }
+  return -1;
+}
 function cumulativeSeries(user, dates){
   let running = 0; const map = {};
   user.entries.forEach(e=>{ map[e.dstr] = e.value; });
@@ -593,9 +756,6 @@ const PALETTE = ['#3ddc97','#e8b84b','#7db8ff','#e88ac0','#c99bff','#ff9d6c','#6
 function renderChart(){
   const box = document.querySelector('#graph-section .chart-box');
   if(typeof Chart === 'undefined'){
-    // Chart.js failed to load from both CDNs (probably a browser
-    // extension or network policy blocking script requests). Fail
-    // soft instead of throwing, and let the user know why.
     box.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-dim);font-size:13px;text-align:center;padding:20px;">Chart library failed to load — check your ad blocker / extensions, or your connection, then refresh.</div>';
     console.error('SGR Host Database: Chart.js is not defined — both CDN sources failed to load.');
     return;
@@ -609,12 +769,16 @@ function renderChart(){
   const cCard = cs.getPropertyValue('--bg-card').trim() || '#111c18';
   const cLine = cs.getPropertyValue('--line').trim() || '#1e2d27';
   const cLineBright = cs.getPropertyValue('--line-bright').trim() || '#2c443a';
-  const dates = allDatesSorted();
+
+  let dates = allDatesSorted();
+  const lastIdx = lastActiveDateIndex(dates);
+  dates = lastIdx >= 0 ? dates.slice(0, lastIdx + 1) : [];
+
   const labels = dates.map(shortLabel);
   const datasets = SHEET.users.map((u,i)=>({
     label:u.username, data:cumulativeSeries(u, dates),
     borderColor:PALETTE[i%PALETTE.length], backgroundColor:PALETTE[i%PALETTE.length],
-    pointRadius:3, pointHoverRadius:5, borderWidth:2.5, tension:0.25,
+    pointStyle:'circle', pointRadius:0, pointHoverRadius:6, borderWidth:2.5, tension:0.25,
     _baseColor:PALETTE[i%PALETTE.length]
   }));
 
@@ -627,7 +791,7 @@ function renderChart(){
       responsive:true, maintainAspectRatio:false,
       interaction:{ mode:'nearest', intersect:false },
       plugins:{
-        legend:{ labels:{ color:cText, font:{ family:"'Inter'", size:11, weight:600 } } },
+        legend:{ labels:{ color:cText, usePointStyle:true, pointStyle:'circle', pointStyleWidth:10, font:{ family:"'Inter'", size:11, weight:600 } } },
         tooltip:{
           backgroundColor:cCard, borderColor:cLineBright, borderWidth:1, padding:10,
           titleFont:{ family:"'Inter'", size:11.5, weight:'600' }, bodyFont:{ family:"'Inter'", size:11.5 },
@@ -635,7 +799,7 @@ function renderChart(){
         }
       },
       scales:{
-        y:{ beginAtZero:true, ticks:{ stepSize:2, color:cDim, font:{ family:"'Inter'", size:10.5 } }, grid:{ color:cLine } },
+        y:{ beginAtZero:true, ticks:{ stepSize:1, color:cDim, font:{ family:"'Inter'", size:10.5 } }, grid:{ color:cLine } },
         x:{ ticks:{ color:cDim, font:{ family:"'Inter'", size:10.5 } }, grid:{ display:false } }
       },
       onHover:(evt, active)=>{
@@ -654,7 +818,7 @@ function renderChart(){
   menu.querySelectorAll('.dropdown-item').forEach(item=>{
     item.addEventListener('click', ()=>{
       SELECTED_PLAYER = item.dataset.val;
-      document.getElementById('dropdown-toggle').innerHTML = `${SELECTED_PLAYER || 'All players'} <span class="chev">▾</span>`;
+      document.getElementById('dropdown-toggle').innerHTML = `<span>${SELECTED_PLAYER || 'All players'} <span class="chev">▾</span></span>`;
       if(SELECTED_PLAYER){ ONLY_ME = false; document.getElementById('only-me-btn').classList.remove('active'); }
       document.getElementById('player-dropdown').classList.remove('open');
       applyFilter();
@@ -671,7 +835,7 @@ function applyFilter(){
 document.getElementById('only-me-btn').addEventListener('click', function(){
   ONLY_ME = !ONLY_ME;
   this.classList.toggle('active', ONLY_ME);
-  if(ONLY_ME){ SELECTED_PLAYER=''; document.getElementById('dropdown-toggle').innerHTML = 'All players <span class="chev">▾</span>'; }
+  if(ONLY_ME){ SELECTED_PLAYER=''; document.getElementById('dropdown-toggle').innerHTML = '<span>All players <span class="chev">▾</span></span>'; }
   applyFilter();
 });
 document.getElementById('dropdown-toggle').addEventListener('click', (e)=>{
@@ -687,8 +851,10 @@ const THEME_KEY = 'sgr-theme';
 function setTheme(t){
   document.documentElement.setAttribute('data-theme', t);
   try{ localStorage.setItem(THEME_KEY, t); }catch(e){}
-  document.getElementById('theme-toggle').textContent = t === 'light' ? '☀️' : '🌙';
-  if(CURRENT_USER) renderChart(); // chart tick/grid colors are theme-aware
+  document.getElementById('theme-toggle').innerHTML = t === 'light'
+    ? '<span class="material-symbols-outlined">sunny</span>'
+    : '<span class="material-symbols-outlined">bedtime</span>';
+  if(CURRENT_USER) renderChart();
 }
 document.getElementById('theme-toggle').addEventListener('click', ()=>{
   const current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
@@ -698,22 +864,23 @@ setTheme(document.documentElement.getAttribute('data-theme') === 'light' ? 'ligh
 
 /* ---------------- RENDER: CARDS ---------------- */
 function renderCards(){
+  clearElectricBorders();
   const grid = document.getElementById('cards-grid');
   document.getElementById('roster-caption').textContent = `${SHEET.users.length} staff`;
   const sorted = [...SHEET.users].sort((a,b)=>{
-    const ra = rankFor(a.username).order, rb = rankFor(b.username).order;
+    const ra = rankFor(a).order, rb = rankFor(b).order;
     if(ra!==rb) return ra-rb;
     return totalLogs(b) - totalLogs(a);
   });
-  grid.innerHTML = sorted.map(u=>{
+  grid.innerHTML = sorted.map((u,i)=>{
     const total = totalLogs(u);
     const st = statusFor(total);
-    const { rank } = rankFor(u.username);
+    const { rank } = rankFor(u);
     const initials = u.username.slice(0,2).toUpperCase();
     const pfpHtml = u.pfp ? `<img class="pfp" src="${u.pfp}" alt="${u.username}">` : `<div class="pfp fallback">${initials}</div>`;
-    const infoHtml = rank ? `<div class="card-info"><ul>${rank.info.map(i=>`<li>${i}</li>`).join('')}</ul></div><div class="card-hr"></div>` : '';
+    const infoHtml = rank ? `<div class="card-info"><ul>${rank.info.map(x=>`<li>${x}</li>`).join('')}</ul><div class="card-hr"></div></div>` : '';
     return `
-      <div class="card ${st.cls}">
+      <div class="card ${st.cls}" data-idx="${i}" data-rank="${rank ? rank.name : ''}">
         <div class="card-top">
           ${pfpHtml}
           <div><div class="card-name">${u.username}</div><div class="card-rank">${rank ? rank.name : 'Unranked'}</div></div>
@@ -723,20 +890,37 @@ function renderCards(){
         <div class="card-logs">${total}<span class="unit">logs</span></div>
       </div>`;
   }).join('');
+
+  const brand = CONFIG.BRAND_COLOR;
+  const brandDark = shadeColor(brand, -35);
+  grid.querySelectorAll('.card').forEach(card=>{
+    const rankName = card.dataset.rank;
+    if(rankName === 'Host Manager'){
+      ELECTRIC_INSTANCES.push(attachElectricBorder(card, { color: brand, chaos:0.06, borderRadius:16 }));
+    } else if(rankName === 'Host Lead'){
+      ELECTRIC_INSTANCES.push(attachElectricBorder(card, { color: brandDark, chaos:0.06, borderRadius:16 }));
+    }
+  });
 }
 
 /* ---------------- RENDER: HOST OF THE MONTH ---------------- */
 function renderMotm(){
   const el = document.getElementById('motm-list');
   if(!SHEET.motm.length){ el.innerHTML = `<div class="eyebrow">No entries yet.</div>`; return; }
+  const cs = getComputedStyle(document.documentElement);
+  const gold = cs.getPropertyValue('--accent-gold').trim() || '#e8b84b';
   el.innerHTML = SHEET.motm.map((m,i)=>`
-    <div class="motm-row">
-      <div class="motm-left">
-        <div class="motm-rank">${i+1}</div>
-        <div><div class="motm-name">${m.username}</div><div class="motm-date">${m.date||''}</div></div>
+    <div class="motm-card">
+      <div class="motm-card-top">
+        <div class="motm-badge">${i+1}</div>
+        <div><div class="motm-card-name">${m.username}</div><div class="motm-card-date">${m.date||''}</div></div>
       </div>
-      <div class="motm-logs">${m.logs ?? '—'} logs</div>
+      <div class="card-hr"></div>
+      <div class="motm-card-logs">${m.logs ?? '—'}<span class="unit">logs</span></div>
     </div>`).join('');
+  el.querySelectorAll('.motm-card').forEach(card=>{
+    ELECTRIC_INSTANCES.push(attachElectricBorder(card, { color: gold, chaos:0.06, borderRadius:16 }));
+  });
 }
 
 function renderAll(){ renderPill(); renderChart(); renderCards(); renderMotm(); }
