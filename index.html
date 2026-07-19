@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGR Host Database</title>
+<link rel="icon" href="https://github.com/okfait/okgarage-mini/blob/main/01%20(81).png?raw=true">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+</head>
+<body>
+<script>
+/* =====================================================================
+   CONFIG
+   ===================================================================== */
+const CONFIG = {
+  // Direct CSV export of your sheet (works as long as the sheet's Share
+  // setting is "Anyone with the link → Viewer" — it does NOT need to be
+  // separately "Published to web"). gid=0 is the first tab (Foaie1).
+  // If you add more tabs and need a different one, grab its gid from the
+  // tab's URL (…#gid=123456) and swap it in below.
+  SHEET_CSV_URL: "https://docs.google.com/spreadsheets/d/1Xv5az4DrAtOV8zyeSAkpjZVTWWB8QWJI1DJybvPY7HM/export?format=csv&gid=0",
+  TEAM_NAME: "Shadow Greenville Roleplay",
+  BRAND_COLOR: "#258162",
+  LOGO_URL: "https://github.com/okfait/okgarage-mini/blob/main/01%20(81).png?raw=true"
+};
+
+/* Rank ladder — highest to lowest. Edit ASSIGN below when someone is
+   promoted/demoted; the sheet itself has no rank column. */
+const RANKS = [
+  { name:"Host Manager",   group:"Management",       info:["Oversees and manages the Server Host department.","Reviews applications.","Handles reports."] },
+  { name:"Host Lead",      group:"Management",       info:["Assists the Host Manager in department management.","Handles reports."] },
+  { name:"Host Supervisor",group:"Management",       info:["Issues warnings to Hosts.","Assists Host Team members in everyday situations.","Handpicked by the Host Manager."] },
+  { name:"Senior Host",    group:"Host Operations",  info:["Gains GIF permissions in citizen chat.","Attains BVE Level 2.","Gains image permissions in citizen chat."] },
+  { name:"Host",           group:"Host Operations",  info:["Drives a dark blue undercover vehicle with a \"HOST\" plate.","Manages messages and is exempt from channel cooldowns.","Attains BVE Level 1.","Obtains advanced session permissions (requires Advanced Citizenship)."] },
+  { name:"Junior Host",    group:"Host Operations",  info:["Has passed Trial Host training and progressed to the next stage.","Begins learning session hosting and management skills.","Drives a dark blue undercover vehicle with a \"J-HOST\" plate.","Obtains independent hosting permissions."] },
+  { name:"Trial Host",     group:"Probationary Hosts",info:["The first stage of becoming a host.","Undergoes basic training in hosting fundamentals.","Takes grammar and spelling tests.","Assigned a Server Host Trainer for guidance.","Hosts a supervised session upon completing fundamental training.","Drives a dark blue undercover vehicle with a \"T-HOST\" plate.","Can co-host sessions once 2 steps of training are complete."] }
+];
+// Map each username (case-insensitive) to a rank name from the list above.
+const ASSIGN = {
+  "GeoYT2010": "Host Manager",
+  "971_isbald": "Trial Host"
+};
+</script>
+
+<style>
+:root{
+  --bg:#0b1210;
+  --bg-elevated:#111b17;
+  --bg-card:#111c18;
+  --line:#1e2d27;
+  --line-bright:#2c443a;
+  --accent:#258162;
+  --accent-bright:#3ddc97;
+  --accent-gold:#e8b84b;
+  --accent-danger:#d9605a;
+  --text:#f2f5f3;
+  --text-muted:#93a89f;
+  --text-dim:#5c6f68;
+  --font-display:'Poppins',sans-serif;
+  --font-body:'Inter',sans-serif;
+}
+*{box-sizing:border-box;}
+html{ scrollbar-width:none; -ms-overflow-style:none; }
+html::-webkit-scrollbar{ display:none; width:0; height:0; }
+body{
+  margin:0; padding:0;
+  background:
+    radial-gradient(ellipse at top, rgba(37,129,98,0.10), transparent 55%),
+    var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  font-weight:400;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+body::-webkit-scrollbar{ display:none; width:0; height:0; }
+::selection{ background:var(--accent); color:#fff; }
+@media (prefers-reduced-motion: reduce){ *{ animation-duration:0.001ms !important; transition-duration:0.001ms !important; } }
+
+.eyebrow{ font-family:var(--font-body); font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-dim); }
+
+/* ---------- LOGIN ---------- */
+#login-screen{
+  position:fixed; inset:0; z-index:50; display:flex; align-items:center; justify-content:center;
+  background:
+    repeating-linear-gradient(0deg, rgba(37,129,98,0.035) 0px, rgba(37,129,98,0.035) 1px, transparent 1px, transparent 3px),
+    var(--bg);
+  overflow:hidden;
+}
+/* Ambient drifting fade — sized in vmax well past any viewport diagonal so
+   it never shows a hard, cut-off edge on wide/tall screens. */
+#login-screen::before, #login-screen::after{
+  content:""; position:absolute; width:170vmax; height:170vmax; border-radius:50%;
+  filter:blur(90px); pointer-events:none; will-change:transform;
+}
+#login-screen::before{
+  top:-85vmax; left:-85vmax;
+  background:radial-gradient(circle, rgba(61,220,151,0.16), transparent 62%);
+  animation:driftA 20s ease-in-out infinite alternate;
+}
+#login-screen::after{
+  bottom:-85vmax; right:-85vmax;
+  background:radial-gradient(circle, rgba(37,129,98,0.18), transparent 62%);
+  animation:driftB 24s ease-in-out infinite alternate;
+}
+@keyframes driftA{ 0%{ transform:translate(0,0) scale(1); } 100%{ transform:translate(6vmax,5vmax) scale(1.08); } }
+@keyframes driftB{ 0%{ transform:translate(0,0) scale(1); } 100%{ transform:translate(-6vmax,-5vmax) scale(1.08); } }
+.login-card{ position:relative; z-index:1; width:min(380px, 90vw); background:var(--bg-card); border:1px solid var(--line-bright); border-radius:20px; padding:36px 30px 28px; box-shadow:0 30px 80px rgba(0,0,0,0.55); }
+.login-badge{ width:auto; height:104px; margin:0 auto 18px; display:flex; align-items:center; justify-content:center; }
+.login-badge img{ height:100%; width:auto; max-width:220px; object-fit:contain; filter:drop-shadow(0 10px 26px rgba(0,0,0,0.45)); }
+.login-title{ font-family:var(--font-display); font-weight:700; font-size:22px; text-align:center; letter-spacing:-0.01em; margin:0 0 26px; }
+.field{ margin-bottom:14px; }
+.field label{ display:block; font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px; }
+.field input{ width:100%; padding:12px 14px; border-radius:11px; background:var(--bg-elevated); border:1px solid var(--line-bright); color:var(--text); font-family:var(--font-body); font-size:14.5px; outline:none; transition:border-color .15s, box-shadow .15s; }
+.field input:focus{ border-color:var(--accent-bright); box-shadow:0 0 0 3px rgba(61,220,151,0.15); }
+@keyframes onAutoFillStart{ from{ opacity:1; } to{ opacity:1; } }
+@keyframes onAutoFillCancel{ from{ opacity:1; } to{ opacity:1; } }
+.field input:-webkit-autofill{ animation-name:onAutoFillStart; animation-duration:0.1s; }
+.field input:not(:-webkit-autofill){ animation-name:onAutoFillCancel; animation-duration:0.1s; }
+#login-btn{ width:100%; margin-top:8px; padding:14px; border:none; border-radius:11px; background:linear-gradient(135deg, var(--accent-bright), var(--accent)); color:#04140d; font-family:var(--font-display); font-weight:700; font-size:15px; letter-spacing:0.01em; cursor:pointer; transition:transform .12s, box-shadow .12s; }
+#login-btn:hover{ transform:translateY(-1px); box-shadow:0 8px 24px rgba(61,220,151,0.25); }
+#login-error{ margin-top:12px; font-size:12.5px; color:var(--accent-danger); text-align:center; min-height:14px; }
+
+/* ---------- APP SHELL ---------- */
+#app{ display:none; }
+.app-content{ max-width:1180px; margin:0 auto; padding:112px 24px 60px; }
+
+/* Fixed, transparent, blurred top bar spanning the full viewport width */
+header.top{
+  position:fixed; top:0; left:0; right:0; z-index:40;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 24px; gap:16px;
+  background:rgba(11,18,16,0.55);
+  -webkit-backdrop-filter:blur(18px) saturate(140%);
+  backdrop-filter:blur(18px) saturate(140%);
+  border-bottom:1px solid rgba(44,68,58,0.5);
+}
+header.top .top-inner{ max-width:1180px; width:100%; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+.brand{ display:flex; align-items:center; gap:13px; }
+.brand-mark{ height:46px; width:auto; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.brand-mark img{ height:100%; width:auto; max-width:200px; object-fit:contain; }
+.brand-text .name{ font-family:var(--font-display); font-weight:700; font-size:19px; line-height:1.15; letter-spacing:-0.01em; }
+.who{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.who .name{ font-size:13px; color:var(--text-muted); }
+.who .name b{ color:var(--text); font-weight:600; }
+#logout-btn{ background:transparent; border:1px solid var(--line-bright); color:var(--text-muted); font-size:11.5px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; padding:9px 14px; border-radius:10px; cursor:pointer; transition:.15s; font-family:var(--font-body); }
+#logout-btn:hover{ border-color:var(--accent-danger); color:var(--accent-danger); }
+
+/* Quick-nav "add new" dropdown in the top bar */
+.quicknav{ position:relative; }
+#quicknav-btn{ display:inline-flex; align-items:center; gap:7px; background:var(--accent); border:1px solid var(--accent-bright); color:#04140d; font-size:11.5px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; padding:9px 15px 9px 12px; border-radius:10px; cursor:pointer; font-family:var(--font-body); transition:.15s; }
+#quicknav-btn:hover{ transform:translateY(-1px); box-shadow:0 8px 20px rgba(61,220,151,0.25); }
+#quicknav-btn .plus{ font-size:15px; font-weight:800; line-height:1; }
+.quicknav-menu{ position:absolute; top:calc(100% + 8px); right:0; min-width:190px; background:var(--bg-card); border:1px solid var(--line-bright); border-radius:14px; padding:6px; box-shadow:0 20px 50px rgba(0,0,0,0.45); opacity:0; pointer-events:none; transform:translateY(-6px); transition:opacity .15s, transform .15s; z-index:10; }
+.quicknav.open .quicknav-menu{ opacity:1; pointer-events:auto; transform:translateY(0); }
+.quicknav-item{ display:block; padding:10px 12px; border-radius:9px; font-size:12.5px; font-weight:600; color:var(--text-muted); cursor:pointer; text-decoration:none; transition:.1s; }
+.quicknav-item:hover{ background:var(--bg-elevated); color:var(--accent-bright); }
+
+section.section{ margin-bottom:40px; }
+.section-head{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:18px; flex-wrap:wrap; gap:10px; }
+.section-title{ font-family:var(--font-display); font-weight:700; font-size:14px; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent-bright); }
+
+/* ---------- LOGS PILL ---------- */
+.logs-label{ text-align:center; font-family:var(--font-display); font-weight:800; font-size:30px; letter-spacing:0.02em; color:var(--accent-bright); margin-bottom:16px; }
+.pill-wrap{ display:flex; flex-direction:column; align-items:center; gap:10px; }
+.pill-track{ position:relative; width:100%; max-width:640px; height:44px; border-radius:999px; background:var(--bg-elevated); border:1px solid var(--line-bright); overflow:visible; margin:0 auto; }
+.pill-fill{ position:absolute; top:0; left:0; bottom:0; width:0%; border-radius:999px; background:linear-gradient(90deg, var(--accent), var(--accent-bright)); transition:width 0.9s cubic-bezier(.2,.8,.2,1); overflow:hidden; }
+.pill-value{ position:absolute; left:16px; top:0; bottom:0; display:flex; align-items:center; font-family:var(--font-display); font-weight:700; font-size:16px; color:#04140d; z-index:2; }
+.pill-value.on-track{ color:var(--text); }
+.pill-promo .tip{ color:var(--accent-bright); }
+/* Marker's own box is a wide, centered, invisible hover hitbox; the thin
+   gold line and label live on a pseudo-element so the visual stays 2px
+   while the hoverable area is much larger and easier to hit. */
+.pill-marker{ position:absolute; top:-20px; bottom:-20px; width:34px; margin-left:-17px; z-index:3; cursor:pointer; }
+.pill-marker::before{ content:""; position:absolute; top:20px; bottom:20px; left:50%; width:2px; transform:translateX(-50%); background:var(--accent-gold); box-shadow:0 0 8px rgba(232,184,75,0.7); }
+.pill-marker .marker-num{ position:absolute; top:0; left:50%; transform:translateX(-50%); font-size:12px; font-weight:700; color:var(--accent-gold); white-space:nowrap; }
+.tip-box{ position:absolute; bottom:calc(100% + 12px); left:50%; transform:translateX(-50%); background:var(--bg-card); border:1px solid var(--line-bright); border-radius:10px; padding:9px 13px; font-size:12.5px; font-weight:600; white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .15s, transform .15s; box-shadow:0 10px 26px rgba(0,0,0,0.4); z-index:5; }
+.tip-box::after{ content:""; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:6px solid transparent; border-top-color:var(--bg-card); }
+.pill-marker:hover .tip-box, .pill-promo:hover .tip-box{ opacity:1; transform:translateX(-50%) translateY(-3px); }
+.pill-marker .tip-box{ color:var(--accent-gold); }
+/* Promo hitbox: generous invisible padding around the label/number so the
+   whole corner of the pill is hoverable, not just the tiny digits. */
+.pill-promo{ position:absolute; right:0; top:-20px; bottom:-20px; display:flex; align-items:center; padding:0 16px 0 24px; font-family:var(--font-display); font-weight:700; font-size:16px; color:var(--text-muted); z-index:2; cursor:pointer; }
+.pill-promo .tip-box{ color:var(--accent-bright); left:auto; right:0; transform:none; }
+.pill-promo:hover .tip-box{ transform:translateY(-3px); }
+.pill-caption{ font-size:12.5px; color:var(--text-dim); text-align:center; }
+.quota-soon{ display:flex; align-items:center; gap:10px; font-size:13px; color:var(--text-dim); margin-top:6px; }
+.dots{ display:flex; gap:4px; }
+.dots span{ width:5px; height:5px; border-radius:50%; background:var(--accent-bright); animation:bob 1s ease-in-out infinite; }
+.dots span:nth-child(2){ animation-delay:.15s; } .dots span:nth-child(3){ animation-delay:.3s; }
+@keyframes bob{ 0%,100%{ transform:translateY(0); opacity:.4;} 50%{ transform:translateY(-4px); opacity:1;} }
+
+/* ---------- GRAPH CONTROLS ---------- */
+.graph-controls{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.toggle-pill{ display:inline-flex; align-items:center; gap:9px; background:var(--bg-elevated); border:1px solid var(--line-bright); color:var(--text-muted); font-size:12.5px; font-weight:600; padding:9px 16px 9px 10px; border-radius:999px; cursor:pointer; transition:.15s; font-family:var(--font-body); }
+.toggle-pill .dot{ width:14px; height:14px; border-radius:50%; border:2px solid var(--line-bright); background:transparent; transition:.2s; flex-shrink:0; }
+.toggle-pill:hover{ border-color:var(--line-bright); color:var(--text); }
+.toggle-pill.active{ color:var(--text); border-color:var(--accent-bright); }
+.toggle-pill.active .dot{ background:var(--accent-bright); border-color:var(--accent-bright); box-shadow:0 0 8px rgba(61,220,151,.6); }
+
+.dropdown{ position:relative; }
+.dropdown-toggle{ display:inline-flex; align-items:center; gap:8px; background:var(--bg-elevated); border:1px solid var(--line-bright); color:var(--text); font-size:12.5px; font-weight:600; padding:9px 16px; border-radius:999px; cursor:pointer; font-family:var(--font-body); transition:.15s; }
+.dropdown-toggle:hover{ border-color:var(--accent-bright); }
+.dropdown-toggle .chev{ font-size:9px; color:var(--text-dim); transition:transform .15s; }
+.dropdown.open .dropdown-toggle .chev{ transform:rotate(180deg); }
+.dropdown-menu{ position:absolute; top:calc(100% + 8px); left:0; min-width:180px; max-height:260px; overflow-y:auto; background:var(--bg-card); border:1px solid var(--line-bright); border-radius:14px; padding:6px; box-shadow:0 20px 50px rgba(0,0,0,0.45); opacity:0; pointer-events:none; transform:translateY(-6px); transition:opacity .15s, transform .15s; z-index:10; }
+.dropdown.open .dropdown-menu{ opacity:1; pointer-events:auto; transform:translateY(0); }
+.dropdown-item{ padding:9px 12px; border-radius:9px; font-size:12.5px; font-weight:500; color:var(--text-muted); cursor:pointer; transition:.1s; }
+.dropdown-item:hover{ background:var(--bg-elevated); color:var(--text); }
+.dropdown-item.selected{ color:var(--accent-bright); font-weight:600; }
+
+.chart-box{ position:relative; height:340px; margin-top:20px; }
+
+/* ---------- ROSTER CARDS ---------- */
+.cards-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr)); gap:14px; }
+.card{
+  background:var(--bg-card); border:1px solid var(--line); border-radius:16px;
+  padding:17px; cursor:default;
+  transition:border-color .2s, transform .2s, box-shadow .2s;
+}
+.card:hover{ border-color:var(--accent); transform:translateY(-3px); box-shadow:0 16px 40px rgba(0,0,0,0.35); }
+.card-top{ display:flex; align-items:center; gap:11px; }
+.pfp{ width:44px; height:44px; border-radius:50%; object-fit:cover; flex-shrink:0; border:2px solid var(--line-bright); background:var(--bg-elevated); }
+.pfp.fallback{ display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-weight:700; color:var(--text-muted); }
+.card-name{ font-weight:700; font-size:14.5px; }
+.card-rank{ font-size:11.5px; font-weight:600; color:var(--text-muted); margin-top:1px; }
+.card-hr{ height:1px; background:var(--line); margin:13px 0; }
+.card-info{ max-height:0; opacity:0; overflow:hidden; transition:max-height .35s cubic-bezier(.2,.8,.2,1), opacity .25s, margin .35s; }
+.card:hover .card-info{ max-height:320px; opacity:1; margin-bottom:13px; }
+.card-info ul{ margin:0; padding-left:16px; font-size:11.5px; color:var(--text-muted); line-height:1.6; }
+.card-info li{ margin-bottom:3px; }
+.card-logs{ font-family:var(--font-display); font-weight:700; font-size:24px; }
+.card-logs .unit{ font-size:11px; color:var(--text-dim); font-weight:500; margin-left:6px; }
+.status-danger .card-logs{ color:var(--accent-danger); }
+.status-hold .card-logs{ color:var(--text); }
+.status-promo .card-logs{ color:var(--accent-gold); }
+
+/* ---------- HOST OF THE MONTH ---------- */
+.motm-row{ display:flex; align-items:center; justify-content:space-between; padding:15px 4px; border-bottom:1px solid var(--line); }
+.motm-row:last-child{ border-bottom:none; }
+.motm-left{ display:flex; align-items:center; gap:13px; }
+.motm-rank{ font-family:var(--font-display); font-weight:700; font-size:13px; color:var(--accent-gold); width:28px; height:28px; border-radius:50%; border:1px solid var(--accent-gold); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.motm-name{ font-weight:700; font-size:14.5px; }
+.motm-date{ font-size:11.5px; color:var(--text-dim); margin-top:1px; }
+.motm-logs{ font-family:var(--font-display); font-weight:700; color:var(--accent-gold); font-size:16px; }
+
+/* ---------- FOOTER ---------- */
+footer{ margin-top:20px; padding-top:26px; border-top:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px; }
+.footer-text{ font-size:12px; color:var(--text-dim); line-height:1.6; }
+.logo-box{ background:#fff; border-radius:12px; padding:8px 10px; display:flex; align-items:center; box-shadow:0 6px 20px rgba(0,0,0,0.3); }
+.logo-box img{ height:26px; display:block; }
+
+@media (max-width:640px){
+  header.top .top-inner{ flex-direction:column; align-items:flex-start; gap:12px; }
+  .app-content{ padding-top:210px; }
+}
+</style>
+
+<!-- ============================= LOGIN ============================= -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-badge"><img src="" id="login-logo-img" alt="Server logo"></div>
+    <div class="login-title" id="login-team-name">Shadow Greenville Roleplay</div>
+    <form id="login-form" autocomplete="on">
+      <div class="field"><label for="login-user">Username</label><input id="login-user" name="username" type="text" autocomplete="username" placeholder="RobloxUsername"></div>
+      <div class="field"><label for="login-pass">Password</label><input id="login-pass" name="password" type="password" autocomplete="current-password" placeholder="••••••••"></div>
+      <button id="login-btn" type="submit">Sign In</button>
+      <div id="login-error"></div>
+    </form>
+  </div>
+</div>
+
+<!-- ============================== APP =============================== -->
+<div id="app">
+  <header class="top">
+    <div class="top-inner">
+      <div class="brand">
+        <div class="brand-mark"><img src="" id="brand-logo-img" alt="Server logo"></div>
+        <div class="brand-text">
+          <div class="name" id="team-name-display">Shadow Greenville Roleplay</div>
+        </div>
+      </div>
+      <div class="who">
+        <div class="name">Signed in as <b id="who-name">—</b></div>
+        <button id="logout-btn">Sign Out</button>
+        <div class="quicknav" id="quicknav">
+          <button id="quicknav-btn" type="button"><span class="plus">+</span> Add New</button>
+          <div class="quicknav-menu" id="quicknav-menu">
+            <a class="quicknav-item" href="#graph-section">Hosts Graph</a>
+            <a class="quicknav-item" href="#roster-section">Roster</a>
+            <a class="quicknav-item" href="#motm-section">Host Of The Month</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-content">
+    <section class="section" id="pill-section">
+      <div class="logs-label">LOGS</div>
+      <div id="pill-region"></div>
+    </section>
+
+    <section class="section" id="graph-section">
+      <div class="section-head">
+        <div class="section-title">Hosts Graph</div>
+        <div class="graph-controls">
+          <button class="toggle-pill" id="only-me-btn"><span class="dot"></span>Show only me</button>
+          <div class="dropdown" id="player-dropdown">
+            <button class="dropdown-toggle" id="dropdown-toggle" type="button">All players <span class="chev">▾</span></button>
+            <div class="dropdown-menu" id="dropdown-menu"></div>
+          </div>
+        </div>
+      </div>
+      <div class="chart-box"><canvas id="logs-chart"></canvas></div>
+    </section>
+
+    <section class="section" id="roster-section">
+      <div class="section-head">
+        <div class="section-title">Roster</div>
+        <div class="eyebrow" id="roster-caption"></div>
+      </div>
+      <div class="cards-grid" id="cards-grid"></div>
+    </section>
+
+    <section class="section" id="motm-section">
+      <div class="section-head"><div class="section-title">Host Of The Month</div></div>
+      <div id="motm-list"></div>
+    </section>
+
+    <footer>
+      <div class="footer-text">Website made by Geo to be used in the Shadow GVRP community.<br>© <span id="year"></span> Shadow Greenville Roleplay.</div>
+      <div class="logo-box"><img src="https://github.com/okfait/okgarage-mini/blob/main/01%20(80).png?raw=true" alt="OK Fait Club logo"></div>
+    </footer>
+  </div>
+</div>
+
+<script>
+/* Smooth scrolling (also makes the quick-nav "Add New" anchor links glide
+   instead of jumping straight to the section). */
+if(window.Lenis){
+  const lenis = new Lenis({ duration: 1.1, smoothWheel: true, anchors: true });
+  function raf(time){ lenis.raf(time); requestAnimationFrame(raf); }
+  requestAnimationFrame(raf);
+}
+
+document.getElementById('year').textContent = new Date().getFullYear();
+document.getElementById('login-team-name').textContent = CONFIG.TEAM_NAME;
+document.getElementById('team-name-display').textContent = CONFIG.TEAM_NAME;
+document.getElementById('login-logo-img').src = CONFIG.LOGO_URL;
+document.getElementById('brand-logo-img').src = CONFIG.LOGO_URL;
+document.documentElement.style.setProperty('--accent', CONFIG.BRAND_COLOR);
+
+/* =====================================================================
+   DEMO DATA — mirrors the real sheet layout, used only as a fallback
+   ===================================================================== */
+const DEMO_CSV = `
+,Qota Of the Month,,,,GeoYT2010,971_isbald
+Logs for same rank,11,,,Password,AlGHqwPPsv,ksdgYjsGJH
+Logs for promotion,14+,,,RobloxProfilePic,,
+,,,,,,
+Host Of The Month,,,,1/7/2026,1,0
+Username,Amount Of Logs,Date,,2/7/2026,0,0
+GeoYT2010,15,July of 2026,,3/7/2026,2,1
+,,,,4/7/2026,1,0
+,,,,5/7/2026,0,1
+,,,,6/7/2026,2,0
+`.trim();
+
+let SHEET = { sameRankQuota:null, promoQuota:null, motm:[], users:[] };
+let CURRENT_USER = null;
+let CHART = null;
+let ONLY_ME = false;
+let SELECTED_PLAYER = "";
+
+function num(v){
+  if(v===undefined || v===null) return null;
+  const s = String(v).trim();
+  if(s==='') return null;
+  const n = parseFloat(s.replace(/[^0-9.\-]/g,''));
+  return isNaN(n) ? null : n;
+}
+function parseDate(s){
+  if(!s) return null;
+  const parts = String(s).trim().split('/');
+  if(parts.length!==3) return null;
+  const [d,m,y] = parts.map(x=>parseInt(x,10));
+  if(!d||!m||!y) return null;
+  const dt = new Date(y, m-1, d);
+  return isNaN(dt.getTime()) ? null : dt;
+}
+function shortLabel(dstr){
+  const p = dstr.split('/');
+  if(p.length!==3) return dstr;
+  return `${p[0]}/${p[1]}/${p[2].slice(-2)}`;
+}
+
+function parseSheetRows(rows){
+  const out = { sameRankQuota:null, promoQuota:null, motm:[], users:[] };
+  if(rows.length < 2) return out;
+
+  out.sameRankQuota = num(rows[1] && rows[1][1]);
+  out.promoQuota = num(rows[2] && rows[2][1]);
+
+  for(let r=6; r<rows.length; r++){
+    const row = rows[r];
+    if(!row) continue;
+    const uname = (row[0]||'').trim();
+    if(!uname) continue;
+    out.motm.push({ username:uname, logs:num(row[1]), date:(row[2]||'').trim() });
+  }
+
+  // Shared date column = E (index 4). Collect every row where E parses as a date.
+  const dateRows = [];
+  for(let r=3; r<rows.length; r++){
+    const row = rows[r];
+    if(!row) continue;
+    const dstr = (row[4]||'').trim();
+    const d = parseDate(dstr);
+    if(d) dateRows.push({ r, dstr, d });
+  }
+  dateRows.sort((a,b)=>a.d-b.d);
+
+  // Each user occupies one column starting at F (index 5): row0=username, row1=password, row2=pfp, then log values aligned to dateRows.
+  const header = rows[0] || [];
+  const maxCols = Math.max(header.length, (rows[1]||[]).length, (rows[2]||[]).length);
+  for(let c=5; c<maxCols; c++){
+    const username = ((rows[0]||[])[c] || '').trim();
+    if(!username) continue;
+    const password = ((rows[1]||[])[c] || '').trim();
+    const pfp = ((rows[2]||[])[c] || '').trim();
+    const entries = dateRows.map(dr => ({ date:dr.d, dstr:dr.dstr, value: num((rows[dr.r]||[])[c]) || 0 }));
+    out.users.push({ username, password, pfp, entries });
+  }
+  return out;
+}
+
+function totalLogs(user){ return user.entries.reduce((s,e)=>s+e.value,0); }
+function statusFor(total){
+  const sr = SHEET.sameRankQuota, pr = SHEET.promoQuota;
+  if(sr===null || pr===null) return { cls:'', label:'Quota pending' };
+  if(total < sr) return { cls:'status-danger', label:'Below quota' };
+  if(total < pr) return { cls:'status-hold', label:'Same rank' };
+  return { cls:'status-promo', label:'Promotion' };
+}
+function rankFor(username){
+  const rankName = ASSIGN[username] || Object.keys(ASSIGN).find(k=>k.toLowerCase()===username.toLowerCase()) && ASSIGN[Object.keys(ASSIGN).find(k=>k.toLowerCase()===username.toLowerCase())];
+  const idx = RANKS.findIndex(r=>r.name===rankName);
+  return idx===-1 ? { order:RANKS.length, rank:null } : { order:idx, rank:RANKS[idx] };
+}
+
+/* ---------------- LOGIN ---------------- */
+document.getElementById('login-form').addEventListener('submit', function(e){
+  e.preventDefault();
+  attemptLogin();
+});
+
+function attemptLogin(){
+  const u = document.getElementById('login-user').value.trim();
+  const p = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-error');
+  const match = SHEET.users.find(x => x.username.toLowerCase()===u.toLowerCase() && x.password===p);
+  if(!match){ errEl.textContent = 'Username or password not recognized.'; return; }
+  errEl.textContent = '';
+  CURRENT_USER = match;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('who-name').textContent = match.username;
+  renderAll();
+}
+
+/* ---- Browser "save password" + return-visit autofill autologin ----
+   Real <form> + autocomplete="username"/"current-password" above is what
+   makes Chrome/Edge/etc offer to save the credentials after a successful
+   sign-in. This part detects when the browser (not this script) has
+   silently filled the fields back in on a later visit — Chrome adds a
+   special animation to autofilled inputs, so we listen for that instead
+   of guessing — and auto-submits once both fields are populated. */
+(function(){
+  const userEl = document.getElementById('login-user');
+  const passEl = document.getElementById('login-pass');
+  let userFilled = false, passFilled = false, fired = false;
+  function maybeAutoLogin(){
+    if(fired || !userFilled || !passFilled) return;
+    if(!userEl.value.trim() || !passEl.value) return;
+    fired = true;
+    setTimeout(()=>{ if(document.getElementById('login-screen').style.display !== 'none') attemptLogin(); }, 250);
+  }
+  [[userEl,'user'],[passEl,'pass']].forEach(([el,which])=>{
+    el.addEventListener('animationstart', (e)=>{
+      if(e.animationName !== 'onAutoFillStart') return;
+      if(which==='user') userFilled = true; else passFilled = true;
+      maybeAutoLogin();
+    });
+  });
+})();
+document.getElementById('logout-btn').addEventListener('click', ()=>{
+  CURRENT_USER = null; ONLY_ME = false; SELECTED_PLAYER='';
+  document.getElementById('login-user').value=''; document.getElementById('login-pass').value='';
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+});
+
+/* ---------------- RENDER: PILL ---------------- */
+function renderPill(){
+  const region = document.getElementById('pill-region');
+  const total = totalLogs(CURRENT_USER);
+  const sr = SHEET.sameRankQuota, pr = SHEET.promoQuota;
+
+  if(sr===null || pr===null){
+    region.innerHTML = `
+      <div class="pill-wrap">
+        <div class="pill-track"><div class="pill-fill" style="width:${Math.min(total*8,100)}%"></div>
+          <div class="pill-value on-track">${total}</div>
+        </div>
+        <div class="quota-soon">Quota <div class="dots"><span></span><span></span><span></span></div> soon</div>
+      </div>`;
+    return;
+  }
+  const pct = Math.min((total/pr)*100, 100);
+  const markerPct = Math.min((sr/pr)*100, 100);
+  region.innerHTML = `
+    <div class="pill-wrap">
+      <div class="pill-track">
+        <div class="pill-fill" style="width:${pct}%"></div>
+        <div class="pill-marker" style="left:${markerPct}%">
+          <div class="marker-num">${sr}</div>
+          <div class="tip-box">You need ${sr}+ logs to keep your rank</div>
+        </div>
+        <div class="pill-value ${pct>16?'':'on-track'}">${total}</div>
+        <div class="pill-promo"><span class="tip">${pr}</span><div class="tip-box">You need ${pr} logs to get promoted</div></div>
+      </div>
+      <div class="pill-caption">${total>=pr ? 'Promoted this cycle' : total>=sr ? 'Rank held' : `${(pr-total).toFixed(1)} logs to promotion`}</div>
+    </div>`;
+}
+
+/* ---------------- RENDER: GRAPH ---------------- */
+function allDatesSorted(){
+  const set = new Map();
+  SHEET.users.forEach(u=>u.entries.forEach(e=>set.set(e.dstr, e.date)));
+  return [...set.entries()].sort((a,b)=>a[1]-b[1]).map(x=>x[0]);
+}
+function cumulativeSeries(user, dates){
+  let running = 0; const map = {};
+  user.entries.forEach(e=>{ map[e.dstr] = e.value; });
+  return dates.map(d=>{ running += (map[d]||0); return running; });
+}
+const PALETTE = ['#3ddc97','#e8b84b','#7db8ff','#e88ac0','#c99bff','#ff9d6c','#6cd4d9','#d9d96c'];
+
+function renderChart(){
+  const dates = allDatesSorted();
+  const labels = dates.map(shortLabel);
+  const datasets = SHEET.users.map((u,i)=>({
+    label:u.username, data:cumulativeSeries(u, dates),
+    borderColor:PALETTE[i%PALETTE.length], backgroundColor:PALETTE[i%PALETTE.length],
+    pointRadius:3, pointHoverRadius:5, borderWidth:2.5, tension:0.25,
+    _baseColor:PALETTE[i%PALETTE.length]
+  }));
+
+  if(CHART) CHART.destroy();
+  const ctx = document.getElementById('logs-chart').getContext('2d');
+  CHART = new Chart(ctx, {
+    type:'line',
+    data:{ labels, datasets },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{ mode:'nearest', intersect:false },
+      plugins:{
+        legend:{ labels:{ color:'#93a89f', font:{ family:"'Inter'", size:11, weight:600 } } },
+        tooltip:{
+          backgroundColor:'#111c18', borderColor:'#2c443a', borderWidth:1, padding:10,
+          titleFont:{ family:"'Inter'", size:11.5, weight:'600' }, bodyFont:{ family:"'Inter'", size:11.5 },
+          callbacks:{ label:(ctx)=>` ${ctx.dataset.label}: ${ctx.formattedValue} logs` }
+        }
+      },
+      scales:{
+        y:{ beginAtZero:true, ticks:{ stepSize:2, color:'#5c6f68', font:{ family:"'Inter'", size:10.5 } }, grid:{ color:'#1e2d27' } },
+        x:{ ticks:{ color:'#5c6f68', font:{ family:"'Inter'", size:10.5 } }, grid:{ display:false } }
+      },
+      onHover:(evt, active)=>{
+        if(!active.length){ resetOpacity(); return; }
+        const idx = active[0].datasetIndex;
+        CHART.data.datasets.forEach((ds,i)=>{ ds.borderColor = i===idx ? ds._baseColor : ds._baseColor+'33'; });
+        CHART.update('none');
+      }
+    }
+  });
+  document.getElementById('logs-chart').addEventListener('mouseleave', resetOpacity);
+
+  const menu = document.getElementById('dropdown-menu');
+  menu.innerHTML = `<div class="dropdown-item ${SELECTED_PLAYER===''?'selected':''}" data-val="">All players</div>` +
+    SHEET.users.map(u=>`<div class="dropdown-item ${SELECTED_PLAYER===u.username?'selected':''}" data-val="${u.username}">${u.username}</div>`).join('');
+  menu.querySelectorAll('.dropdown-item').forEach(item=>{
+    item.addEventListener('click', ()=>{
+      SELECTED_PLAYER = item.dataset.val;
+      document.getElementById('dropdown-toggle').innerHTML = `${SELECTED_PLAYER || 'All players'} <span class="chev">▾</span>`;
+      if(SELECTED_PLAYER){ ONLY_ME = false; document.getElementById('only-me-btn').classList.remove('active'); }
+      document.getElementById('player-dropdown').classList.remove('open');
+      applyFilter();
+    });
+  });
+}
+function resetOpacity(){ if(!CHART) return; CHART.data.datasets.forEach(ds=>{ ds.borderColor = ds._baseColor; }); CHART.update('none'); }
+function applyFilter(){
+  if(!CHART) return;
+  const onlyName = ONLY_ME ? CURRENT_USER.username : SELECTED_PLAYER;
+  CHART.data.datasets.forEach(ds=>{ ds.hidden = onlyName ? ds.label !== onlyName : false; });
+  CHART.update();
+}
+document.getElementById('only-me-btn').addEventListener('click', function(){
+  ONLY_ME = !ONLY_ME;
+  this.classList.toggle('active', ONLY_ME);
+  if(ONLY_ME){ SELECTED_PLAYER=''; document.getElementById('dropdown-toggle').innerHTML = 'All players <span class="chev">▾</span>'; }
+  applyFilter();
+});
+document.getElementById('dropdown-toggle').addEventListener('click', (e)=>{
+  e.stopPropagation();
+  document.getElementById('player-dropdown').classList.toggle('open');
+});
+document.addEventListener('click', ()=>{
+  document.getElementById('player-dropdown').classList.remove('open');
+  document.getElementById('quicknav').classList.remove('open');
+});
+
+/* ---------------- QUICK NAV (top bar "Add New") ---------------- */
+document.getElementById('quicknav-btn').addEventListener('click', (e)=>{
+  e.stopPropagation();
+  document.getElementById('quicknav').classList.toggle('open');
+});
+document.querySelectorAll('.quicknav-item').forEach(item=>{
+  item.addEventListener('click', ()=>{ document.getElementById('quicknav').classList.remove('open'); });
+});
+
+/* ---------------- RENDER: CARDS ---------------- */
+function renderCards(){
+  const grid = document.getElementById('cards-grid');
+  document.getElementById('roster-caption').textContent = `${SHEET.users.length} staff`;
+  const sorted = [...SHEET.users].sort((a,b)=>{
+    const ra = rankFor(a.username).order, rb = rankFor(b.username).order;
+    if(ra!==rb) return ra-rb;
+    return totalLogs(b) - totalLogs(a);
+  });
+  grid.innerHTML = sorted.map(u=>{
+    const total = totalLogs(u);
+    const st = statusFor(total);
+    const { rank } = rankFor(u.username);
+    const initials = u.username.slice(0,2).toUpperCase();
+    const pfpHtml = u.pfp ? `<img class="pfp" src="${u.pfp}" alt="${u.username}">` : `<div class="pfp fallback">${initials}</div>`;
+    const infoHtml = rank ? `<div class="card-info"><ul>${rank.info.map(i=>`<li>${i}</li>`).join('')}</ul></div><div class="card-hr"></div>` : '';
+    return `
+      <div class="card ${st.cls}">
+        <div class="card-top">
+          ${pfpHtml}
+          <div><div class="card-name">${u.username}</div><div class="card-rank">${rank ? rank.name : 'Unranked'}</div></div>
+        </div>
+        <div class="card-hr"></div>
+        ${infoHtml}
+        <div class="card-logs">${total}<span class="unit">logs</span></div>
+      </div>`;
+  }).join('');
+}
+
+/* ---------------- RENDER: HOST OF THE MONTH ---------------- */
+function renderMotm(){
+  const el = document.getElementById('motm-list');
+  if(!SHEET.motm.length){ el.innerHTML = `<div class="eyebrow">No entries yet.</div>`; return; }
+  el.innerHTML = SHEET.motm.map((m,i)=>`
+    <div class="motm-row">
+      <div class="motm-left">
+        <div class="motm-rank">${i+1}</div>
+        <div><div class="motm-name">${m.username}</div><div class="motm-date">${m.date||''}</div></div>
+      </div>
+      <div class="motm-logs">${m.logs ?? '—'} logs</div>
+    </div>`).join('');
+}
+
+function renderAll(){ renderPill(); renderChart(); renderCards(); renderMotm(); }
+
+/* ---------------- LOAD DATA ---------------- */
+function boot(rows, isDemo){
+  SHEET = parseSheetRows(rows);
+  if(isDemo){
+    console.warn('SGR Host Database: live sheet fetch failed, showing demo data. Check CONFIG.SHEET_CSV_URL.');
+  }
+}
+
+if(CONFIG.SHEET_CSV_URL && CONFIG.SHEET_CSV_URL.indexOf('http') === 0){
+  Papa.parse(CONFIG.SHEET_CSV_URL, {
+    download:true,
+    complete:(res)=> boot(res.data, false),
+    error:()=>{ boot(Papa.parse(DEMO_CSV).data, true); }
+  });
+} else {
+  boot(Papa.parse(DEMO_CSV).data, true);
+}
+</script>
+</body>
+</html>
