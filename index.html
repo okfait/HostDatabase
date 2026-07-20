@@ -29,6 +29,11 @@ const CONFIG = {
   BRAND_COLOR: "#258162",
   LOGO_URL: "https://github.com/okfait/okgarage-mini/blob/main/01%20(81).png?raw=true"
 };
+// Fetches the "LogHistory" tab by NAME instead of by gid, so it keeps
+// working even though that tab was created later and its gid is unknown.
+const SHEET_ID_MATCH = CONFIG.SHEET_CSV_URL.match(/\/d\/([a-zA-Z0-9-_]+)/);
+const SHEET_ID = SHEET_ID_MATCH ? SHEET_ID_MATCH[1] : '';
+const LOG_HISTORY_CSV_URL = SHEET_ID ? `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=LogHistory` : '';
 
 /* Rank ladder — highest to lowest. Your sheet now has a "Rank" row
    (row 4) per host — put one of these exact names in that cell and the
@@ -291,6 +296,10 @@ section.section{ margin-bottom:40px; scroll-margin-top:100px; }
 .pfp.fallback{ display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-weight:700; color:var(--text-muted); }
 .card-name{ font-weight:700; font-size:14.5px; }
 .card-rank{ font-size:11.5px; font-weight:600; color:var(--text-muted); margin-top:1px; }
+.card-tags{ display:flex; gap:6px; flex-wrap:wrap; margin-top:12px; }
+.tag{ font-size:10px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; padding:3px 8px; border-radius:6px; }
+.tag-loa{ background:rgba(232,184,75,0.15); color:var(--accent-gold); border:1px solid rgba(232,184,75,0.35); }
+.tag-warn{ background:rgba(217,96,90,0.15); color:var(--accent-danger); border:1px solid rgba(217,96,90,0.35); }
 .card-hr{ height:1px; background:var(--line); margin:13px 0; }
 .card-info{ max-height:0; opacity:0; overflow:hidden; transition:max-height .5s cubic-bezier(.2,.8,.2,1), opacity .35s ease; }
 .card:hover .card-info{ max-height:320px; opacity:1; transition:max-height 1.1s cubic-bezier(.2,.8,.2,1), opacity .7s ease .15s; }
@@ -706,6 +715,131 @@ function parseSheetRows(rows){
   return out;
 }
 
+/* ================= "New" sheet layout (Host Team Records) =================
+   Instead of hardcoding cell letters, this hunts for the actual header
+   text ("Username", "Rank", "Logs", "LOA", …) wherever it lives, so it
+   keeps working if a row/column ever shifts. Log HISTORY doesn't live on
+   this sheet at all anymore — the Apps Script archives it to a separate
+   "LogHistory" tab (Date, Username, Logs) every time you click
+   "Save & Clear Today's Logs", so that's fetched and merged in separately. */
+function findLabelCell(rows, label){
+  const target = label.trim().toLowerCase();
+  for(let r=0;r<rows.length;r++){
+    const row = rows[r]||[];
+    for(let c=0;c<row.length;c++){
+      if(((row[c]||'')+'').trim().toLowerCase() === target) return { r, c };
+    }
+  }
+  return null;
+}
+function valueRightOf(rows, pos, maxGap=4){
+  if(!pos) return null;
+  const row = rows[pos.r]||[];
+  for(let c=pos.c+1; c<=pos.c+maxGap && c<row.length; c++){
+    const v = ((row[c]||'')+'').trim();
+    if(v) return v;
+  }
+  return null;
+}
+function detectSystem(rows){
+  const pos = findLabelCell(rows, 'LogSystemWebsite');
+  const val = valueRightOf(rows, pos, 6);
+  return (val && val.toLowerCase().includes('new')) ? 'new' : 'old';
+}
+const WORD_NUM = { one:1, two:2, three:3, four:4, five:5, six:6, seven:7, eight:8, nine:9, ten:10 };
+function warnBadgeText(raw){
+  const n = WORD_NUM[raw.trim().toLowerCase()];
+  return n ? `${n} Warning${n>1?'s':''}` : raw;
+}
+function parseNewFormat(rows){
+  const out = { sameRankQuota:null, promoQuota:null, motm:[], users:[] };
+
+  const sameRankPos = findLabelCell(rows, 'Logs for keeping the rank') || findLabelCell(rows, 'Logs for same rank');
+  const promoPos = findLabelCell(rows, 'Logs for promotion');
+  out.sameRankQuota = num(valueRightOf(rows, sameRankPos));
+  out.promoQuota = num(valueRightOf(rows, promoPos));
+
+  // Roster header: a row containing "Username", with "Rank" a few columns after it.
+  let headerPos = null;
+  for(let r=0;r<rows.length;r++){
+    const row = rows[r]||[];
+    const uc = row.findIndex(v=>((v||'')+'').trim().toLowerCase()==='username');
+    if(uc===-1) continue;
+    const rc = row.findIndex((v,ci)=> ci>uc && ci<=uc+4 && ((v||'')+'').trim().toLowerCase()==='rank');
+    if(rc!==-1){ headerPos = { r, colUsername:uc, colRank:rc }; break; }
+  }
+  if(!headerPos) return out; // new layout not found — caller falls back to Old
+
+  const headerRow = rows[headerPos.r] || [];
+  function colOnHeader(label){
+    const i = headerRow.findIndex(v=>((v||'')+'').trim().toLowerCase()===label.toLowerCase());
+    return i===-1 ? null : i;
+  }
+  const colPassword = colOnHeader('Password');
+  const colPfp = colOnHeader('ProfilePic');
+  const colLOA = colOnHeader('LOA');
+  const colWarn = colOnHeader('Amount of warnings');
+  // "Eligible for payment" is intentionally never read — not used anywhere.
+
+  for(let r=headerPos.r+1; r<rows.length; r++){
+    const row = rows[r]||[];
+    const username = ((row[headerPos.colUsername]||'')+'').trim();
+    const rankName = ((row[headerPos.colRank]||'')+'').trim();
+    if(!username || username.toLowerCase()==='username') continue; // unfilled template slot
+    const password = colPassword!==null ? ((row[colPassword]||'')+'').trim() : '';
+    const pfp = colPfp!==null ? ((row[colPfp]||'')+'').trim() : '';
+    const loaRaw = colLOA!==null ? ((row[colLOA]||'')+'').trim() : '';
+    const warnRaw = colWarn!==null ? ((row[colWarn]||'')+'').trim() : '';
+    out.users.push({
+      username, password, pfp, rankName,
+      loa: !!loaRaw && loaRaw.toLowerCase()!=='n/a',
+      warnLabel: (warnRaw && warnRaw.toLowerCase()!=='none') ? warnRaw : '',
+      entries: [] // filled in by applyLogHistory() once the LogHistory tab loads
+    });
+  }
+
+  // New-layout Host Of The Month table has its own Logs/Username/Date sub-header.
+  const motmBanner = findLabelCell(rows, 'Host Of The Month');
+  if(motmBanner){
+    let sub = null;
+    for(let r=motmBanner.r; r<Math.min(motmBanner.r+6, rows.length); r++){
+      const row = rows[r]||[];
+      const li = row.findIndex(v=>((v||'')+'').trim().toLowerCase()==='logs');
+      const ui = row.findIndex(v=>((v||'')+'').trim().toLowerCase()==='username');
+      const di = row.findIndex(v=>((v||'')+'').trim().toLowerCase()==='date');
+      if(li!==-1 && ui!==-1 && di!==-1){ sub = { r, li, ui, di }; break; }
+    }
+    if(sub){
+      for(let r=sub.r+1; r<rows.length; r++){
+        const row = rows[r]||[];
+        const uname = ((row[sub.ui]||'')+'').trim();
+        if(!uname || uname.toLowerCase()==='username') continue;
+        out.motm.push({ username:uname, logs:num(row[sub.li]), date:((row[sub.di]||'')+'').trim() });
+      }
+    }
+  }
+  return out;
+}
+function applyLogHistory(sheetObj, historyRows){
+  const dataRows = historyRows.filter(r => r && r.length>=3 && (r[0]||'').trim() && (r[0]||'').trim().toLowerCase()!=='date');
+  const dateMap = {};
+  dataRows.forEach(r=>{
+    const dstr = (r[0]||'').trim();
+    const d = parseDate(dstr);
+    if(d) dateMap[dstr] = d;
+  });
+  const dateList = Object.keys(dateMap).map(dstr=>({ dstr, d:dateMap[dstr] })).sort((a,b)=>a.d-b.d);
+  sheetObj.users.forEach(u=>{
+    const byDate = {};
+    dataRows.forEach(r=>{
+      if(((r[1]||'')+'').trim().toLowerCase() !== u.username.toLowerCase()) return;
+      const v = num(r[2]);
+      if(v!==null) byDate[(r[0]||'').trim()] = v;
+    });
+    u.entries = dateList.map(dr => ({ date:dr.d, dstr:dr.dstr, value: byDate[dr.dstr] || 0, has: Object.prototype.hasOwnProperty.call(byDate, dr.dstr) }));
+  });
+}
+
 function totalLogs(user){ return user.entries.reduce((s,e)=>s+e.value,0); }
 function statusFor(total){
   const sr = SHEET.sameRankQuota, pr = SHEET.promoQuota;
@@ -892,6 +1026,10 @@ function renderChart(){
     pointStyle:'circle', pointRadius:0, pointHoverRadius:6, borderWidth:2.5, tension:0.25,
     _baseColor:colorForIndex(i)
   }));
+  // Fixed axis ceiling based on EVERYONE's data, not just whoever is
+  // currently visible — otherwise "show only me" rescales the whole graph.
+  const overallMax = datasets.reduce((m,ds)=>Math.max(m, ...ds.data, 0), 0);
+  const yMax = Math.ceil(overallMax) + 1;
 
   if(CHART) CHART.destroy();
   const ctx = document.getElementById('logs-chart').getContext('2d');
@@ -910,11 +1048,17 @@ function renderChart(){
         }
       },
       scales:{
-        y:{ beginAtZero:true, ticks:{ stepSize:1, color:cDim, font:{ family:"'Inter'", size:10.5 } }, grid:{ color:cLine } },
+        y:{ beginAtZero:true, max:yMax, ticks:{ stepSize:1, color:cDim, font:{ family:"'Inter'", size:10.5 } }, grid:{ color:cLine } },
         x:{ ticks:{ color:cDim, font:{ family:"'Inter'", size:10.5 } }, grid:{ display:false } }
       },
       onHover:(evt, active)=>{
         if(!active.length){ stopShine(); return; }
+        // 'nearest' mode always returns SOMETHING as long as the cursor is
+        // inside the chart area, even if it's nowhere near an actual line —
+        // so only count it if the cursor is genuinely close to that point.
+        const el = active[0].element;
+        const dx = evt.x - el.x, dy = evt.y - el.y;
+        if(Math.sqrt(dx*dx + dy*dy) > 26){ stopShine(); return; }
         startShine(active[0].datasetIndex);
       }
     }
@@ -1093,12 +1237,17 @@ function renderCards(){
     const initials = u.username.slice(0,2).toUpperCase();
     const pfpHtml = u.pfp ? `<img class="pfp" src="${u.pfp}" alt="${u.username}">` : `<div class="pfp fallback">${initials}</div>`;
     const infoHtml = rank ? `<div class="card-info"><ul>${rank.info.map(x=>`<li>${x}</li>`).join('')}</ul><div class="card-hr"></div></div>` : '';
+    const tagsHtml = (u.loa || u.warnLabel) ? `<div class="card-tags">
+        ${u.loa ? `<span class="tag tag-loa">LOA</span>` : ''}
+        ${u.warnLabel ? `<span class="tag tag-warn">${warnBadgeText(u.warnLabel)}</span>` : ''}
+      </div>` : '';
     return `
       <div class="card ${st.cls}" data-idx="${i}" data-rank="${rank ? rank.name : ''}" data-username="${u.username.toLowerCase()}">
         <div class="card-top">
           ${pfpHtml}
           <div><div class="card-name">${u.username}</div><div class="card-rank">${rank ? rank.name : 'Unranked'}</div></div>
         </div>
+        ${tagsHtml}
         <div class="card-hr"></div>
         ${infoHtml}
         <div class="card-logs ${isTop ? 'top-logger shiny-text' : ''}">${total}<span class="unit">logs</span></div>
@@ -1154,7 +1303,29 @@ function renderAll(){ renderPill(); renderChart(); renderCards(); renderMotm(); 
 
 /* ---------------- LOAD DATA ---------------- */
 function boot(rows, isDemo){
+  const system = detectSystem(rows);
+  if(system === 'new'){
+    const parsed = parseNewFormat(rows);
+    if(parsed.users.length){
+      SHEET = parsed;
+      if(LOG_HISTORY_CSV_URL){
+        Papa.parse(LOG_HISTORY_CSV_URL, {
+          download:true,
+          complete:(res)=>{ applyLogHistory(SHEET, res.data); finishBoot(isDemo); },
+          error:()=>{ finishBoot(isDemo); } // no history saved yet — fine, just shows 0 logs
+        });
+      } else {
+        finishBoot(isDemo);
+      }
+      return;
+    }
+    // toggle says "New" but the layout couldn't be found — fall through to Old
+    // rather than showing an empty site.
+  }
   SHEET = parseSheetRows(rows);
+  finishBoot(isDemo);
+}
+function finishBoot(isDemo){
   if(isDemo){
     console.warn('SGR Host Database: live sheet fetch failed, showing demo data. Check CONFIG.SHEET_CSV_URL.');
   }
