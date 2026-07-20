@@ -118,6 +118,13 @@ body::-webkit-scrollbar{ display:none; width:0; height:0; }
 @media (prefers-reduced-motion: reduce){ *{ animation-duration:0.001ms !important; transition-duration:0.001ms !important; } }
 
 .eyebrow{ font-family:var(--font-body); font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-dim); }
+.roster-head-right{ display:flex; align-items:center; gap:14px; }
+.roster-search-pill{ display:flex; align-items:center; gap:8px; background:var(--bg-elevated); border:1px solid var(--line-bright); border-radius:999px; padding:8px 14px; transition:border-color .15s; }
+.roster-search-pill:focus-within{ border-color:var(--accent-bright); }
+.roster-search-pill .search-icon{ width:14px; height:14px; flex-shrink:0; color:var(--text-dim); }
+.roster-search-pill input{ border:none; outline:none; background:transparent; color:var(--text); font-family:var(--font-body); font-size:12.5px; width:130px; }
+.roster-search-pill input::placeholder{ color:var(--text-dim); }
+.card.search-hidden{ display:none; }
 
 .icon{ display:inline-flex; width:18px; height:18px; flex-shrink:0; vertical-align:middle; }
 .icon svg{ width:100%; height:100%; display:block; }
@@ -249,7 +256,10 @@ section.section{ margin-bottom:40px; scroll-margin-top:100px; }
 .dropdown-toggle:hover{ border-color:var(--accent-bright); }
 .dropdown-toggle .chev{ font-size:9px; color:var(--text-dim); transition:transform .15s; }
 .dropdown.open .dropdown-toggle .chev{ transform:rotate(180deg); }
-.dropdown-menu{ position:absolute; top:calc(100% + 8px); left:0; min-width:180px; max-height:260px; overflow-y:auto; background:var(--bg-card); border:1px solid var(--line-bright); border-radius:14px; padding:6px; box-shadow:0 20px 50px rgba(0,0,0,0.45); opacity:0; pointer-events:none; transform:translateY(-6px); transition:opacity .15s, transform .15s; z-index:10; scrollbar-width:none; -ms-overflow-style:none; }
+.dropdown-menu{ position:absolute; top:calc(100% + 8px); left:0; min-width:200px; max-height:280px; overflow-y:auto; background:var(--bg-card); border:1px solid var(--line-bright); border-radius:14px; padding:6px; box-shadow:0 20px 50px rgba(0,0,0,0.45); opacity:0; pointer-events:none; transform:translateY(-6px); transition:opacity .15s, transform .15s; z-index:10; scrollbar-width:none; -ms-overflow-style:none; }
+.dropdown-search{ width:100%; box-sizing:border-box; margin-bottom:6px; padding:8px 10px; background:var(--bg-elevated); border:1px solid var(--line-bright); border-radius:9px; color:var(--text); font-family:var(--font-body); font-size:12px; outline:none; }
+.dropdown-search:focus{ border-color:var(--accent-bright); }
+.dropdown-search::placeholder{ color:var(--text-dim); }
 .dropdown-menu::-webkit-scrollbar{ display:none; width:0; height:0; }
 .dropdown.open .dropdown-menu{ opacity:1; pointer-events:auto; transform:translateY(0); }
 .dropdown-item{ padding:9px 12px; border-radius:9px; font-size:12.5px; font-weight:500; color:var(--text-muted); cursor:pointer; transition:.1s; }
@@ -379,7 +389,13 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
     <section class="section" id="roster-section">
       <div class="section-head">
         <div class="section-title shiny-text"><span class="icon" data-icon="group"></span> Roster</div>
-        <div class="eyebrow" id="roster-caption"></div>
+        <div class="roster-head-right">
+          <div class="roster-search-pill">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="text" id="roster-search" placeholder="Search hosts…">
+          </div>
+          <div class="eyebrow" id="roster-caption"></div>
+        </div>
       </div>
       <div class="cards-grid" id="cards-grid"></div>
     </section>
@@ -898,12 +914,12 @@ function renderChart(){
         x:{ ticks:{ color:cDim, font:{ family:"'Inter'", size:10.5 } }, grid:{ display:false } }
       },
       onHover:(evt, active)=>{
-        if(!active.length){ resetOpacity(); return; }
-        highlightDataset(active[0].datasetIndex);
+        if(!active.length){ stopShine(); return; }
+        startShine(active[0].datasetIndex);
       }
     }
   });
-  document.getElementById('logs-chart').addEventListener('mouseleave', resetOpacity);
+  document.getElementById('logs-chart').addEventListener('mouseleave', stopShine);
 
   // Custom HTML legend — the canvas-drawn one couldn't guarantee perfectly
   // round swatches at every zoom/DPR, so this is plain CSS circles instead.
@@ -913,8 +929,8 @@ function renderChart(){
   ).join('');
   legendEl.querySelectorAll('.chart-legend-item').forEach(item=>{
     const idx = +item.dataset.idx;
-    item.addEventListener('mouseenter', ()=> highlightDataset(idx));
-    item.addEventListener('mouseleave', resetOpacity);
+    item.addEventListener('mouseenter', ()=> startShine(idx));
+    item.addEventListener('mouseleave', stopShine);
     item.addEventListener('click', ()=>{
       const ds = CHART.data.datasets[idx];
       ds.hidden = !ds.hidden;
@@ -924,35 +940,100 @@ function renderChart(){
   });
 
   const menu = document.getElementById('dropdown-menu');
-  menu.innerHTML = `<div class="dropdown-item ${SELECTED_PLAYER===''?'selected':''}" data-val="">All players</div>` +
-    SHEET.users.map(u=>`<div class="dropdown-item ${SELECTED_PLAYER===u.username?'selected':''}" data-val="${u.username}">${u.username}</div>`).join('');
+  menu.innerHTML =
+    `<input type="text" class="dropdown-search" id="dropdown-search" placeholder="Search players…">` +
+    `<div class="dropdown-item" data-val="">All players</div>` +
+    SHEET.users.map(u=>`<div class="dropdown-item" data-val="${u.username}">${u.username}</div>`).join('');
+  function refreshDropdownSelection(){
+    menu.querySelectorAll('.dropdown-item').forEach(item=>{
+      item.classList.toggle('selected', item.dataset.val === SELECTED_PLAYER);
+    });
+  }
+  refreshDropdownSelection();
   menu.querySelectorAll('.dropdown-item').forEach(item=>{
     item.addEventListener('click', ()=>{
       SELECTED_PLAYER = item.dataset.val;
       document.getElementById('dropdown-toggle').innerHTML = `<span>${SELECTED_PLAYER || 'All players'} <span class="chev">▾</span></span>`;
       if(SELECTED_PLAYER){ ONLY_ME = false; document.getElementById('only-me-btn').classList.remove('active'); }
       document.getElementById('player-dropdown').classList.remove('open');
+      refreshDropdownSelection();
       applyFilter();
     });
   });
-}
-function highlightDataset(idx){
-  if(!CHART) return;
-  CHART.data.datasets.forEach((ds,i)=>{
-    const c = i===idx ? ds._baseColor : withAlpha(ds._baseColor, 0.2);
-    ds.borderColor = c; ds.backgroundColor = c;
+  const searchInput = document.getElementById('dropdown-search');
+  searchInput.addEventListener('input', ()=>{
+    const q = searchInput.value.trim().toLowerCase();
+    menu.querySelectorAll('.dropdown-item').forEach(item=>{
+      const isAll = item.dataset.val === '';
+      item.style.display = (isAll || item.textContent.toLowerCase().includes(q)) ? '' : 'none';
+    });
   });
-  CHART.update('none');
+  searchInput.addEventListener('click', (e)=> e.stopPropagation());
+}
+
+/* ---------------- Shimmer sweep on the hovered graph line ----------------
+   Mirrors the .shiny-text CSS effect (a moving bright band), but built on
+   a canvas gradient since a line stroke can't use background-clip:text. */
+let SHINE_IDX = -1, SHINE_RAF = null, SHINE_PHASE = 0;
+function shineGradient(ctx, chartArea, baseColor, phase){
+  const grad = ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
+  const peak = (phase % 1.6) - 0.3; // sweeps in from the left, out past the right, loops
+  const band = 0.16;
+  const stops = [[0, baseColor], [1, baseColor]];
+  [peak - band, peak, peak + band].forEach((o, i)=>{
+    if(o > 0.001 && o < 0.999) stops.push([o, i===1 ? '#ffffff' : baseColor]);
+  });
+  const seen = new Set();
+  stops.sort((a,b)=>a[0]-b[0]).forEach(([o,c])=>{
+    let oo = Math.min(1, Math.max(0, o));
+    while(seen.has(oo.toFixed(4))) oo += 0.0002;
+    seen.add(oo.toFixed(4));
+    grad.addColorStop(oo, c);
+  });
+  return grad;
+}
+function startShine(idx){
+  if(!CHART) return;
+  if(SHINE_IDX === idx && SHINE_RAF) return;
+  SHINE_IDX = idx;
   document.querySelectorAll('.chart-legend-item').forEach((el,i)=>{
     el.classList.toggle('dimmed', i!==idx);
+    el.classList.toggle('shiny-text', i===idx);
   });
+  if(SHINE_RAF) return; // loop already running, it'll pick up the new idx
+  function tick(){
+    if(!CHART || SHINE_IDX === -1){ SHINE_RAF = null; return; }
+    SHINE_PHASE += 0.02;
+    CHART.data.datasets.forEach((ds,i)=>{
+      if(i===SHINE_IDX){
+        const grad = shineGradient(CHART.ctx, CHART.chartArea, ds._baseColor, SHINE_PHASE);
+        ds.borderColor = grad; ds.backgroundColor = grad;
+      } else {
+        const dim = withAlpha(ds._baseColor, 0.2);
+        ds.borderColor = dim; ds.backgroundColor = dim;
+      }
+    });
+    CHART.update('none');
+    SHINE_RAF = requestAnimationFrame(tick);
+  }
+  tick();
 }
-function resetOpacity(){
+function stopShine(){
+  SHINE_IDX = -1;
+  SHINE_RAF = null;
+  document.querySelectorAll('.chart-legend-item').forEach(el=> el.classList.remove('dimmed','shiny-text'));
   if(!CHART) return;
   CHART.data.datasets.forEach(ds=>{ ds.borderColor = ds._baseColor; ds.backgroundColor = ds._baseColor; });
   CHART.update('none');
-  document.querySelectorAll('.chart-legend-item').forEach(el=>el.classList.remove('dimmed'));
 }
+// Safety net: if the mouse leaves the chart/legend fast enough that Chart.js's
+// own mouseleave never fires (common when flicking onto a roster card),
+// this catches it on the very next mousemove anywhere else on the page.
+document.addEventListener('mousemove', (e)=>{
+  if(SHINE_IDX === -1) return;
+  if(e.target.closest('#logs-chart') || e.target.closest('.chart-legend-item')) return;
+  stopShine();
+});
 function applyFilter(){
   if(!CHART) return;
   const onlyName = ONLY_ME ? CURRENT_USER.username : SELECTED_PLAYER;
@@ -1013,7 +1094,7 @@ function renderCards(){
     const pfpHtml = u.pfp ? `<img class="pfp" src="${u.pfp}" alt="${u.username}">` : `<div class="pfp fallback">${initials}</div>`;
     const infoHtml = rank ? `<div class="card-info"><ul>${rank.info.map(x=>`<li>${x}</li>`).join('')}</ul><div class="card-hr"></div></div>` : '';
     return `
-      <div class="card ${st.cls}" data-idx="${i}" data-rank="${rank ? rank.name : ''}">
+      <div class="card ${st.cls}" data-idx="${i}" data-rank="${rank ? rank.name : ''}" data-username="${u.username.toLowerCase()}">
         <div class="card-top">
           ${pfpHtml}
           <div><div class="card-name">${u.username}</div><div class="card-rank">${rank ? rank.name : 'Unranked'}</div></div>
@@ -1036,7 +1117,17 @@ function renderCards(){
       ELECTRIC_INSTANCES.push(attachElectricBorder(card, { color: brandDark, chaos:0.06, borderRadius:16, opacity: glowOpacity }));
     }
   });
+  applyRosterSearch();
 }
+function applyRosterSearch(){
+  const input = document.getElementById('roster-search');
+  if(!input) return;
+  const q = input.value.trim().toLowerCase();
+  document.querySelectorAll('#cards-grid .card').forEach(card=>{
+    card.classList.toggle('search-hidden', !!q && !card.dataset.username.includes(q));
+  });
+}
+document.getElementById('roster-search').addEventListener('input', applyRosterSearch);
 
 /* ---------------- RENDER: HOST OF THE MONTH ---------------- */
 function renderMotm(){
