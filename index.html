@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- Apply saved theme immediately, before first paint, so there's no flash -->
 <script>(function(){ try{ var t = localStorage.getItem('sgr-theme'); if(t === 'light') document.documentElement.setAttribute('data-theme','light'); }catch(e){} })();</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,21 +18,17 @@
    CONFIG
    ===================================================================== */
 const CONFIG = {
-  // Direct CSV export of your sheet (works as long as the sheet's Share
-  // setting is "Anyone with the link → Viewer" — it does NOT need to be
-  // separately "Published to web"). gid=0 is the first tab (Foaie1).
-  // If you add more tabs and need a different one, grab its gid from the
-  // tab's URL (…#gid=123456) and swap it in below.
-  SHEET_CSV_URL: "https://docs.google.com/spreadsheets/d/1Xv5az4DrAtOV8zyeSAkpjZVTWWB8QWJI1DJybvPY7HM/export?format=csv&gid=0",
+  SHEET_ID: "1Xv5az4DrAtOV8zyeSAkpjZVTWWB8QWJI1DJybvPY7HM",
   TEAM_NAME: "Shadow Greenville Roleplay",
   BRAND_COLOR: "#258162",
   LOGO_URL: "https://github.com/okfait/okgarage-mini/blob/main/01%20(81).png?raw=true"
 };
+// Main tab (holds both the Old system and the New "Host Team Records" system,
+// plus the A10/B10 LogSystemWebsite switch), and a separate history tab that
+// the Apps Script "Save & Clear" button archives each date's logs into.
+CONFIG.MAIN_CSV_URL = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/export?format=csv&gid=0`;
+CONFIG.HISTORY_CSV_URL = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/gviz/tq?tqx=out:csv&sheet=LogHistory`;
 
-/* Rank ladder — highest to lowest. Your sheet now has a "Rank" row
-   (row 4) per host — put one of these exact names in that cell and the
-   card picks it up automatically. ASSIGN below is only a fallback for
-   any host whose Rank cell is still blank. */
 const RANKS = [
   { name:"Host Manager",   group:"Management",        info:["Oversees and manages the Server Host department.","Reviews applications.","Handles reports."] },
   { name:"Host Lead",      group:"Management",        info:["Assists the Host Manager in department management.","Handles reports."] },
@@ -43,131 +38,53 @@ const RANKS = [
   { name:"Junior Host",    group:"Host Operations",   info:["Has passed Trial Host training and progressed to the next stage.","Begins learning session hosting and management skills.","Drives a dark blue undercover vehicle with a \"J-HOST\" plate.","Obtains independent hosting permissions."] },
   { name:"Trial Host",     group:"Probationary Hosts",info:["The first stage of becoming a host.","Undergoes basic training in hosting fundamentals.","Takes grammar and spelling tests.","Assigned a Server Host Trainer for guidance.","Hosts a supervised session upon completing fundamental training.","Drives a dark blue undercover vehicle with a \"T-HOST\" plate.","Can co-host sessions once 2 steps of training are complete."] }
 ];
-// Fallback only — used if a host's Rank cell in the sheet is blank.
 const ASSIGN = { "GeoYT2010": "Host Manager" };
 
-/* Inline SVG icons — no external font/network request, so they can
-   never fail to load the way the Google Material Symbols font did. */
+/* Inline icons — no external icon font, so nothing to fail to load. */
 const ICONS = {
-  moon:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>',
-  sun:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>',
-  chart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>',
-  group: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
-  crown: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7Z"/><path d="M5 20h14"/></svg>'
+  bar_chart: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V12"/><path d="M10 20V4"/><path d="M16 20V14"/></svg>',
+  group: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  crown: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 5 3.5 12h11L21 5l-6 6-3-7-3 7-6-6Z"/><path d="M6 20h12"/></svg>',
+  bedtime: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>',
+  sunny: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/></svg>'
 };
 </script>
 
 <style>
 :root{
-  --bg:#0b1210;
-  --bg-elevated:#111b17;
-  --bg-card:#111c18;
-  --line:#1e2d27;
-  --line-bright:#2c443a;
-  --accent:#258162;
-  --accent-bright:#3ddc97;
-  --accent-gold:#e8b84b;
-  --accent-danger:#d9605a;
-  --text:#f2f5f3;
-  --text-muted:#93a89f;
-  --text-dim:#5c6f68;
-  --header-bg:rgba(11,18,16,0.55);
-  --header-border:rgba(44,68,58,0.5);
-  --font-display:'Poppins',sans-serif;
-  --font-body:'Inter',sans-serif;
+  --bg:#0b1210; --bg-elevated:#111b17; --bg-card:#111c18; --line:#1e2d27; --line-bright:#2c443a;
+  --accent:#258162; --accent-bright:#3ddc97; --accent-gold:#e8b84b; --accent-danger:#d9605a;
+  --text:#f2f5f3; --text-muted:#93a89f; --text-dim:#5c6f68;
+  --font-display:'Poppins',sans-serif; --font-body:'Inter',sans-serif;
 }
-[data-theme="light"]{
-  --bg:#f3f6f4;
-  --bg-elevated:#ffffff;
-  --bg-card:#ffffff;
-  --line:#dfe7e2;
-  --line-bright:#c7d5cd;
-  --text:#0f1a16;
-  --text-muted:#5c6f68;
-  --text-dim:#8a998f;
-  --header-bg:rgba(255,255,255,0.7);
-  --header-border:rgba(199,213,205,0.7);
-}
-[data-theme="light"] body{
-  background:
-    radial-gradient(ellipse at top, rgba(37,129,98,0.08), transparent 55%),
-    var(--bg);
-}
-[data-theme="light"] #login-screen{
-  background:
-    repeating-linear-gradient(0deg, rgba(37,129,98,0.05) 0px, rgba(37,129,98,0.05) 1px, transparent 1px, transparent 3px),
-    var(--bg);
-}
+[data-theme="light"]{ --bg:#f3f6f4; --bg-elevated:#ffffff; --bg-card:#ffffff; --line:#dfe7e2; --line-bright:#c7d5cd; --text:#0f1a16; --text-muted:#5c6f68; --text-dim:#8a998f; }
+[data-theme="light"] body{ background: radial-gradient(ellipse at top, rgba(37,129,98,0.08), transparent 55%), var(--bg); }
+[data-theme="light"] #login-screen{ background: repeating-linear-gradient(0deg, rgba(37,129,98,0.05) 0px, rgba(37,129,98,0.05) 1px, transparent 1px, transparent 3px), var(--bg); }
 *{box-sizing:border-box;}
 html{ scrollbar-width:none; -ms-overflow-style:none; }
 html::-webkit-scrollbar{ display:none; width:0; height:0; }
-body{
-  margin:0; padding:0;
-  background:
-    radial-gradient(ellipse at top, rgba(37,129,98,0.10), transparent 55%),
-    var(--bg);
-  color:var(--text);
-  font-family:var(--font-body);
-  font-weight:400;
-  min-height:100vh;
-  -webkit-font-smoothing:antialiased;
-  text-rendering:optimizeLegibility;
-}
+body{ margin:0; padding:0; background: radial-gradient(ellipse at top, rgba(37,129,98,0.10), transparent 55%), var(--bg); color:var(--text); font-family:var(--font-body); min-height:100vh; -webkit-font-smoothing:antialiased; }
 body::-webkit-scrollbar{ display:none; width:0; height:0; }
 ::selection{ background:var(--accent); color:#fff; }
 @media (prefers-reduced-motion: reduce){ *{ animation-duration:0.001ms !important; transition-duration:0.001ms !important; } }
+.icon{ width:18px; height:18px; flex-shrink:0; }
+.eyebrow{ font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-dim); }
 
-.eyebrow{ font-family:var(--font-body); font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-dim); }
-.roster-head-right{ display:flex; align-items:center; gap:14px; }
-.roster-search-pill{ display:flex; align-items:center; gap:8px; background:var(--bg-elevated); border:1px solid var(--line-bright); border-radius:999px; padding:8px 14px; transition:border-color .15s; }
-.roster-search-pill:focus-within{ border-color:var(--accent-bright); }
-.roster-search-pill .search-icon{ width:14px; height:14px; flex-shrink:0; color:var(--text-dim); }
-.roster-search-pill input{ border:none; outline:none; background:transparent; color:var(--text); font-family:var(--font-body); font-size:12.5px; width:130px; }
-.roster-search-pill input::placeholder{ color:var(--text-dim); }
-.card.search-hidden{ display:none; }
-
-.icon{ display:inline-flex; width:18px; height:18px; flex-shrink:0; vertical-align:middle; }
-.icon svg{ width:100%; height:100%; display:block; }
-
-/* ---------- shine sweep, used on a few key headings ---------- */
-.shiny-text{
-  background-image:linear-gradient(120deg, currentColor 0%, currentColor 35%, #ffffff 50%, currentColor 65%, currentColor 100%);
-  background-size:220% auto;
-  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
-  animation:shineSweep 3.4s linear infinite;
-}
+.shiny-text{ background-image:linear-gradient(120deg, currentColor 0%, currentColor 35%, #ffffff 50%, currentColor 65%, currentColor 100%); background-size:220% auto; -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; animation:shineSweep 3.4s linear infinite; }
 @keyframes shineSweep{ 0%{ background-position:150% center; } 100%{ background-position:-50% center; } }
 
-/* ---------- ported ElectricBorder canvas effect ---------- */
 .electric-wrap{ position:relative; }
 .electric-canvas{ position:absolute; pointer-events:none; z-index:0; }
 
 /* ---------- LOGIN ---------- */
-#login-screen{
-  position:fixed; inset:0; z-index:50; display:flex; align-items:center; justify-content:center;
-  background:
-    repeating-linear-gradient(0deg, rgba(37,129,98,0.035) 0px, rgba(37,129,98,0.035) 1px, transparent 1px, transparent 3px),
-    var(--bg);
-  overflow:hidden;
-}
-#login-screen::before, #login-screen::after{
-  content:""; position:absolute; width:170vmax; height:170vmax; border-radius:50%;
-  filter:blur(90px); pointer-events:none; will-change:transform;
-}
-#login-screen::before{
-  top:-85vmax; left:-85vmax;
-  background:radial-gradient(circle, rgba(61,220,151,0.16), transparent 62%);
-  animation:driftA 20s ease-in-out infinite alternate;
-}
-#login-screen::after{
-  bottom:-85vmax; right:-85vmax;
-  background:radial-gradient(circle, rgba(37,129,98,0.18), transparent 62%);
-  animation:driftB 24s ease-in-out infinite alternate;
-}
+#login-screen{ position:fixed; inset:0; z-index:50; display:flex; align-items:center; justify-content:center; background: repeating-linear-gradient(0deg, rgba(37,129,98,0.035) 0px, rgba(37,129,98,0.035) 1px, transparent 1px, transparent 3px), var(--bg); overflow:hidden; }
+#login-screen::before, #login-screen::after{ content:""; position:absolute; width:170vmax; height:170vmax; border-radius:50%; filter:blur(90px); pointer-events:none; will-change:transform; }
+#login-screen::before{ top:-85vmax; left:-85vmax; background:radial-gradient(circle, rgba(61,220,151,0.16), transparent 62%); animation:driftA 20s ease-in-out infinite alternate; }
+#login-screen::after{ bottom:-85vmax; right:-85vmax; background:radial-gradient(circle, rgba(37,129,98,0.18), transparent 62%); animation:driftB 24s ease-in-out infinite alternate; }
 @keyframes driftA{ 0%{ transform:translate(0,0) scale(1); } 100%{ transform:translate(6vmax,5vmax) scale(1.08); } }
 @keyframes driftB{ 0%{ transform:translate(0,0) scale(1); } 100%{ transform:translate(-6vmax,-5vmax) scale(1.08); } }
 .login-card{ position:relative; z-index:1; width:min(380px, 90vw); background:var(--bg-card); border:1px solid var(--line-bright); border-radius:20px; padding:36px 30px 28px; box-shadow:0 30px 80px rgba(0,0,0,0.55); }
-.login-badge{ width:auto; height:104px; margin:0 auto 18px; display:flex; align-items:center; justify-content:center; }
+.login-badge{ height:104px; margin:0 auto 18px; display:flex; align-items:center; justify-content:center; }
 .login-badge img{ height:100%; width:auto; max-width:220px; object-fit:contain; filter:drop-shadow(0 10px 26px rgba(0,0,0,0.45)); }
 .login-title{ font-family:var(--font-display); font-weight:700; font-size:22px; text-align:center; letter-spacing:-0.01em; margin:0 0 26px; }
 .field{ margin-bottom:14px; }
@@ -178,54 +95,40 @@ body::-webkit-scrollbar{ display:none; width:0; height:0; }
 @keyframes onAutoFillCancel{ from{ opacity:1; } to{ opacity:1; } }
 .field input:-webkit-autofill{ animation-name:onAutoFillStart; animation-duration:0.1s; }
 .field input:not(:-webkit-autofill){ animation-name:onAutoFillCancel; animation-duration:0.1s; }
-#login-btn{ width:100%; margin-top:8px; padding:14px; border:none; border-radius:11px; background:linear-gradient(135deg, var(--accent-bright), var(--accent)); color:#04140d; font-family:var(--font-display); font-weight:700; font-size:15px; letter-spacing:0.01em; cursor:pointer; transition:transform .12s, box-shadow .12s; }
+#login-btn{ width:100%; margin-top:8px; padding:14px; border:none; border-radius:11px; background:linear-gradient(135deg, var(--accent-bright), var(--accent)); color:#04140d; font-family:var(--font-display); font-weight:700; font-size:15px; cursor:pointer; transition:transform .12s, box-shadow .12s; }
 #login-btn:hover{ transform:translateY(-1px); box-shadow:0 8px 24px rgba(61,220,151,0.25); }
 #login-error{ margin-top:12px; font-size:12.5px; color:var(--accent-danger); text-align:center; min-height:14px; }
 
 /* ---------- APP SHELL ---------- */
 #app{ display:none; }
 .app-content{ max-width:1180px; margin:0 auto; padding:112px 24px 60px; }
-
-header.top{
-  position:fixed; top:0; left:0; right:0; z-index:40;
-  display:flex; align-items:center; justify-content:space-between;
-  padding:14px 24px; gap:16px;
-  background:var(--header-bg);
-  -webkit-backdrop-filter:blur(18px) saturate(140%);
-  backdrop-filter:blur(18px) saturate(140%);
-  border-bottom:1px solid var(--header-border);
-  box-shadow:0 4px 24px rgba(15,26,22,0.06);
-}
+header.top{ position:fixed; top:0; left:0; right:0; z-index:40; padding:14px 24px; background:rgba(11,18,16,0.55); -webkit-backdrop-filter:blur(18px) saturate(140%); backdrop-filter:blur(18px) saturate(140%); border-bottom:1px solid rgba(44,68,58,0.5); }
 header.top .top-inner{ max-width:1180px; width:100%; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
 .brand{ display:flex; align-items:center; gap:13px; }
-.brand-mark{ height:46px; width:auto; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.brand-mark{ height:46px; display:flex; align-items:center; justify-content:center; }
 .brand-mark img{ height:100%; width:auto; max-width:200px; object-fit:contain; }
-.brand-text .name{ font-family:var(--font-display); font-weight:700; font-size:19px; line-height:1.15; letter-spacing:-0.01em; }
+.brand-text .name{ font-family:var(--font-display); font-weight:700; font-size:19px; letter-spacing:-0.01em; }
 .who{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
 .who .name{ font-size:13px; color:var(--text-muted); }
 .who .name b{ color:var(--text); font-weight:600; }
 #logout-btn{ background:transparent; border:1px solid var(--line-bright); color:var(--text-muted); font-size:11.5px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; padding:9px 14px; border-radius:10px; cursor:pointer; transition:.15s; font-family:var(--font-body); }
 #logout-btn:hover{ border-color:var(--accent-danger); color:var(--accent-danger); }
-
 .topnav{ display:flex; align-items:center; gap:4px; }
-.topnav a{ display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:600; color:var(--text-muted); text-decoration:none; padding:8px 12px; border-radius:9px; transition:.15s; font-family:var(--font-body); }
+.topnav a{ display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:600; color:var(--text-muted); text-decoration:none; padding:8px 12px; border-radius:9px; transition:.15s; }
 .topnav a:hover{ color:var(--accent-bright); background:var(--bg-elevated); }
-
 #theme-toggle{ display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; background:var(--bg-elevated); border:1px solid var(--line-bright); color:var(--text-muted); border-radius:10px; cursor:pointer; transition:.15s; flex-shrink:0; }
 #theme-toggle:hover{ border-color:var(--accent-bright); color:var(--accent-bright); }
 
 section.section{ margin-bottom:40px; scroll-margin-top:100px; }
 .section-head{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:18px; flex-wrap:wrap; gap:10px; }
-.section-title{ font-family:var(--font-display); font-weight:700; font-size:14px; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent-bright); }
+.section-title{ display:inline-flex; align-items:center; gap:8px; font-family:var(--font-display); font-weight:700; font-size:14px; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent-bright); }
 
-/* ---------- LOGS PILL ---------- */
 .logs-label{ text-align:center; font-family:var(--font-display); font-weight:800; font-size:30px; letter-spacing:0.02em; color:var(--accent-bright); margin-bottom:16px; }
 .pill-wrap{ display:flex; flex-direction:column; align-items:center; gap:10px; }
 .pill-track{ position:relative; width:100%; max-width:640px; height:44px; border-radius:999px; background:var(--bg-elevated); border:1px solid var(--line-bright); overflow:visible; margin:0 auto; }
 .pill-fill{ position:absolute; top:0; left:0; bottom:0; width:0%; border-radius:999px; background:linear-gradient(90deg, var(--accent), var(--accent-bright)); transition:width 0.9s cubic-bezier(.2,.8,.2,1); overflow:hidden; }
 .pill-value{ position:absolute; left:16px; top:0; bottom:0; display:flex; align-items:center; font-family:var(--font-display); font-weight:700; font-size:16px; color:#04140d; z-index:2; }
 .pill-value.on-track{ color:var(--text); }
-.pill-promo .tip{ color:var(--accent-bright); }
 .pill-marker{ position:absolute; top:-20px; bottom:-20px; width:34px; margin-left:-17px; z-index:3; cursor:pointer; }
 .pill-marker::before{ content:""; position:absolute; top:20px; bottom:20px; left:50%; width:2px; transform:translateX(-50%); background:var(--accent-gold); box-shadow:0 0 8px rgba(232,184,75,0.7); }
 .pill-marker .marker-num{ position:absolute; top:0; left:50%; transform:translateX(-50%); font-size:12px; font-weight:700; color:var(--accent-gold); white-space:nowrap; }
@@ -243,57 +146,39 @@ section.section{ margin-bottom:40px; scroll-margin-top:100px; }
 .dots span:nth-child(2){ animation-delay:.15s; } .dots span:nth-child(3){ animation-delay:.3s; }
 @keyframes bob{ 0%,100%{ transform:translateY(0); opacity:.4;} 50%{ transform:translateY(-4px); opacity:1;} }
 
-/* ---------- GRAPH CONTROLS ---------- */
 .graph-controls{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-.toggle-pill{ display:inline-flex; align-items:center; gap:9px; background:var(--bg-elevated); border:1px solid var(--line-bright); color:var(--text-muted); font-size:12.5px; font-weight:600; padding:9px 16px 9px 10px; border-radius:999px; cursor:pointer; transition:.15s; font-family:var(--font-body); }
+.toggle-pill{ display:inline-flex; align-items:center; gap:9px; background:var(--bg-elevated); border:1px solid var(--line-bright); color:var(--text-muted); font-size:12.5px; font-weight:600; padding:9px 16px 9px 10px; border-radius:999px; cursor:pointer; transition:.15s; }
 .toggle-pill .dot{ width:14px; height:14px; border-radius:50%; border:2px solid var(--line-bright); background:transparent; transition:.2s; flex-shrink:0; }
 .toggle-pill:hover{ border-color:var(--line-bright); color:var(--text); }
 .toggle-pill.active{ color:var(--text); border-color:var(--accent-bright); }
 .toggle-pill.active .dot{ background:var(--accent-bright); border-color:var(--accent-bright); box-shadow:0 0 8px rgba(61,220,151,.6); }
-
 .dropdown{ position:relative; }
-.dropdown-toggle{ display:inline-flex; align-items:center; gap:8px; background:var(--bg-elevated); border:1px solid var(--line-bright); color:var(--text); font-size:12.5px; font-weight:600; padding:9px 16px; border-radius:999px; cursor:pointer; font-family:var(--font-body); transition:.15s; }
+.dropdown-toggle{ display:inline-flex; align-items:center; gap:8px; background:var(--bg-elevated); border:1px solid var(--line-bright); color:var(--text); font-size:12.5px; font-weight:600; padding:9px 16px; border-radius:999px; cursor:pointer; transition:.15s; }
 .dropdown-toggle:hover{ border-color:var(--accent-bright); }
 .dropdown-toggle .chev{ font-size:9px; color:var(--text-dim); transition:transform .15s; }
 .dropdown.open .dropdown-toggle .chev{ transform:rotate(180deg); }
-.dropdown-menu{ position:absolute; top:calc(100% + 8px); left:0; min-width:200px; max-height:280px; overflow-y:auto; background:var(--bg-card); border:1px solid var(--line-bright); border-radius:14px; padding:6px; box-shadow:0 20px 50px rgba(0,0,0,0.45); opacity:0; pointer-events:none; transform:translateY(-6px); transition:opacity .15s, transform .15s; z-index:10; scrollbar-width:none; -ms-overflow-style:none; }
-.dropdown-search{ width:100%; box-sizing:border-box; margin-bottom:6px; padding:8px 10px; background:var(--bg-elevated); border:1px solid var(--line-bright); border-radius:9px; color:var(--text); font-family:var(--font-body); font-size:12px; outline:none; }
-.dropdown-search:focus{ border-color:var(--accent-bright); }
-.dropdown-search::placeholder{ color:var(--text-dim); }
-.dropdown-menu::-webkit-scrollbar{ display:none; width:0; height:0; }
+.dropdown-menu{ position:absolute; top:calc(100% + 8px); left:0; min-width:180px; max-height:260px; overflow-y:auto; background:var(--bg-card); border:1px solid var(--line-bright); border-radius:14px; padding:6px; box-shadow:0 20px 50px rgba(0,0,0,0.45); opacity:0; pointer-events:none; transform:translateY(-6px); transition:opacity .15s, transform .15s; z-index:10; }
 .dropdown.open .dropdown-menu{ opacity:1; pointer-events:auto; transform:translateY(0); }
 .dropdown-item{ padding:9px 12px; border-radius:9px; font-size:12.5px; font-weight:500; color:var(--text-muted); cursor:pointer; transition:.1s; }
 .dropdown-item:hover{ background:var(--bg-elevated); color:var(--text); }
 .dropdown-item.selected{ color:var(--accent-bright); font-weight:600; }
+.chart-box{ position:relative; height:340px; margin-top:20px; }
 
-.chart-legend{ display:flex; flex-wrap:wrap; gap:7px 16px; margin:14px 0 4px; }
-.chart-legend-item{ display:inline-flex; align-items:center; gap:7px; font-size:11.5px; font-weight:600; color:var(--text-muted); cursor:pointer; user-select:none; transition:opacity .15s, color .15s; }
-.chart-legend-item:hover{ color:var(--text); }
-.chart-legend-item .dot{ width:10px; height:10px; min-width:10px; min-height:10px; border-radius:50%; flex-shrink:0; }
-.chart-legend-item.dimmed{ opacity:0.32; }
-.chart-legend-item.hidden-ds{ opacity:0.32; text-decoration:line-through; }
-
-.chart-box{ position:relative; height:340px; margin-top:20px; padding-bottom:16px; }
-.chart-resize-handle{ position:absolute; left:0; right:0; bottom:0; height:16px; cursor:ns-resize; display:flex; align-items:center; justify-content:center; touch-action:none; }
-.chart-resize-handle::before{ content:""; width:44px; height:4px; border-radius:3px; background:var(--line-bright); transition:background .15s, width .15s; }
-.chart-resize-handle:hover::before, .chart-resize-handle.dragging::before{ background:var(--accent-bright); width:64px; }
-
-/* ---------- ROSTER CARDS ---------- */
 .cards-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr)); gap:14px; }
-.card{
-  position:relative; z-index:1; background:var(--bg-card); border:1px solid var(--line); border-radius:16px;
-  padding:17px; cursor:default;
-  transition:border-color .2s, transform .2s, box-shadow .2s;
-}
+.card{ position:relative; z-index:1; background:var(--bg-card); border:1px solid var(--line); border-radius:16px; padding:17px; cursor:default; transition:border-color .2s, transform .2s, box-shadow .2s; }
 .card:hover{ border-color:var(--accent); transform:translateY(-3px); box-shadow:0 16px 40px rgba(0,0,0,0.35); }
 .card-top{ display:flex; align-items:center; gap:11px; }
 .pfp{ width:44px; height:44px; border-radius:50%; object-fit:cover; flex-shrink:0; border:2px solid var(--line-bright); background:var(--bg-elevated); }
 .pfp.fallback{ display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-weight:700; color:var(--text-muted); }
 .card-name{ font-weight:700; font-size:14.5px; }
 .card-rank{ font-size:11.5px; font-weight:600; color:var(--text-muted); margin-top:1px; }
+.card-tags{ display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
+.tag{ font-size:10px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; padding:3px 8px; border-radius:999px; }
+.tag-loa{ background:rgba(232,184,75,0.15); color:var(--accent-gold); border:1px solid rgba(232,184,75,0.4); }
+.tag-warn{ background:rgba(217,96,90,0.15); color:var(--accent-danger); border:1px solid rgba(217,96,90,0.4); }
 .card-hr{ height:1px; background:var(--line); margin:13px 0; }
-.card-info{ max-height:0; opacity:0; overflow:hidden; transition:max-height .5s cubic-bezier(.2,.8,.2,1), opacity .35s ease; }
-.card:hover .card-info{ max-height:320px; opacity:1; transition:max-height 1.1s cubic-bezier(.2,.8,.2,1), opacity .7s ease .15s; }
+.card-info{ max-height:0; opacity:0; overflow:hidden; transition:max-height .7s cubic-bezier(.2,.8,.2,1), opacity .5s, margin .7s; }
+.card:hover .card-info{ max-height:320px; opacity:1; }
 .card-info ul{ margin:0 0 13px; padding-left:16px; font-size:11.5px; color:var(--text-muted); line-height:1.6; }
 .card-info li{ margin-bottom:3px; }
 .card-info .card-hr{ margin:0 0 13px; }
@@ -301,10 +186,8 @@ section.section{ margin-bottom:40px; scroll-margin-top:100px; }
 .card-logs .unit{ font-size:11px; color:var(--text-dim); font-weight:500; margin-left:6px; }
 .status-danger .card-logs{ color:var(--accent-danger); }
 .status-hold .card-logs{ color:var(--text); }
-.status-promo .card-logs{ color:var(--accent-bright); }
-.card-logs.top-logger{ color:var(--accent-gold) !important; }
+.status-promo .card-logs{ color:var(--accent-gold); }
 
-/* ---------- HOST OF THE MONTH (card grid, same language as roster) ---------- */
 .motm-card{ position:relative; z-index:1; background:var(--bg-card); border:1px solid var(--line); border-radius:16px; padding:17px; transition:border-color .2s, transform .2s, box-shadow .2s; }
 .motm-card:hover{ border-color:var(--accent-gold); transform:translateY(-3px); box-shadow:0 16px 40px rgba(0,0,0,0.35); }
 .motm-card-top{ display:flex; align-items:center; gap:11px; }
@@ -321,14 +204,9 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
 .logo-box{ background:#fff; border-radius:12px; padding:8px 10px; display:flex; align-items:center; box-shadow:0 6px 20px rgba(0,0,0,0.3); }
 .logo-box img{ height:26px; display:block; }
 
-@media (max-width:640px){
-  header.top .top-inner{ flex-direction:column; align-items:flex-start; gap:12px; }
-  .topnav{ flex-wrap:wrap; }
-  .app-content{ padding-top:270px; }
-}
+@media (max-width:640px){ header.top .top-inner{ flex-direction:column; align-items:flex-start; gap:12px; } .topnav{ flex-wrap:wrap; } .app-content{ padding-top:270px; } }
 </style>
 
-<!-- ============================= LOGIN ============================= -->
 <div id="login-screen">
   <div class="login-card">
     <div class="login-badge"><img src="" id="login-logo-img" alt="Server logo"></div>
@@ -342,25 +220,22 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
   </div>
 </div>
 
-<!-- ============================== APP =============================== -->
 <div id="app">
   <header class="top">
     <div class="top-inner">
       <div class="brand">
         <div class="brand-mark"><img src="" id="brand-logo-img" alt="Server logo"></div>
-        <div class="brand-text">
-          <div class="name" id="team-name-display">Shadow Greenville Roleplay</div>
-        </div>
+        <div class="brand-text"><div class="name" id="team-name-display">Shadow Greenville Roleplay</div></div>
       </div>
       <nav class="topnav">
-        <a href="#graph-section"><span class="icon" data-icon="chart"></span>Logs Graph</a>
-        <a href="#roster-section"><span class="icon" data-icon="group"></span>Roster</a>
-        <a href="#motm-section"><span class="icon" data-icon="crown"></span>Host Of The Month</a>
+        <a href="#graph-section" id="nav-graph"></a>
+        <a href="#roster-section" id="nav-roster"></a>
+        <a href="#motm-section" id="nav-motm"></a>
       </nav>
       <div class="who">
         <div class="name">Signed in as <b id="who-name" class="shiny-text">—</b></div>
         <button id="logout-btn"><span>Sign Out</span></button>
-        <button id="theme-toggle" type="button" title="Toggle light/dark mode"><span class="icon" data-icon="moon"></span></button>
+        <button id="theme-toggle" type="button" title="Toggle light/dark mode"></button>
       </div>
     </div>
   </header>
@@ -373,7 +248,7 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
 
     <section class="section" id="graph-section">
       <div class="section-head">
-        <div class="section-title shiny-text"><span class="icon" data-icon="chart"></span> Logs Graph</div>
+        <div class="section-title shiny-text" id="title-graph"></div>
         <div class="graph-controls">
           <button class="toggle-pill" id="only-me-btn"><span class="dot"></span><span>Show only me</span></button>
           <div class="dropdown" id="player-dropdown">
@@ -382,26 +257,19 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
           </div>
         </div>
       </div>
-      <div class="chart-legend" id="chart-legend"></div>
-      <div class="chart-box" id="chart-box"><canvas id="logs-chart"></canvas><div class="chart-resize-handle" id="chart-resize"></div></div>
+      <div class="chart-box"><canvas id="logs-chart"></canvas></div>
     </section>
 
     <section class="section" id="roster-section">
       <div class="section-head">
-        <div class="section-title shiny-text"><span class="icon" data-icon="group"></span> Roster</div>
-        <div class="roster-head-right">
-          <div class="roster-search-pill">
-            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-            <input type="text" id="roster-search" placeholder="Search hosts…">
-          </div>
-          <div class="eyebrow" id="roster-caption"></div>
-        </div>
+        <div class="section-title shiny-text" id="title-roster"></div>
+        <div class="eyebrow" id="roster-caption"></div>
       </div>
       <div class="cards-grid" id="cards-grid"></div>
     </section>
 
     <section class="section" id="motm-section">
-      <div class="section-head"><div class="section-title shiny-text"><span class="icon" data-icon="crown"></span> Host Of The Month</div></div>
+      <div class="section-head"><div class="section-title shiny-text" id="title-motm"></div></div>
       <div class="cards-grid" id="motm-list"></div>
     </section>
 
@@ -416,18 +284,19 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
 </div>
 
 <script>
-/* ---------------- Smooth scroll (Lenis) ---------------- */
+document.getElementById('nav-graph').innerHTML = ICONS.bar_chart + 'Logs Graph';
+document.getElementById('nav-roster').innerHTML = ICONS.group + 'Roster';
+document.getElementById('nav-motm').innerHTML = ICONS.crown + 'Host Of The Month';
+document.getElementById('title-graph').innerHTML = ICONS.bar_chart + ' Logs Graph';
+document.getElementById('title-roster').innerHTML = ICONS.group + ' Roster';
+document.getElementById('title-motm').innerHTML = ICONS.crown + ' Host Of The Month';
+
 let LENIS = null;
 if(window.Lenis){
-  LENIS = new Lenis({
-    duration: 1.1, smoothWheel: true, anchors: true,
-    prevent: (node) => !!(node && node.closest && node.closest('.dropdown-menu'))
-  });
+  LENIS = new Lenis({ duration: 1.1, smoothWheel: true, anchors: true });
   function raf(time){ LENIS.raf(time); requestAnimationFrame(raf); }
   requestAnimationFrame(raf);
 }
-// Explicit handling too, so the nav always glides even if the browser's
-// native anchor jump would otherwise beat Lenis to it.
 document.querySelectorAll('.topnav a[href^="#"]').forEach(a=>{
   a.addEventListener('click', (e)=>{
     e.preventDefault();
@@ -438,59 +307,6 @@ document.querySelectorAll('.topnav a[href^="#"]').forEach(a=>{
   });
 });
 
-document.querySelectorAll('[data-icon]').forEach(el=>{
-  el.innerHTML = ICONS[el.dataset.icon] || '';
-});
-
-/* ---------------- Drag-to-resize the graph, with a magnetic snap back
-   to its default height when released close to it ---------------- */
-(function(){
-  const box = document.getElementById('chart-box');
-  const handle = document.getElementById('chart-resize');
-  const DEFAULT_H = 340, MIN_H = 340, MAX_H = 900, SNAP_THRESHOLD = 28;
-  let startY = 0, startH = 0, dragging = false;
-
-  function onMove(e){
-    if(!dragging) return;
-    const y = e.touches ? e.touches[0].clientY : e.clientY;
-    const h = Math.max(MIN_H, Math.min(MAX_H, startH + (y - startY)));
-    box.style.height = h + 'px';
-    if(CHART) CHART.resize();
-    e.preventDefault();
-  }
-  function onUp(){
-    if(!dragging) return;
-    dragging = false;
-    handle.classList.remove('dragging');
-    document.body.style.removeProperty('cursor');
-    const cur = box.getBoundingClientRect().height;
-    if(Math.abs(cur - DEFAULT_H) <= SNAP_THRESHOLD){
-      box.style.transition = 'height .5s cubic-bezier(.34,1.56,.64,1)';
-      box.style.height = DEFAULT_H + 'px';
-      setTimeout(()=>{ box.style.transition = ''; if(CHART) CHART.resize(); }, 500);
-    }
-    window.removeEventListener('mousemove', onMove);
-    window.removeEventListener('mouseup', onUp);
-    window.removeEventListener('touchmove', onMove);
-    window.removeEventListener('touchend', onUp);
-  }
-  function onDown(e){
-    dragging = true;
-    box.style.transition = '';
-    handle.classList.add('dragging');
-    document.body.style.cursor = 'ns-resize';
-    startY = e.touches ? e.touches[0].clientY : e.clientY;
-    startH = box.getBoundingClientRect().height;
-    window.addEventListener('mousemove', onMove, { passive:false });
-    window.addEventListener('mouseup', onUp);
-    window.addEventListener('touchmove', onMove, { passive:false });
-    window.addEventListener('touchend', onUp);
-    e.preventDefault();
-  }
-  handle.addEventListener('mousedown', onDown);
-  handle.addEventListener('touchstart', onDown, { passive:false });
-})();
-
 document.getElementById('year').textContent = new Date().getFullYear();
 document.getElementById('login-team-name').textContent = CONFIG.TEAM_NAME;
 document.getElementById('team-name-display').textContent = CONFIG.TEAM_NAME;
@@ -500,7 +316,7 @@ document.getElementById('footer-server-logo').src = CONFIG.LOGO_URL;
 document.documentElement.style.setProperty('--accent', CONFIG.BRAND_COLOR);
 
 /* ---------------- ported ElectricBorder (canvas noise outline) ---------------- */
-function attachElectricBorder(target, { color = '#3ddc97', speed = 1, chaos = 0.06, borderRadius = 16, opacity = 1 } = {}){
+function attachElectricBorder(target, { color = '#3ddc97', speed = 1, chaos = 0.06, borderRadius = 16 } = {}){
   const borderOffset = 14;
   const wrap = document.createElement('div');
   wrap.className = 'electric-wrap';
@@ -522,10 +338,7 @@ function attachElectricBorder(target, { color = '#3ddc97', speed = 1, chaos = 0.
   }
   function octavedNoise(x, octaves, lacunarity, gain, baseAmp, baseFreq, t, seed){
     let y = 0, amp = baseAmp, freq = baseFreq;
-    for(let i = 0; i < octaves; i++){
-      y += amp * noise2D(freq * x + seed * 100, t * freq * 0.3);
-      freq *= lacunarity; amp *= gain;
-    }
+    for(let i = 0; i < octaves; i++){ y += amp * noise2D(freq * x + seed * 100, t * freq * 0.3); freq *= lacunarity; amp *= gain; }
     return y;
   }
   function cornerPt(cx, cy, r, startA, arc, p){ const a = startA + p * arc; return { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) }; }
@@ -541,11 +354,9 @@ function attachElectricBorder(target, { color = '#3ddc97', speed = 1, chaos = 0.
     if(dist <= acc + sh){ const p = (dist - acc) / sh; return { x: left, y: top + h - r - p * sh }; } acc += sh;
     const p = (dist - acc) / arc; return cornerPt(left + r, top + r, r, Math.PI, Math.PI/2, p);
   }
-
   function updateSize(){
     const rect = target.getBoundingClientRect();
-    width = rect.width + borderOffset * 2;
-    height = rect.height + borderOffset * 2;
+    width = rect.width + borderOffset * 2; height = rect.height + borderOffset * 2;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = width * dpr; canvas.height = height * dpr;
     canvas.style.width = width + 'px'; canvas.style.height = height + 'px';
@@ -553,16 +364,14 @@ function attachElectricBorder(target, { color = '#3ddc97', speed = 1, chaos = 0.
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
   updateSize();
-
   function draw(now){
     rafId = requestAnimationFrame(draw);
     if(!lastTime) lastTime = now;
     const dt = (now - lastTime) / 1000; lastTime = now;
     timeVal += dt * speed;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.globalAlpha = opacity;
     ctx.strokeStyle = color; ctx.lineWidth = 1.4; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    ctx.shadowColor = color; ctx.shadowBlur = 7 * opacity;
+    ctx.shadowColor = color; ctx.shadowBlur = 7;
     const left = borderOffset, top = borderOffset, bw = width - 2 * borderOffset, bh = height - 2 * borderOffset;
     if(bw <= 0 || bh <= 0) return;
     const maxR = Math.min(bw, bh) / 2, r = Math.min(borderRadius, maxR);
@@ -582,16 +391,9 @@ function attachElectricBorder(target, { color = '#3ddc97', speed = 1, chaos = 0.
   rafId = requestAnimationFrame(draw);
   const ro = new ResizeObserver(updateSize);
   ro.observe(target);
-
-  return {
-    destroy(){
-      cancelAnimationFrame(rafId); ro.disconnect();
-      if(wrap.parentNode){ wrap.parentNode.insertBefore(target, wrap); wrap.remove(); }
-    }
-  };
+  return { destroy(){ cancelAnimationFrame(rafId); ro.disconnect(); if(wrap.parentNode){ wrap.parentNode.insertBefore(target, wrap); wrap.remove(); } } };
 }
 function shadeColor(hex, percent){
-  // percent negative = darker, positive = lighter
   const n = parseInt(hex.replace('#',''), 16);
   let r = (n >> 16) + Math.round(255 * percent / 100);
   let g = ((n >> 8) & 0xff) + Math.round(255 * percent / 100);
@@ -602,7 +404,6 @@ function shadeColor(hex, percent){
 let ELECTRIC_INSTANCES = [];
 function clearElectricBorders(){ ELECTRIC_INSTANCES.forEach(i=>i.destroy()); ELECTRIC_INSTANCES = []; }
 
-/* ---------------- count-up numbers ---------------- */
 function countUp(el, target, duration = 900){
   if(!el) return;
   const startTime = performance.now();
@@ -618,27 +419,8 @@ function countUp(el, target, duration = 900){
 }
 
 /* =====================================================================
-   DEMO DATA — mirrors the real sheet layout, used only as a fallback
+   PARSING HELPERS
    ===================================================================== */
-const DEMO_CSV = `
-,Qota Of the Month,,,,GeoYT2010,971_isbald
-Logs for same rank,11,,,Password,AlGHqwPPsv,ksdgYjsGJH
-Logs for promotion,14+,,,RobloxProfilePic,,
-,,,,Rank,Host Manager,Trial Host
-,Host Of The Month,,,1/7/2026,1,0
-Username,Amount Of Logs,Date,,2/7/2026,0,0
-GeoYT2010,15,July of 2026,,3/7/2026,2,1
-,,,,4/7/2026,,
-,,,,5/7/2026,,
-,,,,6/7/2026,,
-`.trim();
-
-let SHEET = { sameRankQuota:null, promoQuota:null, motm:[], users:[] };
-let CURRENT_USER = null;
-let CHART = null;
-let ONLY_ME = false;
-let SELECTED_PLAYER = "";
-
 function num(v){
   if(v===undefined || v===null) return null;
   const s = String(v).trim();
@@ -660,40 +442,54 @@ function shortLabel(dstr){
   if(p.length!==3) return dstr;
   return `${p[0]}/${p[1]}/${p[2].slice(-2)}`;
 }
+function findLabelValue(rows, label){
+  const target = label.trim().toLowerCase();
+  for(let r=0;r<rows.length;r++){
+    const row = rows[r] || [];
+    for(let c=0;c<row.length;c++){
+      if((row[c]||'').toString().trim().toLowerCase() === target) return (row[c+1]||'').toString().trim();
+    }
+  }
+  return '';
+}
+function findHeaderCols(rows, labels){
+  for(let r=0;r<rows.length;r++){
+    const row = rows[r]||[];
+    const map = {};
+    labels.forEach(lbl=>{
+      const idx = row.findIndex(cell => (cell||'').toString().trim().toLowerCase() === lbl.toLowerCase());
+      if(idx!==-1) map[lbl]=idx;
+    });
+    if(Object.keys(map).length === labels.length) return { rowIndex:r, cols:map };
+  }
+  return null;
+}
 
-function parseSheetRows(rows){
+/* =====================================================================
+   OLD SYSTEM — wide per-date-column layout
+   ===================================================================== */
+function parseOldSystem(rows){
   const out = { sameRankQuota:null, promoQuota:null, motm:[], users:[] };
   if(rows.length < 2) return out;
-
   out.sameRankQuota = num(rows[1] && rows[1][1]);
   out.promoQuota = num(rows[2] && rows[2][1]);
-
   for(let r=6; r<rows.length; r++){
-    const row = rows[r];
-    if(!row) continue;
-    const uname = (row[0]||'').trim();
-    if(!uname) continue;
+    const row = rows[r]; if(!row) continue;
+    const uname = (row[0]||'').trim(); if(!uname) continue;
     out.motm.push({ username:uname, logs:num(row[1]), date:(row[2]||'').trim() });
   }
-
-  // Shared date column = E (index 4). Collect every row where E parses as a date.
   const dateRows = [];
   for(let r=0; r<rows.length; r++){
-    const row = rows[r];
-    if(!row) continue;
+    const row = rows[r]; if(!row) continue;
     const dstr = (row[4]||'').trim();
     const d = parseDate(dstr);
     if(d) dateRows.push({ r, dstr, d });
   }
   dateRows.sort((a,b)=>a.d-b.d);
-
-  // Each user occupies one column starting at F (index 5):
-  // row0=username, row1=password, row2=pfp, row3=rank, then log values aligned to dateRows.
   const header = rows[0] || [];
   const maxCols = Math.max(header.length, (rows[1]||[]).length, (rows[2]||[]).length, (rows[3]||[]).length);
   for(let c=5; c<maxCols; c++){
-    const username = ((rows[0]||[])[c] || '').trim();
-    if(!username) continue;
+    const username = ((rows[0]||[])[c] || '').trim(); if(!username) continue;
     const password = ((rows[1]||[])[c] || '').trim();
     const pfp = ((rows[2]||[])[c] || '').trim();
     const rankName = ((rows[3]||[])[c] || '').trim();
@@ -701,10 +497,81 @@ function parseSheetRows(rows){
       const raw = num((rows[dr.r]||[])[c]);
       return { date:dr.d, dstr:dr.dstr, value: raw===null ? 0 : raw, has: raw!==null };
     });
-    out.users.push({ username, password, pfp, rankName, entries });
+    out.users.push({ username, password, pfp, rankName, loa:'', warnings:'', entries });
   }
   return out;
 }
+
+/* =====================================================================
+   NEW SYSTEM — "Host Team Records" roster + separate LogHistory tab
+   ===================================================================== */
+function parseNewSystemMain(rows){
+  const out = { sameRankQuota:null, promoQuota:null, motm:[], users:[] };
+  out.sameRankQuota = num(findLabelValue(rows,"Logs for keeping the rank") || findLabelValue(rows,"Logs for same rank"));
+  out.promoQuota = num(findLabelValue(rows,"Logs for promotion"));
+
+  const rosterHead = findHeaderCols(rows, ["Username","Rank","Logs","Password","ProfilePic","LOA","Amount of warnings"]);
+  const motmHead = findHeaderCols(rows, ["Logs","Username","Date"]);
+  function findBannerRow(text, fromRow){
+    const target = text.trim().toLowerCase();
+    for(let r=fromRow; r<rows.length; r++){
+      const row = rows[r]||[];
+      if(row.some(cell => (cell||'').toString().trim().toLowerCase() === target)) return r;
+    }
+    return -1;
+  }
+
+  if(rosterHead){
+    const otherRow = findBannerRow("Other", rosterHead.rowIndex+1);
+    const endRow = otherRow!==-1 ? otherRow : (motmHead ? motmHead.rowIndex : rows.length);
+    for(let r=rosterHead.rowIndex+1; r<endRow; r++){
+      const row = rows[r]; if(!row) continue;
+      const username = (row[rosterHead.cols.Username]||'').toString().trim();
+      if(!username || username.toLowerCase()==='username') continue;
+      const rankName = (row[rosterHead.cols.Rank]||'').toString().trim();
+      const passwordRaw = (row[rosterHead.cols.Password]||'').toString().trim();
+      const password = passwordRaw.toLowerCase()==='password' ? '' : passwordRaw;
+      const pfpRaw = (row[rosterHead.cols.ProfilePic]||'').toString().trim();
+      const pfp = pfpRaw.toLowerCase()==='profilepic' ? '' : pfpRaw;
+      const loa = (row[rosterHead.cols.LOA]||'').toString().trim();
+      const warnings = (row[rosterHead.cols['Amount of warnings']]||'').toString().trim();
+      out.users.push({ username, password, pfp, rankName, loa, warnings, entries:[] });
+    }
+  }
+  if(motmHead){
+    for(let r=motmHead.rowIndex+1; r<rows.length; r++){
+      const row = rows[r]; if(!row) continue;
+      const uname = (row[motmHead.cols.Username]||'').toString().trim();
+      if(!uname || uname.toLowerCase()==='username') continue;
+      out.motm.push({ username: uname, logs: num(row[motmHead.cols.Logs]), date:(row[motmHead.cols.Date]||'').toString().trim() });
+    }
+  }
+  out._rosterFound = !!rosterHead;
+  return out;
+}
+function applyHistory(base, historyRows){
+  const byUser = {};
+  base.users.forEach(u=> byUser[u.username.toLowerCase()] = u);
+  (historyRows||[]).forEach(row=>{
+    if(!row || row.length<3) return;
+    const dstr = (row[0]||'').toString().trim();
+    const uname = (row[1]||'').toString().trim();
+    if(!dstr || !uname || dstr.toLowerCase()==='date') return;
+    const d = parseDate(dstr);
+    if(!d) return;
+    const u = byUser[uname.toLowerCase()];
+    if(!u) return;
+    const val = num(row[2]);
+    u.entries.push({ date:d, dstr, value: val===null?0:val, has:true });
+  });
+  base.users.forEach(u=> u.entries.sort((a,b)=>a.date-b.date));
+}
+
+let SHEET = { sameRankQuota:null, promoQuota:null, motm:[], users:[] };
+let CURRENT_USER = null;
+let CHART = null;
+let ONLY_ME = false;
+let SELECTED_PLAYER = "";
 
 function totalLogs(user){ return user.entries.reduce((s,e)=>s+e.value,0); }
 function statusFor(total){
@@ -724,40 +591,20 @@ function rankFor(user){
   return idx===-1 ? { order:RANKS.length, rank:null } : { order:idx, rank:RANKS[idx] };
 }
 
-/* ---------------- LOGIN ---------------- */
-document.getElementById('login-form').addEventListener('submit', function(e){
-  e.preventDefault();
-  attemptLogin();
-});
-
-// Remember-me — stored ourselves in localStorage instead of relying on
-// the browser's native password manager, since that's inconsistent or
-// missing entirely on phones and in-app browsers (Discord's built-in
-// browser, for example). localStorage works the same everywhere.
-const REMEMBER_KEY = 'sgr_remember_v1';
-function saveRemembered(u, p){ try{ localStorage.setItem(REMEMBER_KEY, JSON.stringify({ u, p })); }catch(e){} }
-function clearRemembered(){ try{ localStorage.removeItem(REMEMBER_KEY); }catch(e){} }
-function loadRemembered(){
-  try{ const raw = localStorage.getItem(REMEMBER_KEY); return raw ? JSON.parse(raw) : null; }
-  catch(e){ return null; }
-}
-
-function attemptLogin(silent){
+document.getElementById('login-form').addEventListener('submit', function(e){ e.preventDefault(); attemptLogin(); });
+function attemptLogin(){
   const u = document.getElementById('login-user').value.trim();
   const p = document.getElementById('login-pass').value;
   const errEl = document.getElementById('login-error');
   const match = SHEET.users.find(x => x.username.toLowerCase()===u.toLowerCase() && x.password===p);
-  if(!match){ if(!silent) errEl.textContent = 'Username or password not recognized.'; return; }
+  if(!match){ errEl.textContent = 'Username or password not recognized.'; return; }
   errEl.textContent = '';
-  saveRemembered(u, p);
   CURRENT_USER = match;
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   document.getElementById('who-name').textContent = match.username;
   renderAll();
 }
-
-/* ---- Browser "save password" + return-visit autofill autologin ---- */
 (function(){
   const userEl = document.getElementById('login-user');
   const passEl = document.getElementById('login-pass');
@@ -778,27 +625,18 @@ function attemptLogin(silent){
 })();
 document.getElementById('logout-btn').addEventListener('click', ()=>{
   CURRENT_USER = null; ONLY_ME = false; SELECTED_PLAYER='';
-  clearRemembered();
   document.getElementById('login-user').value=''; document.getElementById('login-pass').value='';
   document.getElementById('app').style.display='none';
   document.getElementById('login-screen').style.display='flex';
 });
 
-/* ---------------- RENDER: PILL ---------------- */
 function renderPill(){
   const region = document.getElementById('pill-region');
   const total = totalLogs(CURRENT_USER);
   const sr = SHEET.sameRankQuota, pr = SHEET.promoQuota;
-
   if(sr===null || pr===null){
     const targetPct = Math.min(total*8,100);
-    region.innerHTML = `
-      <div class="pill-wrap">
-        <div class="pill-track"><div class="pill-fill" id="pill-fill-el" style="width:0%"></div>
-          <div class="pill-value on-track" id="pill-current-num">0</div>
-        </div>
-        <div class="quota-soon">Quota <div class="dots"><span></span><span></span><span></span></div> soon</div>
-      </div>`;
+    region.innerHTML = `<div class="pill-wrap"><div class="pill-track"><div class="pill-fill" id="pill-fill-el" style="width:0%"></div><div class="pill-value on-track" id="pill-current-num">0</div></div><div class="quota-soon">Quota <div class="dots"><span></span><span></span><span></span></div> soon</div></div>`;
     animatePillFill(targetPct);
     countUp(document.getElementById('pill-current-num'), total);
     return;
@@ -809,10 +647,7 @@ function renderPill(){
     <div class="pill-wrap">
       <div class="pill-track">
         <div class="pill-fill" id="pill-fill-el" style="width:0%"></div>
-        <div class="pill-marker" style="left:${markerPct}%">
-          <div class="marker-num" id="pill-marker-num">0</div>
-          <div class="tip-box">You need ${sr}+ logs to keep your rank</div>
-        </div>
+        <div class="pill-marker" style="left:${markerPct}%"><div class="marker-num" id="pill-marker-num">0</div><div class="tip-box">You need ${sr}+ logs to keep your rank</div></div>
         <div class="pill-value ${pct>16?'':'on-track'}" id="pill-current-num">0</div>
         <div class="pill-promo"><span class="tip" id="pill-promo-num">0</span><div class="tip-box">You need ${pr} logs to get promoted</div></div>
       </div>
@@ -824,13 +659,9 @@ function renderPill(){
   countUp(document.getElementById('pill-promo-num'), pr);
 }
 function animatePillFill(targetPct){
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    const el = document.getElementById('pill-fill-el');
-    if(el) el.style.width = targetPct + '%';
-  }));
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ const el = document.getElementById('pill-fill-el'); if(el) el.style.width = targetPct + '%'; }));
 }
 
-/* ---------------- RENDER: GRAPH ---------------- */
 function allDatesSorted(){
   const set = new Map();
   SHEET.users.forEach(u=>u.entries.forEach(e=>set.set(e.dstr, e.date)));
@@ -848,34 +679,17 @@ function cumulativeSeries(user, dates){
   user.entries.forEach(e=>{ map[e.dstr] = e.value; });
   return dates.map(d=>{ running += (map[d]||0); return running; });
 }
-// Bright, unmistakable primaries first (red, orange, yellow, green, blue,
-// purple, pink); once those run out, cycle the same hues again at a
-// different lightness/saturation/slight hue-shift so extra users still
-// get a visually distinct color instead of repeating an exact one.
-const BASE_HUES = [4, 28, 48, 152, 205, 262, 322];
-function colorForIndex(i){
-  const hue = BASE_HUES[i % BASE_HUES.length];
-  const pass = Math.floor(i / BASE_HUES.length);
-  const hueShift = (pass * 11) % 30;
-  const sat = Math.max(38, 74 - pass * 6);
-  const light = pass === 0 ? 58 : (pass % 2 === 1 ? 42 : 70) ;
-  return `hsl(${(hue + hueShift) % 360} ${sat}% ${light}%)`;
-}
+const PALETTE = ['#3ddc97','#e8b84b','#7db8ff','#e88ac0','#c99bff','#ff9d6c','#6cd4d9','#d9d96c'];
 
-function withAlpha(color, alpha){
-  return color.replace(/\)\s*$/, ` / ${alpha})`);
-}
 function renderChart(){
   const box = document.querySelector('#graph-section .chart-box');
   if(typeof Chart === 'undefined'){
     box.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-dim);font-size:13px;text-align:center;padding:20px;">Chart library failed to load — check your ad blocker / extensions, or your connection, then refresh.</div>';
-    console.error('SGR Host Database: Chart.js is not defined — both CDN sources failed to load.');
     return;
   }
-  if(!document.getElementById('logs-chart')){
-    box.innerHTML = '<canvas id="logs-chart"></canvas>';
-  }
+  if(!document.getElementById('logs-chart')) box.innerHTML = '<canvas id="logs-chart"></canvas>';
   const cs = getComputedStyle(document.documentElement);
+  const cText = cs.getPropertyValue('--text-muted').trim() || '#93a89f';
   const cDim = cs.getPropertyValue('--text-dim').trim() || '#5c6f68';
   const cCard = cs.getPropertyValue('--bg-card').trim() || '#111c18';
   const cLine = cs.getPropertyValue('--line').trim() || '#1e2d27';
@@ -884,14 +698,19 @@ function renderChart(){
   let dates = allDatesSorted();
   const lastIdx = lastActiveDateIndex(dates);
   dates = lastIdx >= 0 ? dates.slice(0, lastIdx + 1) : [];
-
   const labels = dates.map(shortLabel);
+
   const datasets = SHEET.users.map((u,i)=>({
     label:u.username, data:cumulativeSeries(u, dates),
-    borderColor:colorForIndex(i), backgroundColor:colorForIndex(i),
+    borderColor:PALETTE[i%PALETTE.length], backgroundColor:PALETTE[i%PALETTE.length],
     pointStyle:'circle', pointRadius:0, pointHoverRadius:6, borderWidth:2.5, tension:0.25,
-    _baseColor:colorForIndex(i)
+    _baseColor:PALETTE[i%PALETTE.length]
   }));
+
+  // Fixed axis ceiling from the FULL team, so toggling "show only me" / a
+  // single player never rescales the chart.
+  const overallMax = datasets.reduce((m,ds)=>Math.max(m, ...(ds.data.length?ds.data:[0])), 0);
+  const yMax = Math.max(1, Math.ceil(overallMax));
 
   if(CHART) CHART.destroy();
   const ctx = document.getElementById('logs-chart').getContext('2d');
@@ -900,9 +719,9 @@ function renderChart(){
     data:{ labels, datasets },
     options:{
       responsive:true, maintainAspectRatio:false,
-      interaction:{ mode:'nearest', intersect:false },
+      interaction:{ mode:'nearest', intersect:true },
       plugins:{
-        legend:{ display:false },
+        legend:{ labels:{ color:cText, usePointStyle:true, pointStyle:'circle', pointStyleWidth:10, font:{ family:"'Inter'", size:11, weight:600 } } },
         tooltip:{
           backgroundColor:cCard, borderColor:cLineBright, borderWidth:1, padding:10,
           titleFont:{ family:"'Inter'", size:11.5, weight:'600' }, bodyFont:{ family:"'Inter'", size:11.5 },
@@ -910,138 +729,37 @@ function renderChart(){
         }
       },
       scales:{
-        y:{ beginAtZero:true, ticks:{ stepSize:1, color:cDim, font:{ family:"'Inter'", size:10.5 } }, grid:{ color:cLine } },
+        y:{ beginAtZero:true, max:yMax, ticks:{ stepSize:1, color:cDim, font:{ family:"'Inter'", size:10.5 } }, grid:{ color:cLine } },
         x:{ ticks:{ color:cDim, font:{ family:"'Inter'", size:10.5 } }, grid:{ display:false } }
       },
       onHover:(evt, active)=>{
-        if(!active.length){ stopShine(); return; }
-        startShine(active[0].datasetIndex);
+        if(!active.length){ resetOpacity(); return; }
+        const idx = active[0].datasetIndex;
+        CHART.data.datasets.forEach((ds,i)=>{ ds.borderColor = i===idx ? ds._baseColor : ds._baseColor+'33'; });
+        CHART.update('none');
       }
     }
   });
-  document.getElementById('logs-chart').addEventListener('mouseleave', stopShine);
-
-  // Custom HTML legend — the canvas-drawn one couldn't guarantee perfectly
-  // round swatches at every zoom/DPR, so this is plain CSS circles instead.
-  const legendEl = document.getElementById('chart-legend');
-  legendEl.innerHTML = datasets.map((ds,i)=>
-    `<span class="chart-legend-item" data-idx="${i}"><span class="dot" style="background:${ds._baseColor}"></span>${ds.label}</span>`
-  ).join('');
-  legendEl.querySelectorAll('.chart-legend-item').forEach(item=>{
-    const idx = +item.dataset.idx;
-    item.addEventListener('mouseenter', ()=> startShine(idx));
-    item.addEventListener('mouseleave', stopShine);
-    item.addEventListener('click', ()=>{
-      const ds = CHART.data.datasets[idx];
-      ds.hidden = !ds.hidden;
-      item.classList.toggle('hidden-ds', ds.hidden);
-      CHART.update();
-    });
-  });
+  document.getElementById('logs-chart').addEventListener('mouseleave', resetOpacity);
 
   const menu = document.getElementById('dropdown-menu');
-  menu.innerHTML =
-    `<input type="text" class="dropdown-search" id="dropdown-search" placeholder="Search players…">` +
-    `<div class="dropdown-item" data-val="">All players</div>` +
-    SHEET.users.map(u=>`<div class="dropdown-item" data-val="${u.username}">${u.username}</div>`).join('');
-  function refreshDropdownSelection(){
-    menu.querySelectorAll('.dropdown-item').forEach(item=>{
-      item.classList.toggle('selected', item.dataset.val === SELECTED_PLAYER);
-    });
-  }
-  refreshDropdownSelection();
+  menu.innerHTML = `<div class="dropdown-item ${SELECTED_PLAYER===''?'selected':''}" data-val="">All players</div>` +
+    SHEET.users.map(u=>`<div class="dropdown-item ${SELECTED_PLAYER===u.username?'selected':''}" data-val="${u.username}">${u.username}</div>`).join('');
   menu.querySelectorAll('.dropdown-item').forEach(item=>{
     item.addEventListener('click', ()=>{
       SELECTED_PLAYER = item.dataset.val;
       document.getElementById('dropdown-toggle').innerHTML = `<span>${SELECTED_PLAYER || 'All players'} <span class="chev">▾</span></span>`;
       if(SELECTED_PLAYER){ ONLY_ME = false; document.getElementById('only-me-btn').classList.remove('active'); }
       document.getElementById('player-dropdown').classList.remove('open');
-      refreshDropdownSelection();
       applyFilter();
     });
   });
-  const searchInput = document.getElementById('dropdown-search');
-  searchInput.addEventListener('input', ()=>{
-    const q = searchInput.value.trim().toLowerCase();
-    menu.querySelectorAll('.dropdown-item').forEach(item=>{
-      const isAll = item.dataset.val === '';
-      item.style.display = (isAll || item.textContent.toLowerCase().includes(q)) ? '' : 'none';
-    });
-  });
-  searchInput.addEventListener('click', (e)=> e.stopPropagation());
 }
-
-/* ---------------- Shimmer sweep on the hovered graph line ----------------
-   Mirrors the .shiny-text CSS effect (a moving bright band), but built on
-   a canvas gradient since a line stroke can't use background-clip:text. */
-let SHINE_IDX = -1, SHINE_RAF = null, SHINE_PHASE = 0;
-function shineGradient(ctx, chartArea, baseColor, phase){
-  const grad = ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
-  const peak = (phase % 1.6) - 0.3; // sweeps in from the left, out past the right, loops
-  const band = 0.16;
-  const stops = [[0, baseColor], [1, baseColor]];
-  [peak - band, peak, peak + band].forEach((o, i)=>{
-    if(o > 0.001 && o < 0.999) stops.push([o, i===1 ? '#ffffff' : baseColor]);
-  });
-  const seen = new Set();
-  stops.sort((a,b)=>a[0]-b[0]).forEach(([o,c])=>{
-    let oo = Math.min(1, Math.max(0, o));
-    while(seen.has(oo.toFixed(4))) oo += 0.0002;
-    seen.add(oo.toFixed(4));
-    grad.addColorStop(oo, c);
-  });
-  return grad;
-}
-function startShine(idx){
-  if(!CHART) return;
-  if(SHINE_IDX === idx && SHINE_RAF) return;
-  SHINE_IDX = idx;
-  document.querySelectorAll('.chart-legend-item').forEach((el,i)=>{
-    el.classList.toggle('dimmed', i!==idx);
-    el.classList.toggle('shiny-text', i===idx);
-  });
-  if(SHINE_RAF) return; // loop already running, it'll pick up the new idx
-  function tick(){
-    if(!CHART || SHINE_IDX === -1){ SHINE_RAF = null; return; }
-    SHINE_PHASE += 0.02;
-    CHART.data.datasets.forEach((ds,i)=>{
-      if(i===SHINE_IDX){
-        const grad = shineGradient(CHART.ctx, CHART.chartArea, ds._baseColor, SHINE_PHASE);
-        ds.borderColor = grad; ds.backgroundColor = grad;
-      } else {
-        const dim = withAlpha(ds._baseColor, 0.2);
-        ds.borderColor = dim; ds.backgroundColor = dim;
-      }
-    });
-    CHART.update('none');
-    SHINE_RAF = requestAnimationFrame(tick);
-  }
-  tick();
-}
-function stopShine(){
-  SHINE_IDX = -1;
-  SHINE_RAF = null;
-  document.querySelectorAll('.chart-legend-item').forEach(el=> el.classList.remove('dimmed','shiny-text'));
-  if(!CHART) return;
-  CHART.data.datasets.forEach(ds=>{ ds.borderColor = ds._baseColor; ds.backgroundColor = ds._baseColor; });
-  CHART.update('none');
-}
-// Safety net: if the mouse leaves the chart/legend fast enough that Chart.js's
-// own mouseleave never fires (common when flicking onto a roster card),
-// this catches it on the very next mousemove anywhere else on the page.
-document.addEventListener('mousemove', (e)=>{
-  if(SHINE_IDX === -1) return;
-  if(e.target.closest('#logs-chart') || e.target.closest('.chart-legend-item')) return;
-  stopShine();
-});
+function resetOpacity(){ if(!CHART) return; CHART.data.datasets.forEach(ds=>{ ds.borderColor = ds._baseColor; }); CHART.update('none'); }
 function applyFilter(){
   if(!CHART) return;
   const onlyName = ONLY_ME ? CURRENT_USER.username : SELECTED_PLAYER;
-  CHART.data.datasets.forEach((ds,i)=>{
-    ds.hidden = onlyName ? ds.label !== onlyName : false;
-    const item = document.querySelector(`.chart-legend-item[data-idx="${i}"]`);
-    if(item) item.classList.toggle('hidden-ds', ds.hidden);
-  });
+  CHART.data.datasets.forEach(ds=>{ ds.hidden = onlyName ? ds.label !== onlyName : false; });
   CHART.update();
 }
 document.getElementById('only-me-btn').addEventListener('click', function(){
@@ -1050,23 +768,15 @@ document.getElementById('only-me-btn').addEventListener('click', function(){
   if(ONLY_ME){ SELECTED_PLAYER=''; document.getElementById('dropdown-toggle').innerHTML = '<span>All players <span class="chev">▾</span></span>'; }
   applyFilter();
 });
-document.getElementById('dropdown-toggle').addEventListener('click', (e)=>{
-  e.stopPropagation();
-  document.getElementById('player-dropdown').classList.toggle('open');
-});
-document.addEventListener('click', ()=>{
-  document.getElementById('player-dropdown').classList.remove('open');
-});
+document.getElementById('dropdown-toggle').addEventListener('click', (e)=>{ e.stopPropagation(); document.getElementById('player-dropdown').classList.toggle('open'); });
+document.addEventListener('click', ()=>{ document.getElementById('player-dropdown').classList.remove('open'); });
 
-/* ---------------- THEME (persisted light/dark) ---------------- */
 const THEME_KEY = 'sgr-theme';
 function setTheme(t){
   document.documentElement.setAttribute('data-theme', t);
   try{ localStorage.setItem(THEME_KEY, t); }catch(e){}
-  document.getElementById('theme-toggle').innerHTML = t === 'light'
-    ? `<span class="icon">${ICONS.sun}</span>`
-    : `<span class="icon">${ICONS.moon}</span>`;
-  if(CURRENT_USER){ renderChart(); renderCards(); renderMotm(); }
+  document.getElementById('theme-toggle').innerHTML = t === 'light' ? ICONS.sunny : ICONS.bedtime;
+  if(CURRENT_USER) renderChart();
 }
 document.getElementById('theme-toggle').addEventListener('click', ()=>{
   const current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
@@ -1074,107 +784,87 @@ document.getElementById('theme-toggle').addEventListener('click', ()=>{
 });
 setTheme(document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark');
 
-/* ---------------- RENDER: CARDS ---------------- */
 function renderCards(){
   clearElectricBorders();
   const grid = document.getElementById('cards-grid');
-  document.getElementById('roster-caption').textContent = `${SHEET.users.length} hosts`;
+  document.getElementById('roster-caption').textContent = `${SHEET.users.length} staff`;
   const sorted = [...SHEET.users].sort((a,b)=>{
     const ra = rankFor(a).order, rb = rankFor(b).order;
     if(ra!==rb) return ra-rb;
     return totalLogs(b) - totalLogs(a);
   });
-  const maxTotal = SHEET.users.reduce((m,u)=>Math.max(m, totalLogs(u)), 0);
   grid.innerHTML = sorted.map((u,i)=>{
     const total = totalLogs(u);
     const st = statusFor(total);
-    const isTop = maxTotal > 0 && total === maxTotal;
     const { rank } = rankFor(u);
     const initials = u.username.slice(0,2).toUpperCase();
     const pfpHtml = u.pfp ? `<img class="pfp" src="${u.pfp}" alt="${u.username}">` : `<div class="pfp fallback">${initials}</div>`;
     const infoHtml = rank ? `<div class="card-info"><ul>${rank.info.map(x=>`<li>${x}</li>`).join('')}</ul><div class="card-hr"></div></div>` : '';
+    const loaActive = u.loa && u.loa.trim() && u.loa.trim().toUpperCase()!=='N/A';
+    const warnActive = u.warnings && u.warnings.trim() && u.warnings.trim().toLowerCase()!=='none';
+    const tagsHtml = (loaActive || warnActive) ? `<div class="card-tags">${loaActive?'<span class="tag tag-loa">On LOA</span>':''}${warnActive?`<span class="tag tag-warn">${u.warnings} warning${u.warnings.trim()==='One'?'':'s'}</span>`:''}</div>` : '';
     return `
-      <div class="card ${st.cls}" data-idx="${i}" data-rank="${rank ? rank.name : ''}" data-username="${u.username.toLowerCase()}">
+      <div class="card ${st.cls}" data-idx="${i}" data-rank="${rank ? rank.name : ''}">
         <div class="card-top">
           ${pfpHtml}
           <div><div class="card-name">${u.username}</div><div class="card-rank">${rank ? rank.name : 'Unranked'}</div></div>
         </div>
+        ${tagsHtml}
         <div class="card-hr"></div>
         ${infoHtml}
-        <div class="card-logs ${isTop ? 'top-logger shiny-text' : ''}">${total}<span class="unit">logs</span></div>
+        <div class="card-logs">${total}<span class="unit">logs</span></div>
       </div>`;
   }).join('');
 
-  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
   const brand = CONFIG.BRAND_COLOR;
-  const brandDark = shadeColor(brand, isLight ? 22 : -35);
-  const glowOpacity = isLight ? 0.5 : 1;
+  const brandDark = shadeColor(brand, -35);
   grid.querySelectorAll('.card').forEach(card=>{
     const rankName = card.dataset.rank;
-    if(rankName === 'Host Manager'){
-      ELECTRIC_INSTANCES.push(attachElectricBorder(card, { color: brand, chaos:0.06, borderRadius:16, opacity: glowOpacity }));
-    } else if(rankName === 'Host Lead'){
-      ELECTRIC_INSTANCES.push(attachElectricBorder(card, { color: brandDark, chaos:0.06, borderRadius:16, opacity: glowOpacity }));
-    }
-  });
-  applyRosterSearch();
-}
-function applyRosterSearch(){
-  const input = document.getElementById('roster-search');
-  if(!input) return;
-  const q = input.value.trim().toLowerCase();
-  document.querySelectorAll('#cards-grid .card').forEach(card=>{
-    card.classList.toggle('search-hidden', !!q && !card.dataset.username.includes(q));
+    if(rankName === 'Host Manager') ELECTRIC_INSTANCES.push(attachElectricBorder(card, { color: brand, chaos:0.06, borderRadius:16 }));
+    else if(rankName === 'Host Lead') ELECTRIC_INSTANCES.push(attachElectricBorder(card, { color: brandDark, chaos:0.06, borderRadius:16 }));
   });
 }
-document.getElementById('roster-search').addEventListener('input', applyRosterSearch);
 
-/* ---------------- RENDER: HOST OF THE MONTH ---------------- */
 function renderMotm(){
   const el = document.getElementById('motm-list');
   if(!SHEET.motm.length){ el.innerHTML = `<div class="eyebrow">No entries yet.</div>`; return; }
   const cs = getComputedStyle(document.documentElement);
   const gold = cs.getPropertyValue('--accent-gold').trim() || '#e8b84b';
-  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
   el.innerHTML = SHEET.motm.map((m,i)=>`
     <div class="motm-card">
-      <div class="motm-card-top">
-        <div class="motm-badge">${i+1}</div>
-        <div><div class="motm-card-name">${m.username}</div><div class="motm-card-date">${m.date||''}</div></div>
-      </div>
+      <div class="motm-card-top"><div class="motm-badge">${i+1}</div><div><div class="motm-card-name">${m.username}</div><div class="motm-card-date">${m.date||''}</div></div></div>
       <div class="card-hr"></div>
       <div class="motm-card-logs">${m.logs ?? '—'}<span class="unit">logs</span></div>
     </div>`).join('');
-  el.querySelectorAll('.motm-card').forEach(card=>{
-    ELECTRIC_INSTANCES.push(attachElectricBorder(card, { color: gold, chaos:0.06, borderRadius:16, opacity: isLight ? 0.5 : 1 }));
-  });
+  el.querySelectorAll('.motm-card').forEach(card=>{ ELECTRIC_INSTANCES.push(attachElectricBorder(card, { color: gold, chaos:0.06, borderRadius:16 })); });
 }
 
 function renderAll(){ renderPill(); renderChart(); renderCards(); renderMotm(); }
 
 /* ---------------- LOAD DATA ---------------- */
-function boot(rows, isDemo){
-  SHEET = parseSheetRows(rows);
-  if(isDemo){
-    console.warn('SGR Host Database: live sheet fetch failed, showing demo data. Check CONFIG.SHEET_CSV_URL.');
-  }
-  const remembered = loadRemembered();
-  if(remembered && remembered.u && remembered.p){
-    document.getElementById('login-user').value = remembered.u;
-    document.getElementById('login-pass').value = remembered.p;
-    attemptLogin(true); // silent — a stale/failed save shouldn't flash an error at someone who hasn't touched the form
-  }
-}
-
-if(CONFIG.SHEET_CSV_URL && CONFIG.SHEET_CSV_URL.indexOf('http') === 0){
-  Papa.parse(CONFIG.SHEET_CSV_URL, {
-    download:true,
-    complete:(res)=> boot(res.data, false),
-    error:()=>{ boot(Papa.parse(DEMO_CSV).data, true); }
-  });
-} else {
-  boot(Papa.parse(DEMO_CSV).data, true);
-}
+Papa.parse(CONFIG.MAIN_CSV_URL, {
+  download:true,
+  complete:(res)=>{
+    const rows = res.data;
+    const mode = (findLabelValue(rows, "LogSystemWebsite") || "Old").trim().toLowerCase();
+    if(mode.startsWith('new')){
+      const base = parseNewSystemMain(rows);
+      if(!base._rosterFound){
+        console.warn('SGR Host Database: New system selected but the roster header row (Username/Rank/Logs/...) was not found — falling back to Old system parsing. Check the sheet layout.');
+        SHEET = parseOldSystem(rows);
+        return;
+      }
+      Papa.parse(CONFIG.HISTORY_CSV_URL, {
+        download:true,
+        complete:(hres)=>{ applyHistory(base, hres.data); SHEET = base; },
+        error:()=>{ console.warn('SGR Host Database: could not load LogHistory tab yet — totals will show 0 until it exists.'); SHEET = base; }
+      });
+    } else {
+      SHEET = parseOldSystem(rows);
+    }
+  },
+  error:()=>{ console.error('SGR Host Database: could not load the live sheet. Check CONFIG.MAIN_CSV_URL / sharing settings.'); }
+});
 </script>
 </body>
 </html>
