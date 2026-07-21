@@ -144,7 +144,8 @@ body::-webkit-scrollbar{ display:none; width:0; height:0; }
 @keyframes shineSweep{ 0%{ background-position:150% center; } 100%{ background-position:-50% center; } }
 
 /* ---------- ported ElectricBorder canvas effect ---------- */
-.electric-wrap{ position:relative; }
+.electric-wrap{ position:relative; height:100%; }
+.electric-wrap > .card{ height:100%; }
 .electric-canvas{ position:absolute; pointer-events:none; z-index:0; }
 
 /* ---------- LOGIN ---------- */
@@ -296,10 +297,12 @@ section.section{ margin-bottom:40px; scroll-margin-top:100px; }
 .pfp.fallback{ display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-weight:700; color:var(--text-muted); }
 .card-name{ font-weight:700; font-size:14.5px; }
 .card-rank{ font-size:11.5px; font-weight:600; color:var(--text-muted); margin-top:1px; }
-.card-tags{ display:flex; gap:6px; flex-wrap:wrap; margin-top:12px; }
-.tag{ font-size:10px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; padding:3px 8px; border-radius:6px; }
-.tag-loa{ background:rgba(232,184,75,0.15); color:var(--accent-gold); border:1px solid rgba(232,184,75,0.35); }
-.tag-warn{ background:rgba(217,96,90,0.15); color:var(--accent-danger); border:1px solid rgba(217,96,90,0.35); }
+.card-tags{ display:flex; flex-direction:column; gap:2px; margin-top:12px; }
+.tag-loa{ font-family:var(--font-display); font-size:13px; font-weight:800; letter-spacing:.03em; text-transform:uppercase; color:var(--accent-gold); cursor:default; width:max-content; }
+.tag-warn{ font-family:var(--font-display); font-size:13px; }
+.tag-warn .warn-num{ color:var(--accent-danger); font-weight:800; }
+.tag-warn .warn-unit{ color:var(--text-dim); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.03em; font-family:var(--font-body); }
+.tag-warn-plain{ font-family:var(--font-display); font-size:13px; font-weight:800; letter-spacing:.03em; text-transform:uppercase; color:var(--accent-danger); }
 .card-hr{ height:1px; background:var(--line); margin:13px 0; }
 .card-info{ max-height:0; opacity:0; overflow:hidden; transition:max-height .5s cubic-bezier(.2,.8,.2,1), opacity .35s ease; }
 .card:hover .card-info{ max-height:320px; opacity:1; transition:max-height 1.1s cubic-bezier(.2,.8,.2,1), opacity .7s ease .15s; }
@@ -317,7 +320,8 @@ section.section{ margin-bottom:40px; scroll-margin-top:100px; }
 .motm-card{ position:relative; z-index:1; background:var(--bg-card); border:1px solid var(--line); border-radius:16px; padding:17px; transition:border-color .2s, transform .2s, box-shadow .2s; }
 .motm-card:hover{ border-color:var(--accent-gold); transform:translateY(-3px); box-shadow:0 16px 40px rgba(0,0,0,0.35); }
 .motm-card-top{ display:flex; align-items:center; gap:11px; }
-.motm-badge{ font-family:var(--font-display); font-weight:700; font-size:13px; color:var(--accent-gold); width:32px; height:32px; border-radius:50%; border:1px solid var(--accent-gold); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.motm-pfp-wrap{ position:relative; flex-shrink:0; }
+.motm-badge{ position:absolute; bottom:-4px; right:-4px; font-family:var(--font-display); font-weight:700; font-size:10.5px; color:var(--accent-gold); width:19px; height:19px; border-radius:50%; border:1px solid var(--accent-gold); background:var(--bg-card); display:flex; align-items:center; justify-content:center; }
 .motm-card-name{ font-weight:700; font-size:14.5px; }
 .motm-card-date{ font-size:11.5px; color:var(--text-dim); margin-top:1px; }
 .motm-card .card-hr{ margin:13px 0; }
@@ -712,6 +716,10 @@ function parseSheetRows(rows){
     });
     out.users.push({ username, password, pfp, rankName, entries });
   }
+  out.motm.forEach(m=>{
+    const u = out.users.find(x=>x.username.toLowerCase()===m.username.toLowerCase());
+    m.pfp = u ? u.pfp : '';
+  });
   return out;
 }
 
@@ -722,9 +730,9 @@ function parseSheetRows(rows){
    this sheet at all anymore — the Apps Script archives it to a separate
    "LogHistory" tab (Date, Username, Logs) every time you click
    "Save & Clear Today's Logs", so that's fetched and merged in separately. */
-function findLabelCell(rows, label){
+function findLabelCell(rows, label, startRow=0){
   const target = label.trim().toLowerCase();
-  for(let r=0;r<rows.length;r++){
+  for(let r=startRow;r<rows.length;r++){
     const row = rows[r]||[];
     for(let c=0;c<row.length;c++){
       if(((row[c]||'')+'').trim().toLowerCase() === target) return { r, c };
@@ -747,9 +755,34 @@ function detectSystem(rows){
   return (val && val.toLowerCase().includes('new')) ? 'new' : 'old';
 }
 const WORD_NUM = { one:1, two:2, three:3, four:4, five:5, six:6, seven:7, eight:8, nine:9, ten:10 };
-function warnBadgeText(raw){
+function renderWarnLine(raw){
   const n = WORD_NUM[raw.trim().toLowerCase()];
-  return n ? `${n} Warning${n>1?'s':''}` : raw;
+  if(n){
+    return `<div class="tag-warn"><span class="warn-num">${n}</span> <span class="warn-unit">Warning${n>1?'s':''}</span></div>`;
+  }
+  // Non-numeric status (e.g. "Suspended") — shown plain, same red as warnings.
+  return `<div class="tag-warn-plain">${raw}</div>`;
+}
+// Parses an LOA cell like "12days 8/3/26" or "14 days 8/3/2026" into a
+// tooltip that says how many days it was for and how many days are left,
+// computed live against today's date rather than baked in from the sheet.
+function parseLoaCell(raw){
+  if(!raw) return null;
+  const m = raw.match(/^(\d+)\s*days?\s+(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/i);
+  if(!m) return null;
+  const days = parseInt(m[1], 10);
+  let [, , dd, mm, yy] = m;
+  dd = parseInt(dd,10); mm = parseInt(mm,10); yy = parseInt(yy,10);
+  if(yy < 100) yy += 2000;
+  const endDate = new Date(yy, mm-1, dd);
+  if(isNaN(endDate.getTime())) return null;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const daysLeft = Math.round((endDate - today) / 86400000);
+  let endsText;
+  if(daysLeft > 0) endsText = `ends in ${daysLeft} day${daysLeft===1?'':'s'}`;
+  else if(daysLeft === 0) endsText = 'ends today';
+  else endsText = `ended ${Math.abs(daysLeft)} day${Math.abs(daysLeft)===1?'':'s'} ago`;
+  return `LOA for ${days} day${days===1?'':'s'} — ${endsText}`;
 }
 function parseNewFormat(rows){
   const out = { sameRankQuota:null, promoQuota:null, motm:[], users:[] };
@@ -785,7 +818,12 @@ function parseNewFormat(rows){
     const row = rows[r]||[];
     const username = ((row[headerPos.colUsername]||'')+'').trim();
     const rankName = ((row[headerPos.colRank]||'')+'').trim();
-    if(!username || username.toLowerCase()==='username') continue; // unfilled template slot
+    // A section banner ("Department HR", "Host Of The Month", …) is a merged
+    // cell — its text lands in the username column but the rank column next
+    // to it is blank, which a real host row never is. That's how we tell
+    // the difference instead of hardcoding row ranges (which would break
+    // the moment you insert/delete a row).
+    if(!username || !rankName || username.toLowerCase()==='username') continue;
     const password = colPassword!==null ? ((row[colPassword]||'')+'').trim() : '';
     const pfp = colPfp!==null ? ((row[colPfp]||'')+'').trim() : '';
     const loaRaw = colLOA!==null ? ((row[colLOA]||'')+'').trim() : '';
@@ -793,13 +831,17 @@ function parseNewFormat(rows){
     out.users.push({
       username, password, pfp, rankName,
       loa: !!loaRaw && loaRaw.toLowerCase()!=='n/a',
+      loaInfo: parseLoaCell(loaRaw),
       warnLabel: (warnRaw && warnRaw.toLowerCase()!=='none') ? warnRaw : '',
       entries: [] // filled in by applyLogHistory() once the LogHistory tab loads
     });
   }
 
-  // New-layout Host Of The Month table has its own Logs/Username/Date sub-header.
-  const motmBanner = findLabelCell(rows, 'Host Of The Month');
+  // New-layout Host Of The Month table has its own Logs/Username/Date
+  // sub-header. Search starts AFTER the roster header, not from row 0 —
+  // otherwise this can latch onto the old section's own "Host Of The
+  // Month" label further up the sheet instead of the new one.
+  const motmBanner = findLabelCell(rows, 'Host Of The Month', headerPos.r);
   if(motmBanner){
     let sub = null;
     for(let r=motmBanner.r; r<Math.min(motmBanner.r+6, rows.length); r++){
@@ -814,7 +856,8 @@ function parseNewFormat(rows){
         const row = rows[r]||[];
         const uname = ((row[sub.ui]||'')+'').trim();
         if(!uname || uname.toLowerCase()==='username') continue;
-        out.motm.push({ username:uname, logs:num(row[sub.li]), date:((row[sub.di]||'')+'').trim() });
+        const matchedUser = out.users.find(u=>u.username.toLowerCase()===uname.toLowerCase());
+        out.motm.push({ username:uname, logs:num(row[sub.li]), date:((row[sub.di]||'')+'').trim(), pfp: matchedUser ? matchedUser.pfp : '' });
       }
     }
   }
@@ -1238,8 +1281,8 @@ function renderCards(){
     const pfpHtml = u.pfp ? `<img class="pfp" src="${u.pfp}" alt="${u.username}">` : `<div class="pfp fallback">${initials}</div>`;
     const infoHtml = rank ? `<div class="card-info"><ul>${rank.info.map(x=>`<li>${x}</li>`).join('')}</ul><div class="card-hr"></div></div>` : '';
     const tagsHtml = (u.loa || u.warnLabel) ? `<div class="card-tags">
-        ${u.loa ? `<span class="tag tag-loa">LOA</span>` : ''}
-        ${u.warnLabel ? `<span class="tag tag-warn">${warnBadgeText(u.warnLabel)}</span>` : ''}
+        ${u.loa ? `<div class="tag-loa" ${u.loaInfo ? `title="${u.loaInfo}"` : ''}>LOA</div>` : ''}
+        ${u.warnLabel ? renderWarnLine(u.warnLabel) : ''}
       </div>` : '';
     return `
       <div class="card ${st.cls}" data-idx="${i}" data-rank="${rank ? rank.name : ''}" data-username="${u.username.toLowerCase()}">
@@ -1285,15 +1328,19 @@ function renderMotm(){
   const cs = getComputedStyle(document.documentElement);
   const gold = cs.getPropertyValue('--accent-gold').trim() || '#e8b84b';
   const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-  el.innerHTML = SHEET.motm.map((m,i)=>`
+  el.innerHTML = SHEET.motm.map((m,i)=>{
+    const initials = m.username.slice(0,2).toUpperCase();
+    const pfpHtml = m.pfp ? `<img class="pfp" src="${m.pfp}" alt="${m.username}">` : `<div class="pfp fallback">${initials}</div>`;
+    return `
     <div class="motm-card">
       <div class="motm-card-top">
-        <div class="motm-badge">${i+1}</div>
+        <div class="motm-pfp-wrap">${pfpHtml}<div class="motm-badge">${i+1}</div></div>
         <div><div class="motm-card-name">${m.username}</div><div class="motm-card-date">${m.date||''}</div></div>
       </div>
       <div class="card-hr"></div>
       <div class="motm-card-logs">${m.logs ?? '—'}<span class="unit">logs</span></div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
   el.querySelectorAll('.motm-card').forEach(card=>{
     ELECTRIC_INSTANCES.push(attachElectricBorder(card, { color: gold, chaos:0.06, borderRadius:16, opacity: isLight ? 0.5 : 1 }));
   });
