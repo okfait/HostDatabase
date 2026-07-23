@@ -782,11 +782,6 @@ function valueRightOf(rows, pos, maxGap=4){
   }
   return null;
 }
-function detectSystem(rows){
-  const pos = findLabelCell(rows, 'LogSystemWebsite');
-  const val = valueRightOf(rows, pos, 6);
-  return (val && val.toLowerCase().includes('new')) ? 'new' : 'old';
-}
 const WORD_NUM = { one:1, two:2, three:3, four:4, five:5, six:6, seven:7, eight:8, nine:9, ten:10 };
 const WARN_RING_R = 27;
 const WARN_RING_CIRC = 2 * Math.PI * WARN_RING_R;
@@ -870,21 +865,28 @@ function parseNewFormat(rows){
     const row = rows[r]||[];
     const uc = row.findIndex(v=>((v||'')+'').trim().toLowerCase()==='username');
     if(uc===-1) continue;
-    const rc = row.findIndex((v,ci)=> ci>uc && ci<=uc+4 && ((v||'')+'').trim().toLowerCase()==='rank');
+    const rc = row.findIndex((v,ci)=> ci>uc && ci<=uc+8 && ((v||'')+'').trim().toLowerCase()==='rank');
     if(rc!==-1){ headerPos = { r, colUsername:uc, colRank:rc }; break; }
   }
-  if(!headerPos) return out; // new layout not found — caller falls back to Old
+  if(!headerPos){
+    console.warn('SGR Host Database: could not find a "Username"+"Rank" header row anywhere in the sheet — New-format parsing failed.');
+    return out; // new layout not found — caller falls back to Old
+  }
 
   const headerRow = rows[headerPos.r] || [];
-  function colOnHeader(label){
-    const i = headerRow.findIndex(v=>((v||'')+'').trim().toLowerCase()===label.toLowerCase());
-    return i===-1 ? null : i;
+  function colOnHeader(...labels){
+    for(const label of labels){
+      const i = headerRow.findIndex(v=>((v||'')+'').trim().toLowerCase()===label.toLowerCase());
+      if(i!==-1) return i;
+    }
+    return null;
   }
   const colPassword = colOnHeader('Password');
-  const colPfp = colOnHeader('ProfilePic');
+  const colPfp = colOnHeader('ProfilePic', 'ProfilePicLink', 'Profile Pic');
   const colLOA = colOnHeader('LOA');
   const colWarn = colOnHeader('Amount of warnings');
   // "Eligible for payment" is intentionally never read — not used anywhere.
+  console.log(`SGR Host Database: found roster header at row ${headerPos.r+1}, columns — username:${headerPos.colUsername} rank:${headerPos.colRank} password:${colPassword} pfp:${colPfp} loa:${colLOA} warn:${colWarn}`);
 
   for(let r=headerPos.r+1; r<rows.length; r++){
     const row = rows[r]||[];
@@ -908,6 +910,8 @@ function parseNewFormat(rows){
       entries: [] // filled in by applyLogHistory() once the LogHistory tab loads
     });
   }
+  console.log(`SGR Host Database: parsed ${out.users.length} host(s):`,
+    out.users.map(u => `${u.username} (rank: ${u.rankName || 'none'}, password ${u.password ? 'set' : 'MISSING'})`));
 
   // New-layout Host Of The Month table has its own Logs/Username/Date
   // sub-header. Search starts AFTER the roster header, not from row 0 —
@@ -1157,14 +1161,16 @@ function renderChart(){
       plugins:{
         legend:{ display:false },
         tooltip:{
+          mode:'index', intersect:false,
           backgroundColor:cCard, borderColor:cLineBright, borderWidth:1, padding:10,
           titleFont:{ family:"'Inter'", size:11.5, weight:'600' }, bodyFont:{ family:"'Inter'", size:11.5 },
           yAlign:'bottom', xAlign:'center',
-          // Even with intersect:false + nearest, exact ties (multiple users
-          // logging the identical cumulative value on the same date) can
-          // return more than one "active" point — filter keeps just the
-          // single closest one instead of a messy stacked list.
-          filter:(item, idx)=> idx === 0,
+          // 'index' mode above gathers every dataset's value for that date;
+          // filter narrows it down to just the ones that actually coincide
+          // with the point closest to the cursor (e.g. two hosts truly tied
+          // at the same log count that day), rather than dumping in every
+          // line that merely happens to share the same date.
+          filter:(item)=> HOVER_TARGET_VALUE === null || Math.abs(item.parsed.y - HOVER_TARGET_VALUE) < 0.01,
           callbacks:{ label:(ctx)=>` ${ctx.dataset.label}: ${ctx.formattedValue} logs` }
         }
       },
@@ -1173,13 +1179,14 @@ function renderChart(){
         x:{ ticks:{ color:cDim, font:{ family:"'Inter'", size:10.5 } }, grid:{ display:false } }
       },
       onHover:(evt, active)=>{
-        if(!active.length){ stopShine(); return; }
+        if(!active.length){ HOVER_TARGET_VALUE = null; stopShine(); return; }
         // 'nearest' mode always returns SOMETHING as long as the cursor is
         // inside the chart area, even if it's nowhere near an actual line —
         // so only count it if the cursor is genuinely close to that point.
         const el = active[0].element;
         const dx = evt.x - el.x, dy = evt.y - el.y;
-        if(Math.sqrt(dx*dx + dy*dy) > 26){ stopShine(); return; }
+        if(Math.sqrt(dx*dx + dy*dy) > 26){ HOVER_TARGET_VALUE = null; stopShine(); return; }
+        HOVER_TARGET_VALUE = active[0].parsed.y;
         startShine(active[0].datasetIndex);
       }
     }
@@ -1228,6 +1235,7 @@ function renderChart(){
    Mirrors the .shiny-text CSS effect (a moving bright band), but built on
    a canvas gradient since a line stroke can't use background-clip:text. */
 let SHINE_IDX = -1, SHINE_RAF = null, SHINE_PHASE = 0;
+let HOVER_TARGET_VALUE = null; // the y-value of whichever point the cursor is actually nearest to
 function shineGradient(ctx, chartArea, baseColor, phase){
   const grad = ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
   const peak = (phase % 1.6) - 0.3; // sweeps in from the left, out past the right, loops
@@ -1440,25 +1448,24 @@ function renderAll(){ renderPill(); renderChart(); renderCards(); renderMotm(); 
 
 /* ---------------- LOAD DATA ---------------- */
 function boot(rows, isDemo){
-  const system = detectSystem(rows);
-  if(system === 'new'){
-    const parsed = parseNewFormat(rows);
-    if(parsed.users.length){
-      SHEET = parsed;
-      if(LOG_HISTORY_CSV_URL){
-        Papa.parse(LOG_HISTORY_CSV_URL, {
-          download:true,
-          complete:(res)=>{ applyLogHistory(SHEET, res.data); finishBoot(isDemo); },
-          error:()=>{ finishBoot(isDemo); } // no history saved yet — fine, just shows 0 logs
-        });
-      } else {
-        finishBoot(isDemo);
-      }
-      return;
+  const parsed = parseNewFormat(rows);
+  if(parsed.users.length){
+    SHEET = parsed;
+    if(LOG_HISTORY_CSV_URL){
+      Papa.parse(LOG_HISTORY_CSV_URL, {
+        download:true,
+        complete:(res)=>{ applyLogHistory(SHEET, res.data); finishBoot(isDemo); },
+        error:()=>{ finishBoot(isDemo); } // no history saved yet — fine, just shows 0 logs
+      });
+    } else {
+      finishBoot(isDemo);
     }
-    // toggle says "New" but the layout couldn't be found — fall through to Old
-    // rather than showing an empty site.
+    return;
   }
+  // Layout couldn't be found at all (e.g. header text got renamed) — fall
+  // back to the old parser rather than showing a blank site, though this
+  // shouldn't come up in normal use anymore since the Old sheet is gone.
+  console.warn('SGR Host Database: New-format parsing found 0 users — falling back to the Old parser, which will likely also find nothing now that the Old sheet section is gone. This is almost certainly why logins are failing.');
   SHEET = parseSheetRows(rows);
   finishBoot(isDemo);
 }
