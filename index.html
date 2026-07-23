@@ -156,6 +156,8 @@ body::-webkit-scrollbar{ display:none; width:0; height:0; }
 .loading-inner{ display:flex; flex-direction:column; align-items:center; gap:20px; }
 .loading-logo-wrap{ position:relative; width:100px; height:100px; display:flex; align-items:center; justify-content:center; }
 .loading-logo-wrap img{ width:60px; height:60px; object-fit:contain; }
+.logo-img{ opacity:0; transition:opacity .25s; }
+.logo-img.loaded{ opacity:1; }
 .loading-spinner{ position:absolute; inset:0; width:100%; height:100%; animation:loadSpin 1.1s linear infinite; }
 .loading-spinner circle{ fill:none; stroke:var(--accent-bright); stroke-width:4; stroke-linecap:round; stroke-dasharray:170 400; }
 @keyframes loadSpin{ to{ transform:rotate(360deg); } }
@@ -361,7 +363,7 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
   <div class="loading-inner">
     <div class="loading-logo-wrap">
       <svg class="loading-spinner" viewBox="0 0 100 100"><circle cx="50" cy="50" r="42"/></svg>
-      <img src="" id="loading-logo-img" alt="Server logo">
+      <img src="" id="loading-logo-img" class="logo-img" alt="Server logo" onload="this.classList.add('loaded')">
     </div>
     <div class="loading-text">Loading…</div>
   </div>
@@ -370,7 +372,7 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
 <!-- ============================= LOGIN ============================= -->
 <div id="login-screen">
   <div class="login-card">
-    <div class="login-badge"><img src="" id="login-logo-img" alt="Server logo"></div>
+    <div class="login-badge"><img src="" id="login-logo-img" class="logo-img" alt="Server logo" onload="this.classList.add('loaded')"></div>
     <div class="login-title" id="login-team-name">Shadow Greenville Roleplay</div>
     <form id="login-form" autocomplete="on">
       <div class="field"><label for="login-user">Username</label><input id="login-user" name="username" type="text" autocomplete="username" placeholder="RobloxUsername"></div>
@@ -386,7 +388,7 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
   <header class="top">
     <div class="top-inner">
       <div class="brand">
-        <div class="brand-mark"><img src="" id="brand-logo-img" alt="Server logo"></div>
+        <div class="brand-mark"><img src="" id="brand-logo-img" class="logo-img" alt="Server logo" onload="this.classList.add('loaded')"></div>
         <div class="brand-text">
           <div class="name" id="team-name-display">Shadow Greenville Roleplay</div>
         </div>
@@ -447,7 +449,7 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
     <footer>
       <div class="footer-text">Website made by Geo to be used in the Shadow GVRP community.<br>© <span id="year"></span> Shadow Greenville Roleplay.</div>
       <div class="footer-logos">
-        <div class="logo-box"><img src="" id="footer-server-logo" alt="Server logo"></div>
+        <div class="logo-box"><img src="" id="footer-server-logo" class="logo-img" alt="Server logo" onload="this.classList.add('loaded')"></div>
         <div class="logo-box"><img src="https://github.com/okfait/okgarage-mini/blob/main/01%20(80).png?raw=true" alt="OK Fait Club logo"></div>
       </div>
     </footer>
@@ -682,6 +684,11 @@ function num(v){
   if(v===undefined || v===null) return null;
   const s = String(v).trim();
   if(s==='') return null;
+  // A misformatted sheet cell (a Logs cell that got auto-converted to a
+  // date somewhere along the way) shows up here as text like "02.05.2026"
+  // or "31.12.1899" — that's not a real log count, so treat it as unusable
+  // instead of silently mangling it into some other number.
+  if(/^\d{1,2}[.\/]\d{1,2}[.\/]\d{2,4}$/.test(s)) return null;
   const n = parseFloat(s.replace(/[^0-9.\-]/g,''));
   return isNaN(n) ? null : n;
 }
@@ -797,8 +804,18 @@ function pfpRingHtml(u){
   if(isSuspended){
     ringSvg = `<svg class="warn-ring" viewBox="0 0 60 60"><circle class="warn-ring-arc suspended" cx="30" cy="30" r="${WARN_RING_R}" stroke-dasharray="${WARN_RING_CIRC} ${WARN_RING_CIRC}"/></svg>`;
   } else if(warnN){
-    const len = (warnN/3) * WARN_RING_CIRC;
-    ringSvg = `<svg class="warn-ring" viewBox="0 0 60 60"><circle class="warn-ring-arc" cx="30" cy="30" r="${WARN_RING_R}" stroke-dasharray="${len} ${WARN_RING_CIRC}"/></svg>`;
+    // Each warning is drawn as its OWN separate arc in its own 1/3 slot of
+    // the circle (with a gap baked in before the next slot), rather than
+    // one continuous arc — so 2 warnings visibly reads as two distinct
+    // pieces, not a bigger single arc.
+    const slotLen = WARN_RING_CIRC / 3;
+    const gap = 9;
+    const dashLen = slotLen - gap;
+    const circles = [];
+    for(let i=0; i<warnN; i++){
+      circles.push(`<circle class="warn-ring-arc" cx="30" cy="30" r="${WARN_RING_R}" stroke-dasharray="${dashLen} ${WARN_RING_CIRC-dashLen}" stroke-dashoffset="${-(i*slotLen)}"/>`);
+    }
+    ringSvg = `<svg class="warn-ring" viewBox="0 0 60 60">${circles.join('')}</svg>`;
   }
   let tipText = isSuspended ? 'Suspended' : (warnN ? `${warnN} Warning${warnN>1?'s':''}` : '');
   if(u.loaInfo) tipText = tipText ? `${tipText} · ${u.loaInfo}` : u.loaInfo;
@@ -1142,6 +1159,12 @@ function renderChart(){
         tooltip:{
           backgroundColor:cCard, borderColor:cLineBright, borderWidth:1, padding:10,
           titleFont:{ family:"'Inter'", size:11.5, weight:'600' }, bodyFont:{ family:"'Inter'", size:11.5 },
+          yAlign:'bottom', xAlign:'center',
+          // Even with intersect:false + nearest, exact ties (multiple users
+          // logging the identical cumulative value on the same date) can
+          // return more than one "active" point — filter keeps just the
+          // single closest one instead of a messy stacked list.
+          filter:(item, idx)=> idx === 0,
           callbacks:{ label:(ctx)=>` ${ctx.dataset.label}: ${ctx.formattedValue} logs` }
         }
       },
@@ -1298,10 +1321,10 @@ function applySelectionStyle(){
   if(!CHART) return;
   CHART.data.datasets.forEach(ds=>{
     if(SELECTED_SET.size === 0 || SELECTED_SET.has(ds.label)){
-      ds.borderColor = ds._baseColor; ds.backgroundColor = ds._baseColor; ds.borderDash = [];
+      ds.borderColor = ds._baseColor; ds.backgroundColor = ds._baseColor;
     } else {
       const dim = withAlpha(ds._baseColor, 0.2);
-      ds.borderColor = dim; ds.backgroundColor = dim; ds.borderDash = [6,4];
+      ds.borderColor = dim; ds.backgroundColor = dim;
     }
   });
   CHART.update('none');
