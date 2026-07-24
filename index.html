@@ -59,7 +59,7 @@ const ICONS = {
   chart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>',
   group: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
   crown: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7Z"/><path d="M5 20h14"/></svg>',
-  car:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 17h2v-6l-2-5H5L3 11v6h2"/><circle cx="7" cy="17" r="2"/><circle cx="15" cy="17" r="2"/><path d="M9 17h4"/><path d="M4 11h1.5M18.5 11H20"/><path d="m1.5 6 2 1.5-1 2.2M22.5 6l-2 1.5 1 2.2"/></svg>'
+  car:   '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M160-240v-200 200ZM80-440l84-240q6-18 21.5-29t34.5-11h183q-3 20-3 40t3 40H234l-42 120h259q17 24 38 44.5t47 35.5H160v200h560v-163q21-3 41-9t39-15v307q0 17-11.5 28.5T760-80h-40q-17 0-28.5-11.5T680-120v-40H200v40q0 17-11.5 28.5T160-80h-40q-17 0-28.5-11.5T80-120v-320Zm540 160q25 0 42.5-17.5T680-340q0-25-17.5-42.5T620-400q-25 0-42.5 17.5T560-340q0 25 17.5 42.5T620-280Zm-360 0q25 0 42.5-17.5T320-340q0-25-17.5-42.5T260-400q-25 0-42.5 17.5T200-340q0 25 17.5 42.5T260-280Zm420-200q-83 0-141.5-58.5T480-680q0-82 58-141t142-59q83 0 141.5 58.5T880-680q0 83-58.5 141.5T680-480Zm-20-160h40v-160h-40v160Zm20 80q8 0 14-6t6-14q0-8-6-14t-14-6q-8 0-14 6t-6 14q0 8 6 14t14 6Z"/></svg>'
 };
 
 const BANNED_VEHICLES = [
@@ -436,20 +436,28 @@ header.top{
   border-bottom:1px solid var(--header-border);
   box-shadow:0 4px 24px rgba(15,26,22,0.06);
 }
-header.top .top-inner{ max-width:1180px; width:100%; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
-.brand{ display:flex; align-items:center; gap:13px; }
+header.top .top-inner{ max-width:1180px; width:100%; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:nowrap; }
+.brand{ display:flex; align-items:center; gap:13px; flex-shrink:0; }
 .brand-mark{ height:46px; width:auto; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
 .brand-mark img{ height:100%; width:auto; max-width:200px; object-fit:contain; }
-.brand-text .name{ font-family:var(--font-display); font-weight:700; font-size:19px; line-height:1.15; letter-spacing:-0.01em; }
-.who{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
-.who .name{ font-size:13px; color:var(--text-muted); }
+.brand-text .name{ font-family:var(--font-display); font-weight:700; font-size:19px; line-height:1.15; letter-spacing:-0.01em; white-space:nowrap; }
+.who{ display:flex; align-items:center; gap:10px; flex-wrap:nowrap; flex-shrink:0; }
+.who .name{ font-size:13px; color:var(--text-muted); white-space:nowrap; }
 .who .name b{ color:var(--text); font-weight:600; }
-#logout-btn{ background:transparent; border:1px solid var(--line-bright); color:var(--text-muted); font-size:11.5px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; padding:9px 14px; border-radius:10px; cursor:pointer; transition:.15s; font-family:var(--font-body); }
+#logout-btn{ background:transparent; border:1px solid var(--line-bright); color:var(--text-muted); font-size:11.5px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; padding:9px 14px; border-radius:10px; cursor:pointer; transition:.15s; font-family:var(--font-body); white-space:nowrap; }
 #logout-btn:hover{ border-color:var(--accent-danger); color:var(--accent-danger); }
 
-.topnav{ display:flex; align-items:center; gap:4px; }
-.topnav a{ display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:600; color:var(--text-muted); text-decoration:none; padding:8px 12px; border-radius:9px; transition:.15s; font-family:var(--font-body); }
+.topnav{ display:flex; align-items:center; justify-content:center; gap:2px; flex:1 1 auto; min-width:0; }
+.topnav a{ display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600; color:var(--text-muted); text-decoration:none; padding:7px 10px; border-radius:9px; transition:.15s; font-family:var(--font-body); white-space:nowrap; }
 .topnav a:hover{ color:var(--accent-bright); background:var(--bg-elevated); }
+
+/* Below full desktop width, tighten the nav further (icon-only) before
+   the mobile breakpoint stacks everything into rows. Keeps the sign-in
+   block on the same row as the brand/nav for as long as possible. */
+@media (max-width:900px){
+  .topnav a{ padding:7px 8px; gap:0; font-size:0; }
+  .topnav a .icon{ font-size:initial; }
+}
 
 #theme-toggle{ display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; background:var(--bg-elevated); border:1px solid var(--line-bright); color:var(--text-muted); border-radius:10px; cursor:pointer; transition:.15s; flex-shrink:0; }
 #theme-toggle:hover{ border-color:var(--accent-bright); color:var(--accent-bright); }
@@ -570,6 +578,11 @@ section.section{ margin-bottom:40px; scroll-margin-top:100px; }
 #banned-list::-webkit-scrollbar-track{ background:transparent; }
 #banned-list::-webkit-scrollbar-thumb{ background:var(--line-bright); border-radius:8px; }
 #banned-list::-webkit-scrollbar-thumb:hover{ background:var(--accent); }
+.banned-scroll-wrap{ position:relative; }
+.banned-fade{ position:absolute; left:0; right:10px; height:48px; pointer-events:none; opacity:0; transition:opacity .2s ease; z-index:2; }
+.banned-fade-top{ top:0; background:linear-gradient(to bottom, var(--bg) 0%, transparent 100%); }
+.banned-fade-bottom{ bottom:0; background:linear-gradient(to top, var(--bg) 0%, transparent 100%); }
+.banned-fade.visible{ opacity:1; }
 .banned-level-group{ margin-bottom:30px; }
 .banned-level-group.search-hidden{ display:none; }
 .banned-level-heading{ display:flex; align-items:center; gap:9px; font-family:var(--font-display); font-weight:700; font-size:16px; margin-bottom:10px; }
@@ -702,7 +715,11 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
           <div class="eyebrow" id="banned-caption"></div>
         </div>
       </div>
-      <div id="banned-list"></div>
+      <div class="banned-scroll-wrap">
+        <div id="banned-list"></div>
+        <div class="banned-fade banned-fade-top"></div>
+        <div class="banned-fade banned-fade-bottom"></div>
+      </div>
     </section>
 
     <footer>
@@ -1775,6 +1792,38 @@ function applyBannedSearch(){
 }
 document.getElementById('banned-search').addEventListener('input', applyBannedSearch);
 renderBannedVehicles(); // static data — doesn't need to wait for the sheet or login
+
+/* ---------------- Banned vehicles: scoped smooth-scroll + edge fades ---------------- */
+(function(){
+  const box = document.getElementById('banned-list');
+  if(!box) return;
+  const fadeTop = document.querySelector('.banned-fade-top');
+  const fadeBottom = document.querySelector('.banned-fade-bottom');
+  function updateFades(){
+    if(!fadeTop || !fadeBottom) return;
+    const atTop = box.scrollTop <= 2;
+    const atBottom = box.scrollTop + box.clientHeight >= box.scrollHeight - 2;
+    fadeTop.classList.toggle('visible', !atTop);
+    fadeBottom.classList.toggle('visible', !atBottom && box.scrollHeight > box.clientHeight);
+  }
+  box.addEventListener('scroll', updateFades);
+  window.addEventListener('resize', updateFades);
+  // Re-check after the (async) render populates the list, since scrollHeight
+  // isn't known until the cards actually exist.
+  setTimeout(updateFades, 50);
+  setTimeout(updateFades, 400);
+
+  // Give the box its own Lenis instance scoped to just this element, so it
+  // scrolls with the same smooth/inertial feel as the rest of the site
+  // instead of a plain native scrollbar — while the main page's Lenis
+  // instance is told (via `prevent`) to leave this box alone entirely.
+  if(window.Lenis){
+    const boxLenis = new Lenis({ wrapper: box, content: box, duration: 0.9, smoothWheel: true });
+    boxLenis.on('scroll', updateFades);
+    function boxRaf(time){ boxLenis.raf(time); requestAnimationFrame(boxRaf); }
+    requestAnimationFrame(boxRaf);
+  }
+})();
 
 /* ---------------- LOAD DATA ---------------- */
 function boot(rows, isDemo){
