@@ -59,7 +59,7 @@ const ICONS = {
   chart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>',
   group: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
   crown: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7Z"/><path d="M5 20h14"/></svg>',
-  car:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2v-6l-2-5H5L3 11v6h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/><path d="M9 17h6"/><path d="M5 11h14"/></svg>'
+  car:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 17h2v-6l-2-5H5L3 11v6h2"/><circle cx="7" cy="17" r="2"/><circle cx="15" cy="17" r="2"/><path d="M9 17h4"/><path d="M19 3v3"/><path d="M17.5 4.5h3"/></svg>'
 };
 
 const BANNED_VEHICLES = [
@@ -563,6 +563,11 @@ section.section{ margin-bottom:40px; scroll-margin-top:100px; }
 .motm-card-logs{ font-family:var(--font-display); font-weight:700; font-size:24px; text-align:center; color:var(--accent-gold); }
 
 /* ---------- BANNED VEHICLES ---------- */
+#banned-list{ max-height:560px; overflow-y:auto; padding-right:10px; scrollbar-width:thin; scrollbar-color:var(--line-bright) transparent; }
+#banned-list::-webkit-scrollbar{ width:8px; }
+#banned-list::-webkit-scrollbar-track{ background:transparent; }
+#banned-list::-webkit-scrollbar-thumb{ background:var(--line-bright); border-radius:8px; }
+#banned-list::-webkit-scrollbar-thumb:hover{ background:var(--accent); }
 .banned-level-group{ margin-bottom:30px; }
 .banned-level-group.search-hidden{ display:none; }
 .banned-level-heading{ display:flex; align-items:center; gap:9px; font-family:var(--font-display); font-weight:700; font-size:16px; margin-bottom:10px; }
@@ -941,8 +946,17 @@ function num(v){
   // or "31.12.1899" — that's not a real log count, so treat it as unusable
   // instead of silently mangling it into some other number.
   if(/^\d{1,2}[.\/]\d{1,2}[.\/]\d{2,4}$/.test(s)) return null;
-  const n = parseFloat(s.replace(/[^0-9.\-]/g,''));
-  return isNaN(n) ? null : n;
+  // Some locales write decimals with a comma ("1,5") — treat a single
+  // comma as a decimal point rather than stripping it, which previously
+  // turned "1,5" into the digits "15" or worse, a huge garbled number.
+  const normalized = (s.match(/,/g)||[]).length === 1 ? s.replace(',', '.') : s;
+  const n = parseFloat(normalized.replace(/[^0-9.\-]/g,''));
+  if(isNaN(n)) return null;
+  // A genuine log count is never this large — a value this big is almost
+  // always a mangled date-serial number (e.g. a cell that got reformatted
+  // as a date), so treat it as unusable rather than plotting it.
+  if(Math.abs(n) > 30) return null;
+  return n;
 }
 function parseDate(s){
   if(!s) return null;
