@@ -58,7 +58,225 @@ const ICONS = {
   sun:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>',
   chart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>',
   group: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
-  crown: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7Z"/><path d="M5 20h14"/></svg>'
+  crown: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7Z"/><path d="M5 20h14"/></svg>',
+  car:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2v-6l-2-5H5L3 11v6h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/><path d="M9 17h6"/><path d="M5 11h14"/></svg>'
+};
+
+const BANNED_VEHICLES = [
+  { level:'Level 1', name:'1981 Bayro W10', note:'' },
+  { level:'Level 1', name:'1983 Wynne Model-12', note:'DualTurbo trim only' },
+  { level:'Level 1', name:'1992 Okaura 300RS', note:'' },
+  { level:'Level 1', name:'2002 Navara Horizon GT-R Series-II', note:'' },
+  { level:'Level 1', name:'2003 Lotus Esprit', note:'' },
+  { level:'Level 1', name:'2005 Falcon Heritage', note:'' },
+  { level:'Level 1', name:'2007 Marlin Motors Velindre', note:'' },
+  { level:'Level 1', name:'2009 Navara Horizon', note:'' },
+  { level:'Level 1', name:'2010 SirRodgers Zenith', note:'' },
+  { level:'Level 1', name:'2012 Surrey Renaissance', note:'' },
+  { level:'Level 1', name:'2013 Jaguar XK', note:'' },
+  { level:'Level 1', name:'2014 Stuttgart-Sport Falke', note:'' },
+  { level:'Level 1', name:'2015 Maranello MM', note:'' },
+  { level:'Level 1', name:'2015 Jaguar XF', note:'' },
+  { level:'Level 1', name:'2017 Chevy Guardian', note:'SS Oppressor trim only' },
+  { level:'Level 1', name:'2017 Ferdinand Rapido', note:'' },
+  { level:'Level 1', name:'2017 Falcon Stallion', note:'Bellco GT350 & Bellco GT350R Trims only' },
+  { level:'Level 1', name:'2018 Bullhorn Buffalo SFP-10', note:'' },
+  { level:'Level 1', name:'2018 Land Rover Range Rover', note:'' },
+  { level:'Level 1', name:'2018 Renault Mégane R.S.', note:'' },
+  { level:'Level 1', name:'2019 Land Rover Ranger Rover Sport', note:'' },
+  { level:'Level 1', name:'2019 Chevlon Corbeta', note:'TL1 R & RS /TL2 RS/TL3 R & RS & all TZ trims' },
+  { level:'Level 1', name:'2019 Leland LCS-V', note:'' },
+  { level:'Level 1', name:'2020 Bayro Hofemeister', note:'M Trim only' },
+  { level:'Level 1', name:'2020 BKM/Bayro risen roadster', note:'' },
+  { level:'Level 1', name:'2020 BKM/Bayro Y50 W', note:'' },
+  { level:'Level 1', name:'2020 BKM/Bayro  Y60 W', note:'' },
+  { level:'Level 1', name:'2020 Marlin Motors Vivacite E', note:'' },
+  { level:'Level 1', name:'2020 Lotus Evora', note:'' },
+  { level:'Level 1', name:'2021 BKM/Bayro W30', note:'' },
+  { level:'Level 1', name:'2021 BKM/Bayro W30 Wagon', note:'' },
+  { level:'Level 1', name:'2021 Simple Atmos', note:'Jetspeed, Mirage' },
+  { level:'Level 1', name:'2021 BKM/Bayro Regen M', note:'' },
+  { level:'Level 1', name:'2021 BKM/Bayro Regen M Touring', note:'' },
+  { level:'Level 1', name:'2021 Bovine Pueblo- **Fury Trim**', note:'' },
+  { level:'Level 1', name:'2021 Chevlon Amigo', note:'TZR Trim only' },
+  { level:'Level 1', name:'2021 BKM/Bayro  Donner M', note:'' },
+  { level:'Level 1', name:'2021 BKM/Bayro  Donner M convertible', note:'' },
+  { level:'Level 1', name:'2021 Bullhorn Pueblo SFP', note:'Fury trim only' },
+  { level:'Level 1', name:'2021 Stuttgart Vierturig', note:'All 63s trims' },
+  { level:'Level 1', name:'2021 Chevlon Corbeta Manta', note:'' },
+  { level:'Level 1', name:'2021 Marlin Motors Bristol', note:'' },
+  { level:'Level 1', name:'2021 SirRodgers Specter SWB&LWB', note:'' },
+  { level:'Level 1', name:'2021 Falcon Stallion', note:'Bellco GT500 trim only' },
+  { level:'Level 1', name:'2022 BKM/Bayro Hofemeister', note:'M and CS Trims only' },
+  { level:'Level 1', name:'2022 RELOAD Voltage', note:'' },
+  { level:'Level 1', name:'2022 BullHorn Buffalo T-Wex', note:'' },
+  { level:'Level 1', name:'2022 Celestial Type-5', note:'' },
+  { level:'Level 1', name:'2022 Mauntley National GT', note:'' },
+  { level:'Level 1', name:'2022 Ferdinand Rapido GT3', note:'' },
+  { level:'Level 1', name:'2022 Ferdinand Rapido Coupe', note:'Turbo S trim only' },
+  { level:'Level 1', name:'2022 Mauntley Windsor', note:'' },
+  { level:'Level 1', name:'2022 Mauntley Windsor EWB', note:'' },
+  { level:'Level 1', name:'2022 Century Nebula 500', note:'' },
+  { level:'Level 1', name:'2023 Takeo Experience', note:'' },
+  { level:'Level 1', name:'2023 Ferdinand Snapper GT4 and GTS trims', note:'' },
+  { level:'Level 1', name:'2023 Bullhorn Determinator', note:'Nightmare & SFP Fury Redeye & SFP Fury & SFP Fury Redeye Widebody & Super Stock' },
+  { level:'Level 1', name:'2023 Stuttgart Munster', note:'63 Performance Night Pack & 63 Performance only' },
+  { level:'Level 1', name:'2023 Simple Atmos Sapphire', note:'' },
+  { level:'Level 1', name:'2023 Bandit Advance Beast', note:'Rawr trims only' },
+  { level:'Level 1', name:'2023 Bullhorn Prancer', note:'SFP Fury Widebody & SFP Fury & SFP Fury Redeye Blackjack Widebody & TR/392 Scotty Wideboy' },
+  { level:'Level 1', name:'2023 BKM/Bayro  Regen M Touring', note:'' },
+  { level:'Level 1', name:'2023 Chevlon Corbeta Manta Z06', note:'' },
+  { level:'Level 1', name:'2024 Chevlon Coberta Manta E-ray', note:'' },
+  { level:'Level 1', name:'2023 Bovine Prancer- **Fury Trim**', note:'' },
+  { level:'Level 1', name:'2024 BKM/Bayro W70', note:'' },
+  { level:'Level 1', name:'2024 Lotus Emira', note:'' },
+  { level:'Level 1', name:'2025 BKM/Bayro  Y50 W', note:'' },
+  { level:'Level 1', name:'2025 BKM/Bayro  Y60 W', note:'' },
+  { level:'Level 1', name:'2025 BKM/Bayro  W20 Z', note:'' },
+  { level:'Level 1', name:'2025 Bayro Series 40 Grand Tourer', note:'' },
+  { level:'Level 1', name:'2025 Bayro e40', note:'' },
+  { level:'Level 1', name:'2025 Elektrisk Pluto', note:'Pasadena Trim' },
+  { level:'Level 1', name:'2025 Land Rover Defender', note:'' },
+  { level:'Level 1', name:'2025 Stuttgart E-Saloon 053', note:'' },
+  { level:'Level 1', name:'2026 Western Protogen', note:'' },
+  { level:'Level 1', name:'2026 Western Protogen-X', note:'' },
+  { level:'Level 1', name:'2026 Western Segal', note:'convertible included' },
+  { level:'Level 1', name:'2022 Alfa Romeo Giulia Quadrifoglio', note:'' },
+  { level:'Level 1', name:'2023 Alfa Romeo Stelvio Quadrifoglio', note:'' },
+  { level:'Level 1', name:'1974 Lancia Stratos HF Stradale', note:'' },
+  { level:'Level 1', name:'1992 Lancia Delta HF Integrale Evoluzione I', note:'' },
+  { level:'Level 2', name:'1964 BITSY Classic "Mr Grain"', note:'' },
+  { level:'Level 2', name:'1967 Silhouette Veloce', note:'' },
+  { level:'Level 2', name:'1986 Silhouette Attraente', note:'' },
+  { level:'Level 2', name:'1988 Silhouette Attraente', note:'' },
+  { level:'Level 2', name:'1994 Jaguar XJ220', note:'' },
+  { level:'Level 2', name:'2006 Ferdinand Ultima', note:'' },
+  { level:'Level 2', name:'2007 panini Ostro', note:'' },
+  { level:'Level 2', name:'2007 Stuttgart GT Surrey', note:'' },
+  { level:'Level 2', name:'2007 Ferdinand Ultima', note:'' },
+  { level:'Level 2', name:'2008 Ferdinand Ultima', note:'' },
+  { level:'Level 2', name:'2010 Marlin Motors GT', note:'' },
+  { level:'Level 2', name:'2010 Marlin Motors GTS', note:'' },
+  { level:'Level 2', name:'2010 Marlin Motors Vivacite', note:'' },
+  { level:'Level 2', name:'2011 Silhouette Gioiosa Spyder', note:'' },
+  { level:'Level 2', name:'2011 Silhouette Gioiosa', note:'' },
+  { level:'Level 2', name:'2012 Marlin Motors Veloce', note:'' },
+  { level:'Level 2', name:'2013 Maranello Catania', note:'' },
+  { level:'Level 2', name:'2014 Marlin Motors GT', note:'' },
+  { level:'Level 2', name:'2014 Marlin Motors Vivacite S', note:'' },
+  { level:'Level 2', name:'2015 Silhouette Carbon Sporca', note:'' },
+  { level:'Level 2', name:'2016 Marlin Motors Velindre', note:'' },
+  { level:'Level 2', name:'2016 Surrey LT-500', note:'' },
+  { level:'Level 2', name:'2016 Surrey S-350', note:'' },
+  { level:'Level 2', name:'2017 Navara Horizon', note:'' },
+  { level:'Level 2', name:'2017 BullHorn SFP Python', note:'' },
+  { level:'Level 2', name:'2017 Skane Rusa', note:'' },
+  { level:'Level 2', name:'2018 Marlin Motors Vivacite R', note:'' },
+  { level:'Level 2', name:'2018 Skane Rusa', note:'' },
+  { level:'Level 2', name:'2019 Durant Manta HEEN1000', note:'' },
+  { level:'Level 2', name:'2020 Durant Camion HEEN', note:'' },
+  { level:'Level 2', name:'2020 Surrey Speedlet', note:'' },
+  { level:'Level 2', name:'2020 Falcon Heritage', note:'' },
+  { level:'Level 2', name:'2021 Surrey Grand Tourer', note:'' },
+  { level:'Level 2', name:'2021 Audi R8 V10 Spyder', note:'' },
+  { level:'Level 2', name:'2022 Mauntley Soarer', note:'' },
+  { level:'Level 2', name:'2022 Mauntley Cardiff Alpine Summit', note:'' },
+  { level:'Level 2', name:'2022 Mauntley Cardiff', note:'' },
+  { level:'Level 2', name:'2022 SirRodgers Constellation', note:'' },
+  { level:'Level 2', name:'2022 Celestial Type-7', note:'' },
+  { level:'Level 2', name:'2022 Skane Rundtur', note:'' },
+  { level:'Level 2', name:'2022 Western SYNTHTAUR', note:'' },
+  { level:'Level 2', name:'2022 BKM/Bayro Series20 \'Teenage Dream\'', note:'' },
+  { level:'Level 2', name:'2022 BKM/Bayro W40', note:'' },
+  { level:'Level 2', name:'2023 Ferdinand Vivo', note:'Lusso trim only' },
+  { level:'Level 2', name:'2023 Barchetta Corsica', note:'' },
+  { level:'Level 2', name:'2023 Bandit Advance Bellco SS', note:'' },
+  { level:'Level 2', name:'2023 Surrey Ripon', note:'' },
+  { level:'Level 2', name:'2023 Silhouette Rinoceronte', note:'' },
+  { level:'Level 2', name:'2023 NVNA Acesera', note:'' },
+  { level:'Level 2', name:'2023 NVNAsport Acesera', note:'' },
+  { level:'Level 2', name:'2023 Audi RS 5', note:'' },
+  { level:'Level 2', name:'2023 BKM/Bayro e40', note:'' },
+  { level:'Level 2', name:'2024 SirRodgers Appiration', note:'' },
+  { level:'Level 2', name:'2024 Silhouette Tifon', note:'' },
+  { level:'Level 2', name:'2024 Simple Atmos', note:'' },
+  { level:'Level 2', name:'2024 Colin Commander', note:'' },
+  { level:'Level 2', name:'2024 Chiara Vincenzo', note:'' },
+  { level:'Level 2', name:'2024 Audi RS 7', note:'' },
+  { level:'Level 2', name:'2025 Bayro W40', note:'' },
+  { level:'Level 2', name:'2025 Celestial Type-FS', note:'' },
+  { level:'Level 2', name:'2025 Celestial Type-FT', note:'' },
+  { level:'Level 2', name:'2025 Elektrisk Pluto', note:'Monterey Trim' },
+  { level:'Level 2', name:'2025 Audi RS Q8', note:'' },
+  { level:'Level 2', name:'2025 Audi RS 6 Avant', note:'' },
+  { level:'Level 2', name:'2025 Lawn-King G50X Supper Bagger', note:'' },
+  { level:'Level 2', name:'All limited or event vehicles', note:'' },
+  { level:'Level 2', name:'All HEEN/DOGG Vehicles', note:'' },
+  { level:'Level 2', name:'All Plaid Vehicles', note:'' },
+  { level:'Level 2', name:'2021 Alfa romeo Giulia GTAm', note:'' },
+  { level:'Level 2', name:'2009 Alfa Romeo 8C Competizione', note:'' },
+  { level:'Level 3', name:'All limos', note:'Special RP usage only' },
+  { level:'Level 3', name:'2006 BITSY Classic Trophy Truck', note:'' },
+  { level:'Level 3', name:'2006 Pagani Zonda Roadster F', note:'' },
+  { level:'Level 3', name:'2015 Zephyr Vicieux', note:'' },
+  { level:'Level 3', name:'2015 Silhouette Carbon', note:'' },
+  { level:'Level 3', name:'2017 Stuttgart Jogger Limo', note:'' },
+  { level:'Level 3', name:'2017 Stuttgart Jogger 2500', note:'' },
+  { level:'Level 3', name:'2020 BullHorn SuperCarrier', note:'' },
+  { level:'Level 3', name:'2020 Durant Voyager', note:'Can only be used for the campsite RP' },
+  { level:'Level 3', name:'2020 Surrey Speedlet', note:'' },
+  { level:'Level 3', name:'2022 Celestial Type-5 “Reactive Series”', note:'' },
+  { level:'Level 3', name:'2023 Falcon Advance', note:'Palladium Off-Road Camper opt.' },
+  { level:'Level 3', name:'Western Hawk Go-Kart', note:'' },
+  { level:'Level 3', name:'2023 Western Kobold Go-Kart', note:'' },
+  { level:'Level 3', name:'2024 Chiara 006', note:'' },
+  { level:'Level 3', name:'2025 Renault 5 Turbo 3E', note:'' },
+  { level:'Level 3', name:'2026 NVNA Opus', note:'' },
+  { level:'Level 4', name:'1959 Leland Series 67 Skyview Ecto', note:'' },
+  { level:'Level 4', name:'1988 Arrow Phoenix Dimensional Traveler', note:'' },
+  { level:'Level 4', name:'1996 Globe City MegaCity', note:'' },
+  { level:'Level 4', name:'2005 Leland DeRoute Hearse', note:'' },
+  { level:'Level 4', name:'2005 Saleen S7', note:'' },
+  { level:'Level 4', name:'2006 Saleen S7', note:'' },
+  { level:'Level 4', name:'2007 Falcon Prime Police Interceptor WSP', note:'Taxi trim only' },
+  { level:'Level 4', name:'2007 Falcon Prime Police Interceptor Decom Two-Tone', note:'' },
+  { level:'Level 4', name:'2007 Falcon Prime Police Interceptor Decom', note:'' },
+  { level:'Level 4', name:'2008 Eezee Ziggy', note:'' },
+  { level:'Level 4', name:'2010 Eezee GML', note:'' },
+  { level:'Level 4', name:'2010 Eezee GML E', note:'' },
+  { level:'Level 4', name:'2012 Wave Traveller Custom "Land Yacht" - level 4', note:'can be used for RP purposes only by all citizens' },
+  { level:'Level 4', name:'2013 Falcon Scavenger \'Utility Decom\'', note:'' },
+  { level:'Level 4', name:'2013 Vellfire GC', note:'' },
+  { level:'Level 4', name:'2013 Avanta Zeta', note:'' },
+  { level:'Level 4', name:'2014 Lawn-King G50X -', note:'can be used for RP purposes only by all citizens' },
+  { level:'Level 4', name:'2015 Chevlon Guardian', note:'All trims banned for civilians' },
+  { level:'Level 4', name:'2015 Ramsey 50', note:'' },
+  { level:'Level 4', name:'2017 Chevlon Guardian', note:'All trims banned from civilians, except the \'SS Oppressor trim\' which is level 1' },
+  { level:'Level 4', name:'2017 Saleen S7 LM', note:'' },
+  { level:'Level 4', name:'2017 Pagani Huayra Roadster', note:'' },
+  { level:'Level 4', name:'2017 Pagani Zonda HP Barchetta', note:'' },
+  { level:'Level 4', name:'2018 Caseus Tera', note:'' },
+  { level:'Level 4', name:'2019 Durant manta H1300', note:'' },
+  { level:'Level 4', name:'2019 Leland LCS Hearse', note:'' },
+  { level:'Level 4', name:'2020 BKM Series Wagon Polizei', note:'' },
+  { level:'Level 4', name:'2021 Falcon Scavenger \'Police Interceptor\'', note:'' },
+  { level:'Level 4', name:'2022 BMW IX Ivy Trim', note:'' },
+  { level:'Level 4', name:'2023 Celestial Type-1', note:'' },
+  { level:'Level 4', name:'2024 Shizuoka Alliance Milwaukee Edition', note:'' },
+  { level:'Level 4', name:'2026 Eezee GML', note:'' },
+  { level:'Level 4', name:'Fox Mountain Ranger', note:'' },
+  { level:'Level 4', name:'Mega Cart v2.0', note:'' },
+  { level:'Level 4', name:'Halloween Event \'Pumpkin Car\'', note:'' },
+  { level:'Level 4', name:'Winter Sleigh Event Vehicle', note:'' },
+  { level:'Level 4', name:'Fox Mountain Motors SLK-6789', note:'' },
+  { level:'Level 4', name:'Fox Mountain Motors Vertex', note:'' },
+  { level:'Perm Banned', name:'Job Application', note:'' },
+  { level:'Perm Banned', name:'Wheelchair', note:'' },
+  { level:'Perm Banned', name:'Pumpkin Car', note:'' },
+  { level:'Perm Banned', name:'Polar Customs SuperSleigh', note:'' },
+];
+const BANNED_VEHICLE_NOTES = {
+  'Level 1': 'Drifting tires are also banned. Driving any vehicle with unrealistic features, such as shooting fire or similar effects, is not allowed.',
 };
 </script>
 
@@ -129,7 +347,7 @@ body::-webkit-scrollbar{ display:none; width:0; height:0; }
 .roster-search-pill .search-icon{ width:14px; height:14px; flex-shrink:0; color:var(--text-dim); }
 .roster-search-pill input{ border:none; outline:none; background:transparent; color:var(--text); font-family:var(--font-body); font-size:12.5px; width:130px; }
 .roster-search-pill input::placeholder{ color:var(--text-dim); }
-.card.search-hidden{ display:none; }
+.card.search-hidden, .electric-wrap.search-hidden{ display:none; }
 
 .icon{ display:inline-flex; width:18px; height:18px; flex-shrink:0; vertical-align:middle; }
 .icon svg{ width:100%; height:100%; display:block; }
@@ -343,6 +561,25 @@ section.section{ margin-bottom:40px; scroll-margin-top:100px; }
 .motm-card-date{ font-size:11.5px; color:var(--text-dim); margin-top:1px; }
 .motm-card .card-hr{ margin:13px 0; }
 .motm-card-logs{ font-family:var(--font-display); font-weight:700; font-size:24px; text-align:center; color:var(--accent-gold); }
+
+/* ---------- BANNED VEHICLES ---------- */
+.banned-level-group{ margin-bottom:30px; }
+.banned-level-group.search-hidden{ display:none; }
+.banned-level-heading{ display:flex; align-items:center; gap:9px; font-family:var(--font-display); font-weight:700; font-size:16px; margin-bottom:10px; }
+.banned-level-count{ font-family:var(--font-body); font-weight:600; font-size:11px; color:var(--text-dim); background:var(--bg-elevated); border:1px solid var(--line-bright); border-radius:999px; padding:2px 9px; }
+.banned-level-note{ font-size:12px; color:var(--text-dim); margin:-4px 0 12px; line-height:1.5; max-width:720px; }
+.banned-grid{ grid-template-columns:repeat(auto-fill, minmax(210px,1fr)); }
+.banned-card{ position:relative; background:var(--bg-card); border:1px solid var(--line); border-radius:14px; padding:14px 15px; transition:border-color .2s, transform .2s; }
+.banned-card:hover{ border-color:var(--accent); transform:translateY(-2px); }
+.banned-card.search-hidden{ display:none; }
+.banned-badge{ display:inline-block; font-family:var(--font-display); font-weight:800; font-size:10px; letter-spacing:.05em; padding:3px 8px; border-radius:6px; margin-bottom:9px; }
+.banned-badge.lvl1{ background:rgba(61,220,151,0.15); color:var(--accent-bright); }
+.banned-badge.lvl2{ background:rgba(232,184,75,0.15); color:var(--accent-gold); }
+.banned-badge.lvl3{ background:rgba(255,158,90,0.15); color:#ff9e5a; }
+.banned-badge.lvl4{ background:rgba(217,96,90,0.15); color:var(--accent-danger); }
+.banned-badge.lvlperm{ background:rgba(217,96,90,0.28); color:#ff6b61; }
+.banned-name{ font-size:13.5px; font-weight:600; line-height:1.35; }
+.banned-note{ font-size:11.5px; font-style:italic; color:var(--text-dim); margin-top:5px; line-height:1.4; }
 .motm-card-logs .unit{ font-size:11px; color:var(--text-dim); font-weight:500; margin-left:6px; }
 
 footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px; }
@@ -397,6 +634,7 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
         <a href="#graph-section"><span class="icon" data-icon="chart"></span>Logs Graph</a>
         <a href="#roster-section"><span class="icon" data-icon="group"></span>Roster</a>
         <a href="#motm-section"><span class="icon" data-icon="crown"></span>Host Of The Month</a>
+        <a href="#banned-section"><span class="icon" data-icon="car"></span>Banned Vehicles</a>
       </nav>
       <div class="who">
         <div class="name">Signed in as <b id="who-name" class="shiny-text">—</b></div>
@@ -444,6 +682,20 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
     <section class="section" id="motm-section">
       <div class="section-head"><div class="section-title shiny-text"><span class="icon" data-icon="crown"></span> Host Of The Month</div></div>
       <div class="cards-grid" id="motm-list"></div>
+    </section>
+
+    <section class="section" id="banned-section">
+      <div class="section-head">
+        <div class="section-title shiny-text"><span class="icon" data-icon="car"></span> Banned Vehicles</div>
+        <div class="roster-head-right">
+          <div class="roster-search-pill">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="text" id="banned-search" placeholder="Search vehicles…">
+          </div>
+          <div class="eyebrow" id="banned-caption"></div>
+        </div>
+      </div>
+      <div id="banned-list"></div>
     </section>
 
     <footer>
@@ -1405,7 +1657,13 @@ function applyRosterSearch(){
   if(!input) return;
   const q = input.value.trim().toLowerCase();
   document.querySelectorAll('#cards-grid .card').forEach(card=>{
-    card.classList.toggle('search-hidden', !!q && !card.dataset.username.includes(q));
+    const hide = !!q && !card.dataset.username.includes(q);
+    // Electric-border cards (Host Manager / Host Lead / top logger) are
+    // wrapped in an extra .electric-wrap div, which is the ACTUAL grid
+    // item — hiding only the inner .card left an invisible hole in the
+    // grid instead of collapsing, since the wrapper was still there.
+    const gridItem = card.closest('.electric-wrap') || card;
+    gridItem.classList.toggle('search-hidden', hide);
   });
 }
 document.getElementById('roster-search').addEventListener('input', applyRosterSearch);
@@ -1436,6 +1694,50 @@ function renderMotm(){
 }
 
 function renderAll(){ renderPill(); renderChart(); renderCards(); renderMotm(); }
+
+/* ---------------- RENDER: BANNED VEHICLES (static, not sheet-driven) ---------------- */
+const BANNED_LEVEL_CLASS = {
+  'Level 1':'lvl1', 'Level 2':'lvl2', 'Level 3':'lvl3', 'Level 4':'lvl4', 'Perm Banned':'lvlperm'
+};
+function renderBannedVehicles(){
+  const el = document.getElementById('banned-list');
+  if(!el) return;
+  const order = ['Level 1','Level 2','Level 3','Level 4','Perm Banned'];
+  el.innerHTML = order.map(level=>{
+    const items = BANNED_VEHICLES.filter(v=>v.level===level);
+    if(!items.length) return '';
+    const note = BANNED_VEHICLE_NOTES[level] ? `<div class="banned-level-note">${BANNED_VEHICLE_NOTES[level]}</div>` : '';
+    const cards = items.map(v=>`
+      <div class="banned-card" data-search="${(v.name+' '+v.note).toLowerCase()}">
+        <span class="banned-badge ${BANNED_LEVEL_CLASS[level]}">${level === 'Perm Banned' ? 'PERM' : level.replace('Level ','LVL ')}</span>
+        <div class="banned-name">${v.name}</div>
+        ${v.note ? `<div class="banned-note">${v.note}</div>` : ''}
+      </div>`).join('');
+    return `
+      <div class="banned-level-group" data-level="${level}">
+        <div class="banned-level-heading">${level}<span class="banned-level-count">${items.length}</span></div>
+        ${note}
+        <div class="cards-grid banned-grid">${cards}</div>
+      </div>`;
+  }).join('');
+  document.getElementById('banned-caption').textContent = `${BANNED_VEHICLES.length} vehicles`;
+}
+function applyBannedSearch(){
+  const input = document.getElementById('banned-search');
+  if(!input) return;
+  const q = input.value.trim().toLowerCase();
+  document.querySelectorAll('.banned-level-group').forEach(group=>{
+    let visibleCount = 0;
+    group.querySelectorAll('.banned-card').forEach(card=>{
+      const hide = !!q && !card.dataset.search.includes(q);
+      card.classList.toggle('search-hidden', hide);
+      if(!hide) visibleCount++;
+    });
+    group.classList.toggle('search-hidden', visibleCount === 0);
+  });
+}
+document.getElementById('banned-search').addEventListener('input', applyBannedSearch);
+renderBannedVehicles(); // static data — doesn't need to wait for the sheet or login
 
 /* ---------------- LOAD DATA ---------------- */
 function boot(rows, isDemo){
