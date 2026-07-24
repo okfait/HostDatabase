@@ -59,7 +59,7 @@ const ICONS = {
   chart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>',
   group: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
   crown: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7Z"/><path d="M5 20h14"/></svg>',
-  car:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 17h2v-6l-2-5H5L3 11v6h2"/><circle cx="7" cy="17" r="2"/><circle cx="15" cy="17" r="2"/><path d="M9 17h4"/><path d="M19 3v3"/><path d="M17.5 4.5h3"/></svg>'
+  car:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 17h2v-6l-2-5H5L3 11v6h2"/><circle cx="7" cy="17" r="2"/><circle cx="15" cy="17" r="2"/><path d="M9 17h4"/><path d="M4 11h1.5M18.5 11H20"/><path d="m1.5 6 2 1.5-1 2.2M22.5 6l-2 1.5 1 2.2"/></svg>'
 };
 
 const BANNED_VEHICLES = [
@@ -276,7 +276,7 @@ const BANNED_VEHICLES = [
   { level:'Perm Banned', name:'Polar Customs SuperSleigh', note:'' },
 ];
 const BANNED_VEHICLE_NOTES = {
-  'Level 1': 'Drifting tires are also banned. Driving any vehicle with unrealistic features, such as shooting fire or similar effects, is not allowed.',
+  'Level 1': 'Drifting tires are also banned.',
 };
 </script>
 
@@ -347,7 +347,9 @@ body::-webkit-scrollbar{ display:none; width:0; height:0; }
 .roster-search-pill .search-icon{ width:14px; height:14px; flex-shrink:0; color:var(--text-dim); }
 .roster-search-pill input{ border:none; outline:none; background:transparent; color:var(--text); font-family:var(--font-body); font-size:12.5px; width:130px; }
 .roster-search-pill input::placeholder{ color:var(--text-dim); }
+.card, .electric-wrap{ transition:opacity .28s ease, transform .28s ease; }
 .card.search-hidden, .electric-wrap.search-hidden{ display:none; }
+.card.search-fade, .electric-wrap.search-fade{ opacity:0; transform:scale(.94); pointer-events:none; }
 
 .icon{ display:inline-flex; width:18px; height:18px; flex-shrink:0; vertical-align:middle; }
 .icon svg{ width:100%; height:100%; display:block; }
@@ -563,7 +565,7 @@ section.section{ margin-bottom:40px; scroll-margin-top:100px; }
 .motm-card-logs{ font-family:var(--font-display); font-weight:700; font-size:24px; text-align:center; color:var(--accent-gold); }
 
 /* ---------- BANNED VEHICLES ---------- */
-#banned-list{ max-height:560px; overflow-y:auto; padding-right:10px; scrollbar-width:thin; scrollbar-color:var(--line-bright) transparent; }
+#banned-list{ max-height:560px; overflow-y:auto; overscroll-behavior:contain; padding-right:10px; scrollbar-width:thin; scrollbar-color:var(--line-bright) transparent; }
 #banned-list::-webkit-scrollbar{ width:8px; }
 #banned-list::-webkit-scrollbar-track{ background:transparent; }
 #banned-list::-webkit-scrollbar-thumb{ background:var(--line-bright); border-radius:8px; }
@@ -719,7 +721,7 @@ let LENIS = null;
 if(window.Lenis){
   LENIS = new Lenis({
     duration: 1.1, smoothWheel: true, anchors: true,
-    prevent: (node) => !!(node && node.closest && node.closest('.dropdown-menu'))
+    prevent: (node) => !!(node && node.closest && node.closest('.dropdown-menu, #banned-list'))
   });
   function raf(time){ LENIS.raf(time); requestAnimationFrame(raf); }
   requestAnimationFrame(raf);
@@ -937,7 +939,8 @@ let CURRENT_USER = null;
 let CHART = null;
 let SELECTED_SET = new Set(); // usernames "pinned" on the graph — empty = show everyone normally
 
-function num(v){
+function num(v, opts){
+  opts = opts || {};
   if(v===undefined || v===null) return null;
   const s = String(v).trim();
   if(s==='') return null;
@@ -952,10 +955,12 @@ function num(v){
   const normalized = (s.match(/,/g)||[]).length === 1 ? s.replace(',', '.') : s;
   const n = parseFloat(normalized.replace(/[^0-9.\-]/g,''));
   if(isNaN(n)) return null;
-  // A genuine log count is never this large — a value this big is almost
-  // always a mangled date-serial number (e.g. a cell that got reformatted
-  // as a date), so treat it as unusable rather than plotting it.
-  if(Math.abs(n) > 30) return null;
+  // A genuine SINGLE-DAY log count is never this large — a value this big
+  // is almost always a mangled date-serial number (e.g. a cell that got
+  // reformatted as a date), so treat it as unusable rather than plotting it.
+  // Monthly/cumulative totals (Host Of The Month) legitimately go above 30
+  // (e.g. 30.25), so callers pass {allowLarge:true} to skip this cap there.
+  if(!opts.allowLarge && Math.abs(n) > 30) return null;
   return n;
 }
 function parseDate(s){
@@ -985,7 +990,7 @@ function parseSheetRows(rows){
     if(!row) continue;
     const uname = (row[0]||'').trim();
     if(!uname) continue;
-    out.motm.push({ username:uname, logs:num(row[1]), date:(row[2]||'').trim() });
+    out.motm.push({ username:uname, logs:num(row[1], {allowLarge:true}), date:(row[2]||'').trim() });
   }
 
   // Shared date column = E (index 4). Collect every row where E parses as a date.
@@ -1199,7 +1204,7 @@ function parseNewFormat(rows){
         const uname = ((row[sub.ui]||'')+'').trim();
         if(!uname || uname.toLowerCase()==='username') continue;
         const matchedUser = out.users.find(u=>u.username.toLowerCase()===uname.toLowerCase());
-        out.motm.push({ username:uname, logs:num(row[sub.li]), date:((row[sub.di]||'')+'').trim(), pfp: matchedUser ? matchedUser.pfp : '' });
+        out.motm.push({ username:uname, logs:num(row[sub.li], {allowLarge:true}), date:((row[sub.di]||'')+'').trim(), pfp: matchedUser ? matchedUser.pfp : '' });
       }
     }
   }
@@ -1677,7 +1682,25 @@ function applyRosterSearch(){
     // item — hiding only the inner .card left an invisible hole in the
     // grid instead of collapsing, since the wrapper was still there.
     const gridItem = card.closest('.electric-wrap') || card;
-    gridItem.classList.toggle('search-hidden', hide);
+    const wasHidden = gridItem.classList.contains('search-hidden');
+    clearTimeout(gridItem._fadeTimer);
+    if(hide){
+      if(!wasHidden){
+        // Fade out first (opacity+scale), THEN collapse out of the grid
+        // once the transition has had time to play.
+        gridItem.classList.add('search-fade');
+        gridItem._fadeTimer = setTimeout(()=>{ gridItem.classList.add('search-hidden'); }, 280);
+      }
+    } else if(wasHidden){
+      // Was collapsed — bring it back into the grid already faded out,
+      // then release it into a fade-in on the next frame.
+      gridItem.classList.remove('search-hidden');
+      gridItem.classList.add('search-fade');
+      void gridItem.offsetWidth; // force reflow so the fade-in actually animates
+      requestAnimationFrame(()=>{ gridItem.classList.remove('search-fade'); });
+    } else {
+      gridItem.classList.remove('search-fade');
+    }
   });
 }
 document.getElementById('roster-search').addEventListener('input', applyRosterSearch);
