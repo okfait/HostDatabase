@@ -347,9 +347,10 @@ body::-webkit-scrollbar{ display:none; width:0; height:0; }
 .roster-search-pill .search-icon{ width:14px; height:14px; flex-shrink:0; color:var(--text-dim); }
 .roster-search-pill input{ border:none; outline:none; background:transparent; color:var(--text); font-family:var(--font-body); font-size:12.5px; width:130px; }
 .roster-search-pill input::placeholder{ color:var(--text-dim); }
-.card, .electric-wrap{ transition:opacity .28s ease, transform .28s ease; }
-.card.search-hidden, .electric-wrap.search-hidden{ display:none; }
-.card.search-fade, .electric-wrap.search-fade{ opacity:0; transform:scale(.94); pointer-events:none; }
+.card, .electric-wrap, .banned-card{ transition:opacity .28s ease, transform .28s ease; }
+.card.search-hidden, .electric-wrap.search-hidden, .banned-card.search-hidden{ display:none; }
+.card.search-fade, .electric-wrap.search-fade, .banned-card.search-fade{ opacity:0; transform:scale(.94); pointer-events:none; }
+.search-hit{ background:rgba(232,184,75,0.32); color:inherit; border-radius:3px; padding:0 1px; }
 
 .icon{ display:inline-flex; width:18px; height:18px; flex-shrink:0; vertical-align:middle; }
 .icon svg{ width:100%; height:100%; display:block; }
@@ -573,7 +574,7 @@ section.section{ margin-bottom:40px; scroll-margin-top:100px; }
 .motm-card-logs{ font-family:var(--font-display); font-weight:700; font-size:24px; text-align:center; color:var(--accent-gold); }
 
 /* ---------- BANNED VEHICLES ---------- */
-#banned-list{ max-height:560px; overflow-y:auto; overscroll-behavior:contain; padding-right:10px; scrollbar-width:thin; scrollbar-color:var(--line-bright) transparent; }
+#banned-list{ height:560px; overflow-y:auto; overscroll-behavior:contain; padding-right:10px; scrollbar-width:thin; scrollbar-color:var(--line-bright) transparent; }
 #banned-list::-webkit-scrollbar{ width:8px; }
 #banned-list::-webkit-scrollbar-track{ background:transparent; }
 #banned-list::-webkit-scrollbar-thumb{ background:var(--line-bright); border-radius:8px; }
@@ -589,7 +590,7 @@ section.section{ margin-bottom:40px; scroll-margin-top:100px; }
 .banned-level-count{ font-family:var(--font-body); font-weight:600; font-size:11px; color:var(--text-dim); background:var(--bg-elevated); border:1px solid var(--line-bright); border-radius:999px; padding:2px 9px; }
 .banned-level-note{ font-size:12px; color:var(--text-dim); margin:-4px 0 12px; line-height:1.5; max-width:720px; }
 .banned-grid{ grid-template-columns:repeat(auto-fill, minmax(210px,1fr)); }
-.banned-card{ position:relative; background:var(--bg-card); border:1px solid var(--line); border-radius:14px; padding:14px 15px; transition:border-color .2s, transform .2s; }
+.banned-card{ position:relative; background:var(--bg-card); border:1px solid var(--line); border-radius:14px; padding:14px 15px; transition:border-color .2s, transform .28s ease, opacity .28s ease; }
 .banned-card:hover{ border-color:var(--accent); transform:translateY(-2px); }
 .banned-card.search-hidden{ display:none; }
 .banned-badge{ display:inline-block; font-family:var(--font-display); font-weight:800; font-size:10px; letter-spacing:.05em; padding:3px 8px; border-radius:6px; margin-bottom:9px; }
@@ -982,15 +983,23 @@ function num(v, opts){
 }
 function parseDate(s){
   if(!s) return null;
-  const parts = String(s).trim().split('/');
+  // The sheet's date dropdown can display as "2/7/2026" OR "2.7.2026"
+  // (locale-dependent — periods are common in some regions), and the
+  // LogHistory tab just stores whatever text that cell showed at the time.
+  // Splitting on '/' only meant any '.'-style date silently failed to
+  // parse, which dropped that ENTIRE date (and everyone's logs on it —
+  // not just one host's) out of the site invisibly. Accept '/', '.', or
+  // '-' as the separator so no valid date gets lost.
+  const parts = String(s).trim().split(/[\/.\-]/).filter(Boolean);
   if(parts.length!==3) return null;
-  const [d,m,y] = parts.map(x=>parseInt(x,10));
+  let [d,m,y] = parts.map(x=>parseInt(x,10));
   if(!d||!m||!y) return null;
+  if(y < 100) y += 2000; // tolerate a 2-digit year too
   const dt = new Date(y, m-1, d);
   return isNaN(dt.getTime()) ? null : dt;
 }
 function shortLabel(dstr){
-  const p = dstr.split('/');
+  const p = dstr.split(/[\/.\-]/).filter(Boolean);
   if(p.length!==3) return dstr;
   return `${p[0]}/${p[1]}/${p[2].slice(-2)}`;
 }
@@ -1688,37 +1697,95 @@ function renderCards(){
   });
   applyRosterSearch();
 }
+/* ---------------- shared FLIP-style "slide to new spot" animation ----------------
+   When a card leaves/re-enters the grid, everyone ELSE still visible often
+   shifts to a new row/column as the grid reflows. Instead of letting that
+   happen as an instant jump, we snapshot every visible item's position
+   right before the layout changes ("First"), let the layout change happen,
+   then snapshot again ("Last"), and animate the visual gap between the two
+   with a transform — so cards visibly slide into their new spot. */
+function flipSnapshot(items){
+  const rects = new Map();
+  items.forEach(el=>{ if(!el.classList.contains('search-hidden')) rects.set(el, el.getBoundingClientRect()); });
+  return rects;
+}
+function flipPlay(firstRects, items, duration=380){
+  const moved = [];
+  items.forEach(el=>{
+    if(el.classList.contains('search-hidden')) return;
+    const first = firstRects.get(el);
+    if(!first) return; // wasn't visible beforehand — just let it fade in in place
+    const last = el.getBoundingClientRect();
+    const dx = first.left - last.left, dy = first.top - last.top;
+    if(Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+    el.style.transition = 'none';
+    el.style.transform = `translate(${dx}px, ${dy}px)`;
+    moved.push(el);
+  });
+  if(!moved.length) return;
+  void document.body.offsetWidth; // force the browser to apply the inverted position before we animate away from it
+  requestAnimationFrame(()=>{
+    moved.forEach(el=>{ el.style.transition = `transform ${duration}ms cubic-bezier(.22,1,.36,1)`; el.style.transform = ''; });
+    setTimeout(()=>{ moved.forEach(el=>{ el.style.transition = ''; el.style.transform = ''; }); }, duration + 40);
+  });
+}
+
 function applyRosterSearch(){
   const input = document.getElementById('roster-search');
   if(!input) return;
   const q = input.value.trim().toLowerCase();
-  document.querySelectorAll('#cards-grid .card').forEach(card=>{
+  const cards = Array.from(document.querySelectorAll('#cards-grid .card'));
+  // Electric-border cards (Host Manager / Host Lead / top logger) are
+  // wrapped in an extra .electric-wrap div, which is the ACTUAL grid
+  // item — hiding only the inner .card left an invisible hole in the
+  // grid instead of collapsing, since the wrapper was still there.
+  const gridItemFor = card => card.closest('.electric-wrap') || card;
+  const allGridItems = [...new Set(cards.map(gridItemFor))];
+
+  const firstRects = flipSnapshot(allGridItems);
+  clearTimeout(applyRosterSearch._fadeTimer);
+  const leaving = [];
+  const entering = [];
+
+  cards.forEach(card=>{
+    const gridItem = gridItemFor(card);
     const hide = !!q && !card.dataset.username.includes(q);
-    // Electric-border cards (Host Manager / Host Lead / top logger) are
-    // wrapped in an extra .electric-wrap div, which is the ACTUAL grid
-    // item — hiding only the inner .card left an invisible hole in the
-    // grid instead of collapsing, since the wrapper was still there.
-    const gridItem = card.closest('.electric-wrap') || card;
     const wasHidden = gridItem.classList.contains('search-hidden');
-    clearTimeout(gridItem._fadeTimer);
     if(hide){
-      if(!wasHidden){
-        // Fade out first (opacity+scale), THEN collapse out of the grid
-        // once the transition has had time to play.
+      if(!wasHidden && !gridItem.classList.contains('search-fade')){
         gridItem.classList.add('search-fade');
-        gridItem._fadeTimer = setTimeout(()=>{ gridItem.classList.add('search-hidden'); }, 280);
+        leaving.push(gridItem);
       }
     } else if(wasHidden){
-      // Was collapsed — bring it back into the grid already faded out,
-      // then release it into a fade-in on the next frame.
-      gridItem.classList.remove('search-hidden');
-      gridItem.classList.add('search-fade');
-      void gridItem.offsetWidth; // force reflow so the fade-in actually animates
-      requestAnimationFrame(()=>{ gridItem.classList.remove('search-fade'); });
+      entering.push(gridItem);
     } else {
       gridItem.classList.remove('search-fade');
     }
   });
+
+  // Cards coming back into view re-enter the grid flow right away (still
+  // invisible via .search-fade), then everyone still visible slides into
+  // their new spot, and finally the returning card fades in in place.
+  entering.forEach(gridItem=>{ gridItem.classList.remove('search-hidden'); gridItem.classList.add('search-fade'); });
+  if(entering.length){
+    requestAnimationFrame(()=>{
+      flipPlay(firstRects, allGridItems);
+      entering.forEach(gridItem=>{
+        void gridItem.offsetWidth;
+        requestAnimationFrame(()=>{ gridItem.classList.remove('search-fade'); });
+      });
+    });
+  }
+
+  // Cards leaving view fade out first, THEN actually collapse out of the
+  // grid — and everyone left slides smoothly into the gap they leave behind.
+  if(leaving.length){
+    applyRosterSearch._fadeTimer = setTimeout(()=>{
+      const before = flipSnapshot(allGridItems);
+      leaving.forEach(gridItem=> gridItem.classList.add('search-hidden'));
+      requestAnimationFrame(()=> flipPlay(before, allGridItems));
+    }, 280);
+  }
 }
 document.getElementById('roster-search').addEventListener('input', applyRosterSearch);
 
@@ -1749,6 +1816,51 @@ function renderMotm(){
 
 function renderAll(){ renderPill(); renderChart(); renderCards(); renderMotm(); }
 
+/* ---------------- fuzzy "close enough" text search + highlighting ----------------
+   Lets a search like "baro" still find "Bayro" (one letter off — missing,
+   extra, or swapped) instead of requiring an exact substring match. */
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function editDistanceLE1(a, b){
+  if(a === b) return true;
+  const la = a.length, lb = b.length;
+  if(Math.abs(la-lb) > 1) return false;
+  let i=0, j=0, edits=0;
+  while(i<la && j<lb){
+    if(a[i] === b[j]){ i++; j++; continue; }
+    edits++;
+    if(edits>1) return false;
+    if(la === lb){ i++; j++; }       // substitution
+    else if(la > lb){ i++; }         // a has an extra letter
+    else { j++; }                    // a is missing a letter
+  }
+  if(i<la || j<lb) edits++;
+  return edits<=1;
+}
+// Finds the best matching span of `text` for `query`: an exact substring
+// if one exists, otherwise a substring that's at most one letter off.
+function fuzzyFindMatch(text, query){
+  if(!query) return null;
+  const t = text.toLowerCase(), q = query.toLowerCase();
+  const exact = t.indexOf(q);
+  if(exact !== -1) return { start:exact, end:exact+q.length };
+  if(q.length < 3) return null; // too short to fuzzy-match without false positives
+  for(const winLen of [q.length, q.length-1, q.length+1]){
+    if(winLen <= 0) continue;
+    for(let start=0; start+winLen<=t.length; start++){
+      if(editDistanceLE1(t.slice(start, start+winLen), q)) return { start, end:start+winLen };
+    }
+  }
+  return null;
+}
+function highlightMatch(text, match){
+  if(!match) return escapeHtml(text);
+  return escapeHtml(text.slice(0,match.start))
+    + '<mark class="search-hit">' + escapeHtml(text.slice(match.start,match.end)) + '</mark>'
+    + escapeHtml(text.slice(match.end));
+}
+
 /* ---------------- RENDER: BANNED VEHICLES (static, not sheet-driven) ---------------- */
 const BANNED_LEVEL_CLASS = {
   'Level 1':'lvl1', 'Level 2':'lvl2', 'Level 3':'lvl3', 'Level 4':'lvl4', 'Perm Banned':'lvlperm'
@@ -1761,12 +1873,15 @@ function renderBannedVehicles(){
     const items = BANNED_VEHICLES.filter(v=>v.level===level);
     if(!items.length) return '';
     const note = BANNED_VEHICLE_NOTES[level] ? `<div class="banned-level-note">${BANNED_VEHICLE_NOTES[level]}</div>` : '';
-    const cards = items.map(v=>`
-      <div class="banned-card" data-search="${(v.name+' '+v.note).toLowerCase()}">
+    const cards = items.map(v=>{
+      const vid = BANNED_VEHICLES.indexOf(v);
+      return `
+      <div class="banned-card" data-vid="${vid}">
         <span class="banned-badge ${BANNED_LEVEL_CLASS[level]}">${level === 'Perm Banned' ? 'PERM' : level.replace('Level ','LVL ')}</span>
-        <div class="banned-name">${v.name}</div>
-        ${v.note ? `<div class="banned-note">${v.note}</div>` : ''}
-      </div>`).join('');
+        <div class="banned-name">${escapeHtml(v.name)}</div>
+        ${v.note ? `<div class="banned-note">${escapeHtml(v.note)}</div>` : ''}
+      </div>`;
+    }).join('');
     return `
       <div class="banned-level-group" data-level="${level}">
         <div class="banned-level-heading">${level}<span class="banned-level-count">${items.length}</span></div>
@@ -1780,14 +1895,68 @@ function applyBannedSearch(){
   const input = document.getElementById('banned-search');
   if(!input) return;
   const q = input.value.trim().toLowerCase();
-  document.querySelectorAll('.banned-level-group').forEach(group=>{
-    let visibleCount = 0;
-    group.querySelectorAll('.banned-card').forEach(card=>{
-      const hide = !!q && !card.dataset.search.includes(q);
-      card.classList.toggle('search-hidden', hide);
-      if(!hide) visibleCount++;
+  const allCards = Array.from(document.querySelectorAll('.banned-card'));
+  const firstRects = flipSnapshot(allCards);
+  clearTimeout(applyBannedSearch._fadeTimer);
+  const leaving = [];
+  const entering = [];
+
+  allCards.forEach(card=>{
+    const v = BANNED_VEHICLES[card.dataset.vid];
+    const nameMatch = q ? fuzzyFindMatch(v.name, q) : null;
+    const noteMatch = (!nameMatch && q && v.note) ? fuzzyFindMatch(v.note, q) : null;
+    const hide = !!q && !nameMatch && !noteMatch;
+
+    // Re-highlight the matched letters (or restore plain text once cleared).
+    const nameEl = card.querySelector('.banned-name');
+    if(nameEl) nameEl.innerHTML = highlightMatch(v.name, nameMatch);
+    const noteEl = card.querySelector('.banned-note');
+    if(noteEl) noteEl.innerHTML = highlightMatch(v.note, noteMatch);
+
+    const wasHidden = card.classList.contains('search-hidden');
+    if(hide){
+      if(!wasHidden && !card.classList.contains('search-fade')){
+        card.classList.add('search-fade');
+        leaving.push(card);
+      }
+    } else if(wasHidden){
+      entering.push(card);
+    } else {
+      card.classList.remove('search-fade');
+    }
+  });
+
+  entering.forEach(card=>{ card.classList.remove('search-hidden'); card.classList.add('search-fade'); });
+  if(entering.length){
+    requestAnimationFrame(()=>{
+      flipPlay(firstRects, allCards);
+      entering.forEach(card=>{
+        void card.offsetWidth;
+        requestAnimationFrame(()=>{ card.classList.remove('search-fade'); });
+      });
+      updateBannedGroupVisibility();
     });
-    group.classList.toggle('search-hidden', visibleCount === 0);
+  } else {
+    updateBannedGroupVisibility();
+  }
+
+  if(leaving.length){
+    applyBannedSearch._fadeTimer = setTimeout(()=>{
+      const before = flipSnapshot(allCards);
+      leaving.forEach(card=> card.classList.add('search-hidden'));
+      requestAnimationFrame(()=> flipPlay(before, allCards));
+      updateBannedGroupVisibility();
+    }, 280);
+  }
+}
+// A whole level group (its heading + note) hides once none of its cards
+// are left visible — checked separately from the per-card fade timing
+// above so it reacts correctly whether cards are still mid-fade-out or
+// already collapsed.
+function updateBannedGroupVisibility(){
+  document.querySelectorAll('.banned-level-group').forEach(group=>{
+    const visible = Array.from(group.querySelectorAll('.banned-card')).some(c=>!c.classList.contains('search-hidden'));
+    group.classList.toggle('search-hidden', !visible);
   });
 }
 document.getElementById('banned-search').addEventListener('input', applyBannedSearch);
