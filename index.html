@@ -1088,7 +1088,10 @@ const WARN_RING_CIRC = 2 * Math.PI * WARN_RING_R;
 // pulsing for a suspension. Hovering shows a tooltip above it.
 function pfpRingHtml(u){
   const initials = u.username.slice(0,2).toUpperCase();
-  const inner = u.pfp ? `<img class="pfp" src="${u.pfp}" alt="${u.username}">` : `<div class="pfp fallback">${initials}</div>`;
+  // If the pfp link is broken/expired/blocked, fall back to the initials
+  // avatar instead of leaving a broken-image icon (which ignores our
+  // circular sizing and looks stretched/misplaced with the alt text spilling out).
+  const inner = u.pfp ? `<img class="pfp" src="${u.pfp}" alt="${escapeHtml(u.username)}" onerror="this.outerHTML='<div class=&quot;pfp fallback&quot;>${escapeHtml(initials)}</div>'">` : `<div class="pfp fallback">${escapeHtml(initials)}</div>`;
   const warnRaw = (u.warnLabel||'').trim().toLowerCase();
   const isSuspended = warnRaw === 'suspended';
   const warnN = WORD_NUM[warnRaw] || null;
@@ -1709,6 +1712,7 @@ function flipSnapshot(items){
   items.forEach(el=>{ if(!el.classList.contains('search-hidden')) rects.set(el, el.getBoundingClientRect()); });
   return rects;
 }
+const FLIP_TOKENS = new WeakMap();
 function flipPlay(firstRects, items, duration=380){
   const moved = [];
   items.forEach(el=>{
@@ -1725,8 +1729,21 @@ function flipPlay(firstRects, items, duration=380){
   if(!moved.length) return;
   void document.body.offsetWidth; // force the browser to apply the inverted position before we animate away from it
   requestAnimationFrame(()=>{
-    moved.forEach(el=>{ el.style.transition = `transform ${duration}ms cubic-bezier(.22,1,.36,1)`; el.style.transform = ''; });
-    setTimeout(()=>{ moved.forEach(el=>{ el.style.transition = ''; el.style.transform = ''; }); }, duration + 40);
+    moved.forEach(el=>{
+      // Tag this as the latest animation claiming this element — if
+      // someone types fast enough to trigger another flipPlay on the
+      // same card before this one's cleanup fires, the OLD cleanup
+      // below will see its token no longer matches and back off instead
+      // of yanking the transform out from under the newer animation
+      // (which was causing cards to visibly get stuck mid-slide).
+      const token = Symbol();
+      FLIP_TOKENS.set(el, token);
+      el.style.transition = `transform ${duration}ms cubic-bezier(.22,1,.36,1)`;
+      el.style.transform = '';
+      setTimeout(()=>{
+        if(FLIP_TOKENS.get(el) === token){ el.style.transition = ''; el.style.transform = ''; }
+      }, duration + 40);
+    });
   });
 }
 
@@ -1752,7 +1769,7 @@ function applyRosterSearch(){
     const hide = !!q && !card.dataset.username.includes(q);
     const wasHidden = gridItem.classList.contains('search-hidden');
     if(hide){
-      if(!wasHidden && !gridItem.classList.contains('search-fade')){
+      if(!wasHidden){
         gridItem.classList.add('search-fade');
         leaving.push(gridItem);
       }
@@ -1915,7 +1932,7 @@ function applyBannedSearch(){
 
     const wasHidden = card.classList.contains('search-hidden');
     if(hide){
-      if(!wasHidden && !card.classList.contains('search-fade')){
+      if(!wasHidden){
         card.classList.add('search-fade');
         leaving.push(card);
       }
