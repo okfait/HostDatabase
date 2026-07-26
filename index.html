@@ -9,15 +9,6 @@
 <link rel="icon" href="https://github.com/okfait/okgarage-mini/blob/main/01%20(81).png?raw=true">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=book_2,bookmark,bookmarks,content_copy,delete,drag_indicator,refresh,bookmark_add" />
-<style>
-.material-symbols-outlined{
-  font-family:'Material Symbols Outlined';
-  font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;
-  font-weight:normal; font-style:normal; display:inline-block; line-height:1;
-  white-space:nowrap; word-wrap:normal; direction:ltr; -webkit-font-smoothing:antialiased;
-}
-</style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" onerror="this.onerror=null;document.write('<script src=\'https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js\'><\/script>')"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/4.4.4/chart.umd.min.js" onerror="this.onerror=null;document.write('<script src=\'https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js\'><\/script>')"></script>
 <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js" onerror="this.onerror=null;document.write('<script src=\'https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js\'><\/script>')"></script>
@@ -69,14 +60,14 @@ const ICONS = {
   group: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
   crown: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7Z"/><path d="M5 20h14"/></svg>',
   car:   '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M160-240v-200 200ZM80-440l84-240q6-18 21.5-29t34.5-11h183q-3 20-3 40t3 40H234l-42 120h259q17 24 38 44.5t47 35.5H160v200h560v-163q21-3 41-9t39-15v307q0 17-11.5 28.5T760-80h-40q-17 0-28.5-11.5T680-120v-40H200v40q0 17-11.5 28.5T160-80h-40q-17 0-28.5-11.5T80-120v-320Zm540 160q25 0 42.5-17.5T680-340q0-25-17.5-42.5T620-400q-25 0-42.5 17.5T560-340q0 25 17.5 42.5T620-280Zm-360 0q25 0 42.5-17.5T320-340q0-25-17.5-42.5T260-400q-25 0-42.5 17.5T200-340q0 25 17.5 42.5T260-280Zm420-200q-83 0-141.5-58.5T480-680q0-82 58-141t142-59q83 0 141.5 58.5T880-680q0 83-58.5 141.5T680-480Zm-20-160h40v-160h-40v160Zm20 80q8 0 14-6t6-14q0-8-6-14t-14-6q-8 0-14 6t-6 14q0 8 6 14t14 6Z"/></svg>',
-  book2: '<span class="material-symbols-outlined">book_2</span>',
-  addbookmark: '<span class="material-symbols-outlined">bookmark_add</span>',
-  bookmark: '<span class="material-symbols-outlined">bookmark</span>',
-  bookmarks: '<span class="material-symbols-outlined">bookmarks</span>',
-  copy: '<span class="material-symbols-outlined">content_copy</span>',
-  trash: '<span class="material-symbols-outlined">delete</span>',
-  refresh: '<span class="material-symbols-outlined">refresh</span>',
-  drag: '<span class="material-symbols-outlined">drag_indicator</span>'
+  book2: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6c-2-1.5-5-2-8-1.3v13.6c3-.7 6-.2 8 1.3 2-1.5 5-2 8-1.3V4.7C17 4 14 4.5 12 6Z"/><path d="M12 6v13.6"/></svg>',
+  addbookmark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v17l-6-4-6 4V4Z"/><path d="M10 8h4M12 6v4"/></svg>',
+  bookmark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v17l-6-4-6 4V4Z"/></svg>',
+  bookmarks: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v14l-5-3.3-5 3.3V6Z"/><path d="M13 4.3h3a2 2 0 0 1 2 2V19l-2.5-1.7"/></svg>',
+  copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V6a2 2 0 0 1 2-2h10"/></svg>',
+  trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>',
+  refresh: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>',
+  drag: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>'
 };
 
 const BANNED_VEHICLES = [
@@ -374,10 +365,6 @@ body::-webkit-scrollbar{ display:none; width:0; height:0; }
 .search-hit{ background:rgba(232,184,75,0.32); color:inherit; border-radius:3px; padding:0 1px; }
 
 .icon{ display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; flex-shrink:0; vertical-align:middle; }
-.icon .material-symbols-outlined{ font-size:18px; line-height:1; }
-.icon-btn .icon .material-symbols-outlined{ font-size:17px; }
-.format-drag .icon .material-symbols-outlined{ font-size:20px; }
-.formats-subhead .icon .material-symbols-outlined{ font-size:19px; }
 .icon svg{ width:100%; height:100%; display:block; }
 
 /* ---------- shine sweep, used on a few key headings ---------- */
@@ -462,7 +449,7 @@ header.top{
   border-bottom:1px solid var(--header-border);
   box-shadow:0 4px 24px rgba(15,26,22,0.06);
 }
-header.top .top-inner{ max-width:1800px; width:100%; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:nowrap; }
+header.top .top-inner{ width:100%; margin:0 auto; display:flex; align-items:center; justify-content:center; gap:44px; flex-wrap:nowrap; }
 .brand{ display:flex; align-items:center; gap:13px; flex-shrink:0; }
 .brand-mark{ height:46px; width:auto; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
 .brand-mark img{ height:100%; width:auto; max-width:200px; object-fit:contain; }
@@ -473,7 +460,7 @@ header.top .top-inner{ max-width:1800px; width:100%; margin:0 auto; display:flex
 #logout-btn{ background:transparent; border:1px solid var(--line-bright); color:var(--text-muted); font-size:11.5px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; padding:9px 14px; border-radius:10px; cursor:pointer; transition:.15s; font-family:var(--font-body); white-space:nowrap; }
 #logout-btn:hover{ border-color:var(--accent-danger); color:var(--accent-danger); }
 
-.topnav{ display:flex; align-items:center; justify-content:center; gap:2px; flex:1 1 auto; min-width:0; }
+.topnav{ display:flex; align-items:center; justify-content:center; gap:2px; flex:0 1 auto; min-width:0; }
 .topnav a{ display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600; color:var(--text-muted); text-decoration:none; padding:7px 10px; border-radius:9px; transition:.15s; font-family:var(--font-body); white-space:nowrap; }
 .topnav a:hover{ color:var(--accent-bright); background:var(--bg-elevated); }
 
@@ -612,6 +599,8 @@ section.section{ margin-bottom:40px; scroll-margin-top:100px; }
 #banned-list::-webkit-scrollbar-thumb:hover{ background:var(--accent); }
 .banned-scroll-wrap{ position:relative; }
 .banned-fade{ position:absolute; left:0; right:10px; height:48px; pointer-events:none; opacity:0; transition:opacity .2s ease; z-index:2; }
+.no-results-msg{ position:absolute; top:0; left:0; right:10px; height:560px; display:flex; align-items:center; justify-content:center; color:var(--text-dim); font-size:13.5px; text-align:center; pointer-events:none; }
+.no-results-msg-flow{ position:static; height:auto; padding:50px 0; }
 .banned-fade-top{ top:0; background:linear-gradient(to bottom, var(--bg) 0%, transparent 100%); }
 .banned-fade-bottom{ bottom:0; background:linear-gradient(to top, var(--bg) 0%, transparent 100%); }
 .banned-fade.visible{ opacity:1; }
@@ -670,10 +659,11 @@ section.section{ margin-bottom:40px; scroll-margin-top:100px; }
 .format-pill.just-copied .copied-flag{ opacity:1; }
 
 /* multi-select chip row (e.g. DOT / FD / LE) */
-.multi-toggle{ display:flex; gap:4px; }
+.multi-toggle{ display:inline-flex; gap:4px; vertical-align:middle; margin-right:8px; }
 .multi-toggle button{ border:1px solid var(--line-bright); background:var(--bg-elevated); padding:3px 9px; border-radius:7px; font-family:var(--font-body); font-size:10.5px; font-weight:700; letter-spacing:.03em; cursor:pointer; color:var(--text-dim); transition:.15s; }
 .multi-toggle button:hover{ color:var(--text); }
 .multi-toggle button.active{ background:var(--accent); border-color:var(--accent); color:#fff; }
+.format-pill.has-inline-controls{ white-space:normal; overflow:visible; text-overflow:clip; }
 
 /* Interactive format rows — same skeleton as a basic format row (drag |
    prefix | label+pill), plus an actions cluster on the right. The
@@ -690,7 +680,6 @@ section.section{ margin-bottom:40px; scroll-margin-top:100px; }
 .icon-btn .icon{ width:17px; height:17px; }
 .text-btn{ display:inline-flex; align-items:center; gap:6px; padding:0 14px; height:34px; border-radius:10px; background:var(--accent); border:1px solid var(--accent); color:#fff; font-family:var(--font-body); font-size:12px; font-weight:700; cursor:pointer; transition:.15s; white-space:nowrap; }
 .text-btn .icon{ width:16px; height:16px; }
-.text-btn .icon .material-symbols-outlined{ font-size:16px; }
 .text-btn:hover{ opacity:.88; }
 
 .format-pill.interactive-pill{ white-space:normal; overflow:visible; text-overflow:clip; line-height:2; cursor:default; }
@@ -849,6 +838,7 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
         </div>
       </div>
       <div class="cards-grid" id="cards-grid"></div>
+      <div id="roster-no-results" class="no-results-msg no-results-msg-flow" style="display:none;">No hosts match your search/filter.</div>
     </section>
 
     <section class="section" id="motm-section">
@@ -869,6 +859,7 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
       </div>
       <div class="banned-scroll-wrap">
         <div id="banned-list"></div>
+        <div id="banned-no-results" class="no-results-msg" style="display:none;">No vehicles match your search.</div>
         <div class="banned-fade banned-fade-top"></div>
         <div class="banned-fade banned-fade-bottom"></div>
       </div>
@@ -1502,6 +1493,12 @@ function attemptLogin(silent){
   updateTopnavFit();
   renderAll();
   checkEndedLoas();
+  // Session Formats renders immediately on page load (it doesn't need
+  // sheet data), which happens while #app is still display:none behind
+  // the login screen — so the sliding :ha/:a/:m indicators measured 0
+  // width/position back then and stayed invisible. Now that #app is
+  // actually visible, re-measure them for real.
+  document.querySelectorAll('#formats-section .format-prefix').forEach(positionIndicator);
 }
 
 /* ---------------- LOA-ended alert (for hosts who manage the sheet) ----------------
@@ -2059,8 +2056,19 @@ function applyRosterSearch(){
       const before = flipSnapshot(allGridItems);
       leaving.forEach(gridItem=> gridItem.classList.add('search-hidden'));
       requestAnimationFrame(()=> flipPlay(before, allGridItems));
+      updateRosterNoResults();
     }, 280);
   }
+  updateRosterNoResults();
+}
+function updateRosterNoResults(){
+  const noResults = document.getElementById('roster-no-results');
+  if(!noResults) return;
+  const anyVisible = Array.from(document.querySelectorAll('#cards-grid .card')).some(c=>{
+    const gi = c.closest('.electric-wrap') || c;
+    return !gi.classList.contains('search-hidden');
+  });
+  noResults.style.display = anyVisible ? 'none' : 'block';
 }
 document.getElementById('roster-search').addEventListener('input', applyRosterSearch);
 
@@ -2256,10 +2264,14 @@ function applyBannedSearch(){
 // above so it reacts correctly whether cards are still mid-fade-out or
 // already collapsed.
 function updateBannedGroupVisibility(){
+  let anyVisible = false;
   document.querySelectorAll('.banned-level-group').forEach(group=>{
     const visible = Array.from(group.querySelectorAll('.banned-card')).some(c=>!c.classList.contains('search-hidden'));
     group.classList.toggle('search-hidden', !visible);
+    if(visible) anyVisible = true;
   });
+  const noResults = document.getElementById('banned-no-results');
+  if(noResults) noResults.style.display = anyVisible ? 'none' : 'flex';
 }
 document.getElementById('banned-search').addEventListener('input', applyBannedSearch);
 renderBannedVehicles(); // static data — doesn't need to wait for the sheet or login
@@ -2311,58 +2323,61 @@ renderBannedVehicles(); // static data — doesn't need to wait for the sheet or
    final order is handed back to the caller to persist. */
 function enableDragReorder(container, rowSelector, onReorder){
   container.querySelectorAll(rowSelector + ' .format-drag').forEach(handle=>{
-    handle.addEventListener('pointerdown', (e)=>{
-      e.preventDefault();
-      const dragEl = handle.closest(rowSelector);
-      if(!dragEl) return;
-      const startY = e.clientY;
-      const startTop = dragEl.getBoundingClientRect().top;
-      const dragHeight = dragEl.offsetHeight;
-      dragEl.classList.add('dragging');
-      dragEl.style.position = 'relative';
-      dragEl.style.zIndex = 5;
-      dragEl.style.pointerEvents = 'none';
+    wireDragHandle(handle, container, rowSelector, onReorder);
+  });
+}
+function wireDragHandle(handle, container, rowSelector, onReorder){
+  handle.addEventListener('pointerdown', (e)=>{
+    e.preventDefault();
+    const dragEl = handle.closest(rowSelector);
+    if(!dragEl) return;
+    const startY = e.clientY;
+    const startTop = dragEl.getBoundingClientRect().top;
+    const dragHeight = dragEl.offsetHeight;
+    dragEl.classList.add('dragging');
+    dragEl.style.position = 'relative';
+    dragEl.style.zIndex = 5;
+    dragEl.style.pointerEvents = 'none';
 
-      function move(ev){
-        const dy = ev.clientY - startY;
-        const others = Array.from(container.querySelectorAll(rowSelector)).filter(r=>r!==dragEl);
-        const dragCenter = startTop + dy + dragHeight/2;
-        let target = others.length;
-        for(let i=0;i<others.length;i++){
-          const r = others[i].getBoundingClientRect();
-          if(dragCenter < r.top + r.height/2){ target = i; break; }
-        }
-        const desiredNeighbor = others[target] || null;
-        const currentNext = dragEl.nextElementSibling;
-        if(desiredNeighbor !== currentNext && desiredNeighbor !== dragEl){
-          const before = flipSnapshot(others);
-          if(desiredNeighbor) container.insertBefore(dragEl, desiredNeighbor);
-          else container.appendChild(dragEl);
-          flipPlay(before, others);
-        }
-        // Whether or not it just hopped to a new slot, the dragged row's
-        // ON-SCREEN position should always be exactly "where it started"
-        // + "how far the pointer has moved" — recompute the transform
-        // against its CURRENT natural position each time, since hopping
-        // to a new slot changes that natural position and would
-        // otherwise make the row jump instead of tracking the cursor.
-        dragEl.style.transform = 'none';
-        const naturalTop = dragEl.getBoundingClientRect().top;
-        dragEl.style.transform = `translateY(${(startTop + dy) - naturalTop}px)`;
+    function move(ev){
+      const dy = ev.clientY - startY;
+      const others = Array.from(container.querySelectorAll(rowSelector)).filter(r=>r!==dragEl);
+      const dragCenter = startTop + dy + dragHeight/2;
+      let target = others.length;
+      for(let i=0;i<others.length;i++){
+        const r = others[i].getBoundingClientRect();
+        if(dragCenter < r.top + r.height/2){ target = i; break; }
       }
-      function up(){
-        document.removeEventListener('pointermove', move);
-        document.removeEventListener('pointerup', up);
-        dragEl.classList.remove('dragging');
-        dragEl.style.transform = '';
-        dragEl.style.position = '';
-        dragEl.style.zIndex = '';
-        dragEl.style.pointerEvents = '';
-        onReorder(Array.from(container.querySelectorAll(rowSelector)).map(r=>r.dataset.id));
+      const desiredNeighbor = others[target] || null;
+      const currentNext = dragEl.nextElementSibling;
+      if(desiredNeighbor !== currentNext && desiredNeighbor !== dragEl){
+        const before = flipSnapshot(others);
+        if(desiredNeighbor) container.insertBefore(dragEl, desiredNeighbor);
+        else container.appendChild(dragEl);
+        flipPlay(before, others);
       }
-      document.addEventListener('pointermove', move);
-      document.addEventListener('pointerup', up);
-    });
+      // Whether or not it just hopped to a new slot, the dragged row's
+      // ON-SCREEN position should always be exactly "where it started"
+      // + "how far the pointer has moved" — recompute the transform
+      // against its CURRENT natural position each time, since hopping
+      // to a new slot changes that natural position and would
+      // otherwise make the row jump instead of tracking the cursor.
+      dragEl.style.transform = 'none';
+      const naturalTop = dragEl.getBoundingClientRect().top;
+      dragEl.style.transform = `translateY(${(startTop + dy) - naturalTop}px)`;
+    }
+    function up(){
+      document.removeEventListener('pointermove', move);
+      document.removeEventListener('pointerup', up);
+      dragEl.classList.remove('dragging');
+      dragEl.style.transform = '';
+      dragEl.style.position = '';
+      dragEl.style.zIndex = '';
+      dragEl.style.pointerEvents = '';
+      onReorder(Array.from(container.querySelectorAll(rowSelector)).map(r=>r.dataset.id));
+    }
+    document.addEventListener('pointermove', move);
+    document.addEventListener('pointerup', up);
   });
 }
 
@@ -2441,6 +2456,7 @@ const BASIC_FORMATS = [
   { id:'shops', label:'Shops', text:'Open some shops to enhance the roleplaying experience' },
   { id:'services', label:'Services', multi:{
       options:['DOT','FD','LE'],
+      suffix:'is online - RP crashes over 30mph, not doing so will result in a kick',
       build:(sel)=>{
         const list = sel.length ? sel : ['DOT'];
         const joined = list.length <= 1 ? list.join('')
@@ -2482,10 +2498,9 @@ function renderBasicFormats(){
     const f = byId[id];
     const prefix = BASIC_PREFIXES[id] || 'ha';
     const selected = BASIC_MULTI[f.id] || (f.multi ? [f.multi.options[0]] : []);
-    const text = f.multi ? f.multi.build(selected) : f.text;
-    const labelHtml = f.multi
-      ? `<div class="format-label-row"><div class="format-label">${escapeHtml(f.label)}</div><div class="multi-toggle" data-id="${f.id}">${f.multi.options.map(o=>`<button type="button" data-val="${escapeHtml(o)}" class="${selected.includes(o)?'active':''}">${escapeHtml(o)}</button>`).join('')}</div></div>`
-      : `<div class="format-label">${escapeHtml(f.label)}</div>`;
+    const pillHtml = f.multi
+      ? `<div class="multi-toggle" data-id="${f.id}">${f.multi.options.map(o=>`<button type="button" data-val="${escapeHtml(o)}" class="${selected.includes(o)?'active':''}">${escapeHtml(o)}</button>`).join('')}</div> ${escapeHtml(f.multi.suffix)}`
+      : escapeHtml(f.text);
     return `
     <div class="format-row" data-id="${f.id}">
       <div class="format-side">
@@ -2497,8 +2512,8 @@ function renderBasicFormats(){
         <div class="format-side-content"><div class="format-prefix" data-id="${f.id}">${prefixButtonsHtml(prefix)}</div></div>
       </div>
       <div class="format-body">
-        ${labelHtml}
-        <div class="format-pill" data-id="${f.id}">${escapeHtml(text)}<span class="copied-flag">Copied!</span></div>
+        <div class="format-label">${escapeHtml(f.label)}</div>
+        <div class="format-pill${f.multi?' has-inline-controls':''}" data-id="${f.id}">${pillHtml}<span class="copied-flag">Copied!</span></div>
       </div>
     </div>`;
   }).join('');
@@ -2516,7 +2531,8 @@ function renderBasicFormats(){
   });
   container.querySelectorAll('.multi-toggle').forEach(wrap=>{
     wrap.querySelectorAll('button').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
+      btn.addEventListener('click', (e)=>{
+        e.stopPropagation(); // don't let this bubble up into the pill's click-to-copy
         const id = wrap.dataset.id;
         const f = byId[id];
         let sel = BASIC_MULTI[id] || [f.multi.options[0]];
@@ -2529,13 +2545,12 @@ function renderBasicFormats(){
         BASIC_MULTI[id] = sel;
         saveBasicMulti(BASIC_MULTI);
         wrap.querySelectorAll('button').forEach(b=> b.classList.toggle('active', sel.includes(b.dataset.val)));
-        const pill = container.querySelector(`.format-pill[data-id="${id}"]`);
-        if(pill){ pill.innerHTML = `${escapeHtml(f.multi.build(sel))}<span class="copied-flag">Copied!</span>`; }
       });
     });
   });
   container.querySelectorAll('.format-pill').forEach(pill=>{
-    pill.addEventListener('click', ()=>{
+    pill.addEventListener('click', (e)=>{
+      if(e.target.closest('.multi-toggle')) return; // that's a chip click, not a copy click
       const id = pill.dataset.id;
       const f = byId[id];
       const prefix = BASIC_PREFIXES[id] || 'ha';
@@ -2726,7 +2741,6 @@ function saveStrictState(s){ try{ localStorage.setItem(STRICT_STATE_KEY, JSON.st
 let CREATOR_STATE = loadCreatorState();
 let ADDED_CARDS = loadAddedCards(); // [{id, state}, ...]
 let STRICT_STATE = loadStrictState();
-let JUST_ADDED_ID = null;
 
 /* ---------------- sliding :ha/:a/:m indicator ----------------
    One background pill slides + recolors between options instead of the
@@ -2858,14 +2872,28 @@ function wireInteractiveRow(cardEl, state, kind){
     cardEl.querySelector('[data-action="reset"]').addEventListener('click', ()=>{
       Object.assign(CREATOR_STATE, defaultInteractiveState());
       saveCreatorState(CREATOR_STATE);
-      renderInteractiveAll();
+      cardEl.outerHTML = renderInteractiveRow('creator', 'creator', CREATOR_STATE);
+      const freshEl = document.getElementById('interactive-creator-wrap').querySelector('.interactive-card');
+      renderIconsIn(freshEl);
+      wireInteractiveRow(freshEl, CREATOR_STATE, 'creator');
+      initSlidingToggle(freshEl.querySelector('.format-prefix[data-field="prefix"]'));
     });
     cardEl.querySelector('[data-action="add"]').addEventListener('click', ()=>{
       const newId = 'ic_' + Date.now() + '_' + Math.floor(Math.random()*1000);
-      ADDED_CARDS.push({ id:newId, state: JSON.parse(JSON.stringify(CREATOR_STATE)) });
+      const newState = JSON.parse(JSON.stringify(CREATOR_STATE));
+      ADDED_CARDS.push({ id:newId, state:newState });
       saveAddedCards(ADDED_CARDS);
-      JUST_ADDED_ID = newId;
-      renderInteractiveAll();
+      const addedWrap = document.getElementById('interactive-added-list');
+      addedWrap.insertAdjacentHTML('beforeend', renderInteractiveRow('added', newId, newState));
+      const newCardEl = addedWrap.lastElementChild;
+      newCardEl.classList.add('just-added');
+      renderIconsIn(newCardEl);
+      wireInteractiveRow(newCardEl, newState, 'added');
+      initSlidingToggle(newCardEl.querySelector('.format-prefix[data-field="prefix"]'));
+      wireDragHandle(newCardEl.querySelector('.format-drag'), addedWrap, '.interactive-card', (newOrder)=>{
+        ADDED_CARDS = newOrder.map(id=> ADDED_CARDS.find(c=>c.id===id)).filter(Boolean);
+        saveAddedCards(ADDED_CARDS);
+      });
     });
   } else if(kind === 'added'){
     cardEl.querySelector('[data-action="delete"]').addEventListener('click', ()=>{
@@ -2874,7 +2902,7 @@ function wireInteractiveRow(cardEl, state, kind){
         setTimeout(()=>{
           ADDED_CARDS = ADDED_CARDS.filter(c=>c.id !== cardEl.dataset.id);
           saveAddedCards(ADDED_CARDS);
-          renderInteractiveAll();
+          cardEl.remove(); // only this one card leaves — nothing else re-renders
         }, 220);
       });
     });
@@ -2903,12 +2931,6 @@ function renderInteractiveAll(){
     ADDED_CARDS = newOrder.map(id=> ADDED_CARDS.find(c=>c.id===id)).filter(Boolean);
     saveAddedCards(ADDED_CARDS);
   });
-
-  if(JUST_ADDED_ID){
-    const el = Array.from(addedWrap.querySelectorAll('.interactive-card')).find(c=>c.dataset.id===JUST_ADDED_ID);
-    if(el) el.classList.add('just-added');
-    JUST_ADDED_ID = null;
-  }
 }
 
 renderBasicFormats();
