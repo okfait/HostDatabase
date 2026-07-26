@@ -9,7 +9,7 @@
 <link rel="icon" href="https://github.com/okfait/okgarage-mini/blob/main/01%20(81).png?raw=true">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=book_2,bookmark,bookmarks,content_copy,delete,drag_indicator,refresh" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=book_2,bookmark,bookmarks,content_copy,delete,drag_indicator,refresh,bookmark_add" />
 <style>
 .material-symbols-outlined{
   font-family:'Material Symbols Outlined';
@@ -70,6 +70,7 @@ const ICONS = {
   crown: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7Z"/><path d="M5 20h14"/></svg>',
   car:   '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M160-240v-200 200ZM80-440l84-240q6-18 21.5-29t34.5-11h183q-3 20-3 40t3 40H234l-42 120h259q17 24 38 44.5t47 35.5H160v200h560v-163q21-3 41-9t39-15v307q0 17-11.5 28.5T760-80h-40q-17 0-28.5-11.5T680-120v-40H200v40q0 17-11.5 28.5T160-80h-40q-17 0-28.5-11.5T80-120v-320Zm540 160q25 0 42.5-17.5T680-340q0-25-17.5-42.5T620-400q-25 0-42.5 17.5T560-340q0 25 17.5 42.5T620-280Zm-360 0q25 0 42.5-17.5T320-340q0-25-17.5-42.5T260-400q-25 0-42.5 17.5T200-340q0 25 17.5 42.5T260-280Zm420-200q-83 0-141.5-58.5T480-680q0-82 58-141t142-59q83 0 141.5 58.5T880-680q0 83-58.5 141.5T680-480Zm-20-160h40v-160h-40v160Zm20 80q8 0 14-6t6-14q0-8-6-14t-14-6q-8 0-14 6t-6 14q0 8 6 14t14 6Z"/></svg>',
   book2: '<span class="material-symbols-outlined">book_2</span>',
+  addbookmark: '<span class="material-symbols-outlined">bookmark_add</span>',
   bookmark: '<span class="material-symbols-outlined">bookmark</span>',
   bookmarks: '<span class="material-symbols-outlined">bookmarks</span>',
   copy: '<span class="material-symbols-outlined">content_copy</span>',
@@ -363,6 +364,10 @@ body::-webkit-scrollbar{ display:none; width:0; height:0; }
 .roster-search-pill .search-icon{ width:14px; height:14px; flex-shrink:0; color:var(--text-dim); }
 .roster-search-pill input{ border:none; outline:none; background:transparent; color:var(--text); font-family:var(--font-body); font-size:12.5px; width:130px; }
 .roster-search-pill input::placeholder{ color:var(--text-dim); }
+.roster-filter-toggle{ display:flex; align-items:center; gap:7px; background:var(--bg-elevated); border:1px solid var(--line-bright); border-radius:999px; padding:8px 14px; font-family:var(--font-body); font-size:12.5px; color:var(--text-muted); cursor:pointer; transition:border-color .15s; white-space:nowrap; }
+.roster-filter-toggle:hover{ border-color:var(--accent-bright); }
+.roster-filter-toggle svg{ width:14px; height:14px; flex-shrink:0; }
+.roster-filter-dd .dropdown-menu{ min-width:200px; }
 .card, .electric-wrap, .banned-card{ transition:opacity .28s ease, transform .28s ease; }
 .card.search-hidden, .electric-wrap.search-hidden, .banned-card.search-hidden{ display:none; }
 .card.search-fade, .electric-wrap.search-fade, .banned-card.search-fade{ opacity:0; transform:scale(.94); pointer-events:none; }
@@ -457,7 +462,7 @@ header.top{
   border-bottom:1px solid var(--header-border);
   box-shadow:0 4px 24px rgba(15,26,22,0.06);
 }
-header.top .top-inner{ max-width:1180px; width:100%; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:nowrap; }
+header.top .top-inner{ max-width:1800px; width:100%; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:nowrap; }
 .brand{ display:flex; align-items:center; gap:13px; flex-shrink:0; }
 .brand-mark{ height:46px; width:auto; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
 .brand-mark img{ height:100%; width:auto; max-width:200px; object-fit:contain; }
@@ -500,6 +505,7 @@ section.section{ margin-bottom:40px; scroll-margin-top:100px; }
 .pill-value{ position:absolute; left:16px; top:0; bottom:0; display:flex; align-items:center; font-family:var(--font-display); font-weight:700; font-size:16px; color:#04140d; z-index:2; }
 .pill-value.on-track{ color:var(--text); }
 .pill-promo .tip{ color:var(--accent-bright); }
+.pill-promo.met .tip{ color:#0a1a14; }
 .pill-marker{ position:absolute; top:-20px; bottom:-20px; width:34px; margin-left:-17px; z-index:3; cursor:pointer; }
 .pill-marker::before{ content:""; position:absolute; top:20px; bottom:20px; left:50%; width:2px; transform:translateX(-50%); background:var(--accent-gold); box-shadow:0 0 8px rgba(232,184,75,0.7); }
 .pill-marker .marker-num{ position:absolute; top:0; left:50%; transform:translateX(-50%); font-size:12px; font-weight:700; color:var(--accent-gold); white-space:nowrap; }
@@ -633,9 +639,12 @@ section.section{ margin-bottom:40px; scroll-margin-top:100px; }
 .formats-subhead-gap{ margin-top:36px; }
 .format-list{ display:flex; flex-direction:column; }
 
-.format-row{ display:flex; align-items:flex-end; gap:12px; margin-bottom:12px; }
+.format-row{ display:flex; align-items:stretch; gap:12px; margin-bottom:12px; }
 .format-row.dragging{ z-index:5; }
-.format-drag{ flex-shrink:0; width:22px; height:22px; margin-bottom:11px; color:var(--text-dim); cursor:grab; display:flex; align-items:center; justify-content:center; touch-action:none; }
+.format-side{ display:flex; flex-direction:column; flex-shrink:0; }
+.format-label-spacer{ font-family:var(--font-body); font-size:10.5px; font-weight:700; line-height:1.2; margin-bottom:5px; visibility:hidden; user-select:none; }
+.format-side-content{ flex:1; display:flex; align-items:center; }
+.format-drag{ width:22px; height:22px; color:var(--text-dim); cursor:grab; display:flex; align-items:center; justify-content:center; touch-action:none; }
 .format-drag:hover{ color:var(--accent-bright); }
 .format-drag:active{ cursor:grabbing; }
 .format-drag .icon{ width:20px; height:20px; }
@@ -643,22 +652,28 @@ section.section{ margin-bottom:40px; scroll-margin-top:100px; }
 
 /* :ha / :a / :m segmented control — a single indicator pill slides and
    recolors between options instead of the color just swapping instantly. */
-.format-prefix{ position:relative; flex-shrink:0; margin-bottom:11px; display:flex; background:var(--bg-elevated); border:1px solid var(--line-bright); border-radius:11px; padding:3px; gap:2px; }
+.format-prefix{ position:relative; display:flex; background:var(--bg-elevated); border:1px solid var(--line-bright); border-radius:11px; padding:3px; gap:2px; }
 .format-prefix button{ position:relative; z-index:1; border:none; background:transparent; padding:7px 10px; border-radius:8px; font-family:var(--font-body); font-size:11.5px; font-weight:700; letter-spacing:.02em; cursor:pointer; color:var(--text-dim); transition:color .18s ease; }
 .format-prefix button:hover{ color:var(--text); }
-.format-prefix button.active[data-key="ha"]{ color:#fff; }
-.format-prefix button.active[data-key="a"]{ color:#1a1006; }
-.format-prefix button.active[data-key="m"]{ color:#0d1512; }
+.format-prefix button.active{ color:#fff; }
 .format-prefix-fixed{ opacity:.85; }
 .format-prefix-fixed button{ cursor:default; }
 .toggle-indicator{ position:absolute; top:3px; bottom:3px; left:0; width:0; border-radius:8px; background:var(--accent-danger); transition:transform .28s cubic-bezier(.22,1,.36,1), width .28s cubic-bezier(.22,1,.36,1), background .28s ease; z-index:0; }
 
 .format-body{ flex:1; min-width:0; }
-.format-label{ font-family:var(--font-body); font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--text-dim); margin-bottom:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.format-label{ font-family:var(--font-body); font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--text-dim); line-height:1.2; margin-bottom:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.format-label-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:5px; }
+.format-label-row .format-label{ margin-bottom:0; }
 .format-pill{ position:relative; background:var(--bg-elevated); border:1px solid var(--line-bright); border-radius:999px; padding:11px 18px; font-family:var(--font-body); font-size:13px; color:var(--text); text-align:left; cursor:pointer; user-select:none; transition:border-color .15s, background .15s; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .format-pill:hover{ border-color:var(--accent-bright); }
 .format-pill .copied-flag{ position:absolute; right:14px; top:50%; transform:translateY(-50%); font-size:11px; font-weight:700; color:var(--accent-bright); opacity:0; transition:opacity .15s; pointer-events:none; background:var(--bg-elevated); padding-left:10px; }
 .format-pill.just-copied .copied-flag{ opacity:1; }
+
+/* multi-select chip row (e.g. DOT / FD / LE) */
+.multi-toggle{ display:flex; gap:4px; }
+.multi-toggle button{ border:1px solid var(--line-bright); background:var(--bg-elevated); padding:3px 9px; border-radius:7px; font-family:var(--font-body); font-size:10.5px; font-weight:700; letter-spacing:.03em; cursor:pointer; color:var(--text-dim); transition:.15s; }
+.multi-toggle button:hover{ color:var(--text); }
+.multi-toggle button.active{ background:var(--accent); border-color:var(--accent); color:#fff; }
 
 /* Interactive format rows — same skeleton as a basic format row (drag |
    prefix | label+pill), plus an actions cluster on the right. The
@@ -668,12 +683,14 @@ section.section{ margin-bottom:40px; scroll-margin-top:100px; }
 .interactive-card.leaving{ opacity:0; transform:scale(.96); transition:opacity .22s ease, transform .22s ease; pointer-events:none; }
 @keyframes fmtFadeIn{ from{ opacity:0; transform:translateY(6px) scale(.97); } to{ opacity:1; transform:none; } }
 .interactive-card.just-added{ animation:fmtFadeIn .35s ease; }
-.interactive-card-actions{ display:flex; align-items:center; gap:8px; margin-bottom:11px; flex-shrink:0; }
+.interactive-card-actions{ display:flex; align-items:center; gap:8px; flex-shrink:0; }
 .icon-btn{ display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:10px; background:var(--bg-elevated); border:1px solid var(--line-bright); color:var(--text-muted); cursor:pointer; transition:.15s; flex-shrink:0; }
 .icon-btn:hover{ color:var(--accent-bright); border-color:var(--accent-bright); }
 .icon-btn.icon-btn-danger:hover{ color:var(--accent-danger); border-color:var(--accent-danger); }
 .icon-btn .icon{ width:17px; height:17px; }
-.text-btn{ display:inline-flex; align-items:center; gap:6px; padding:0 16px; height:34px; border-radius:10px; background:var(--accent); border:1px solid var(--accent); color:#fff; font-family:var(--font-body); font-size:12px; font-weight:700; cursor:pointer; transition:.15s; white-space:nowrap; }
+.text-btn{ display:inline-flex; align-items:center; gap:6px; padding:0 14px; height:34px; border-radius:10px; background:var(--accent); border:1px solid var(--accent); color:#fff; font-family:var(--font-body); font-size:12px; font-weight:700; cursor:pointer; transition:.15s; white-space:nowrap; }
+.text-btn .icon{ width:16px; height:16px; }
+.text-btn .icon .material-symbols-outlined{ font-size:16px; }
 .text-btn:hover{ opacity:.88; }
 
 .format-pill.interactive-pill{ white-space:normal; overflow:visible; text-overflow:clip; line-height:2; cursor:default; }
@@ -694,10 +711,26 @@ section.section{ margin-bottom:40px; scroll-margin-top:100px; }
 .confirm-actions button.confirm-yes{ background:var(--accent-danger); border-color:var(--accent-danger); color:#fff; }
 .confirm-actions button.confirm-yes:hover{ opacity:.88; }
 
+/* LOA-ended alert banner — slides down from the top of the screen */
+.loa-alert-overlay{ position:fixed; top:0; left:0; right:0; z-index:110; display:flex; justify-content:center; padding-top:18px; pointer-events:none; }
+.loa-alert-box{ pointer-events:auto; display:flex; align-items:center; gap:14px; background:var(--bg-card); border:1px solid var(--line-bright); border-radius:16px; padding:14px 16px; box-shadow:0 20px 60px rgba(0,0,0,0.5); max-width:540px; width:calc(100% - 32px); transform:translateY(-40px); opacity:0; transition:transform .3s cubic-bezier(.22,1,.36,1), opacity .3s ease; }
+.loa-alert-overlay.open .loa-alert-box{ transform:translateY(0); opacity:1; }
+.loa-alert-pfp .pfp{ width:42px; height:42px; flex-shrink:0; }
+.loa-alert-text{ flex:1; font-size:13px; line-height:1.4; color:var(--text); min-width:0; }
+.loa-alert-actions{ display:flex; gap:8px; flex-shrink:0; }
+.loa-alert-actions button{ padding:8px 14px; border-radius:9px; font-family:var(--font-body); font-size:12px; font-weight:700; cursor:pointer; border:1px solid var(--line-bright); background:var(--bg-elevated); color:var(--text-muted); transition:.15s; white-space:nowrap; }
+.loa-alert-actions button:hover{ color:var(--text); }
+.loa-alert-actions button.loa-alert-ok{ background:var(--accent); border-color:var(--accent); color:#fff; }
+.loa-alert-actions button.loa-alert-ok:hover{ opacity:.88; }
+@media (max-width:560px){
+  .loa-alert-box{ flex-wrap:wrap; }
+  .loa-alert-actions{ width:100%; justify-content:flex-end; }
+}
+
 /* Extra breathing room below the last interactive row so its dropdowns
    (especially AORP's long location list) have room to open fully
    without being cut off by the page/section ending right underneath. */
-#formats-section{ padding-bottom:360px; }
+#formats-section{ padding-bottom:150px; }
 
 @media (max-width:640px){
   .format-row{ flex-wrap:wrap; }
@@ -792,6 +825,22 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
       <div class="section-head">
         <div class="section-title shiny-text"><span class="icon" data-icon="group"></span> Roster</div>
         <div class="roster-head-right">
+          <div class="dropdown roster-filter-dd" id="roster-filter-dd">
+            <button type="button" class="roster-filter-toggle" id="roster-filter-toggle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M7 12h10M10 19h4"/></svg>
+              <span id="roster-filter-label">Show all</span>
+              <span class="field-dropdown-caret">▾</span>
+            </button>
+            <div class="dropdown-menu">
+              <div class="dropdown-item selected" data-val="">Show all</div>
+              <div class="dropdown-item" data-val="promotion">Meets promotion quota</div>
+              <div class="dropdown-item" data-val="keeping">Keeping the rank</div>
+              <div class="dropdown-item" data-val="failing">Failing quota</div>
+              <div class="dropdown-item" data-val="loa">On LOA</div>
+              <div class="dropdown-item" data-val="warning">Has a warning</div>
+              <div class="dropdown-item" data-val="suspended">Suspended</div>
+            </div>
+          </div>
           <div class="roster-search-pill">
             <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
             <input type="text" id="roster-search" placeholder="Search hosts…">
@@ -1255,7 +1304,7 @@ function pfpRingHtml(u){
     ringSvg = `<svg class="warn-ring" viewBox="0 0 60 60">${circles.join('')}</svg>`;
   }
   let tipText = isSuspended ? 'Suspended' : (warnN ? `${warnN} Warning${warnN>1?'s':''}` : '');
-  if(u.loaInfo) tipText = tipText ? `${tipText} · ${u.loaInfo}` : u.loaInfo;
+  if(u.loaInfo) tipText = tipText ? `${tipText} · ${u.loaInfo.text}` : u.loaInfo.text;
   else if(u.loa) tipText = tipText ? `${tipText} · On LOA` : 'On LOA';
   const tipHtml = tipText ? `<div class="tip-box pfp-tip">${tipText}</div>` : '';
   return `<div class="pfp-ring-wrap${u.loa ? ' has-loa' : ''}">${ringSvg}${inner}${tipHtml}</div>`;
@@ -1277,7 +1326,8 @@ function parseLoaCell(raw){
   if(isNaN(endMoment.getTime())) return null;
   const diffMs = endMoment - new Date();
   let endsText;
-  if(diffMs <= 0){
+  const ended = diffMs <= 0;
+  if(ended){
     const agoMs = Math.abs(diffMs);
     const agoDays = Math.floor(agoMs / 86400000);
     endsText = agoDays >= 1 ? `ended ${agoDays} day${agoDays===1?'':'s'} ago` : 'ended';
@@ -1291,7 +1341,7 @@ function parseLoaCell(raw){
     const mins = Math.max(1, Math.floor(diffMs / 60000));
     endsText = `ends in ${mins} minute${mins===1?'':'s'}`;
   }
-  return `LOA for ${days} day${days===1?'':'s'} — ${endsText}`;
+  return { text:`LOA for ${days} day${days===1?'':'s'} - ${endsText}`, ended };
 }
 function parseNewFormat(rows){
   const out = { sameRankQuota:null, promoQuota:null, motm:[], users:[] };
@@ -1451,6 +1501,57 @@ function attemptLogin(silent){
   document.getElementById('who-name').textContent = match.username;
   updateTopnavFit();
   renderAll();
+  checkEndedLoas();
+}
+
+/* ---------------- LOA-ended alert (for hosts who manage the sheet) ----------------
+   Geo, sinchaso, and KJ1vn1 get a heads-up banner when someone's LOA has
+   actually lapsed, since the site knows the real end time even though the
+   sheet still shows it as active until someone manually clears it. */
+const LOA_ALERT_STAFF = ['geoyt2010','sinchaso','kj1vn1'];
+const LOA_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1Xv5az4DrAtOV8zyeSAkpjZVTWWB8QWJI1DJybvPY7HM/edit?gid=0#gid=0';
+let LOA_ALERT_QUEUE = [];
+function checkEndedLoas(){
+  if(!CURRENT_USER || !LOA_ALERT_STAFF.includes(CURRENT_USER.username.toLowerCase())) return;
+  LOA_ALERT_QUEUE = SHEET.users.filter(u => u.loaInfo && u.loaInfo.ended);
+  showNextLoaAlert();
+}
+function ensureLoaAlertModal(){
+  if(document.getElementById('loa-alert-overlay')) return;
+  const el = document.createElement('div');
+  el.id = 'loa-alert-overlay';
+  el.className = 'loa-alert-overlay';
+  el.innerHTML = `
+    <div class="loa-alert-box">
+      <div class="loa-alert-pfp" id="loa-alert-pfp"></div>
+      <div class="loa-alert-text" id="loa-alert-text"></div>
+      <div class="loa-alert-actions">
+        <button type="button" class="loa-alert-goto">Take me there</button>
+        <button type="button" class="loa-alert-ok">OK</button>
+      </div>
+    </div>`;
+  document.body.appendChild(el);
+  el.querySelector('.loa-alert-ok').addEventListener('click', ()=>{
+    el.classList.remove('open');
+    setTimeout(showNextLoaAlert, 260);
+  });
+  el.querySelector('.loa-alert-goto').addEventListener('click', ()=>{
+    window.open(LOA_SHEET_URL, '_blank');
+  });
+}
+function showNextLoaAlert(){
+  if(!LOA_ALERT_QUEUE.length) return;
+  const u = LOA_ALERT_QUEUE.shift();
+  ensureLoaAlertModal();
+  const overlay = document.getElementById('loa-alert-overlay');
+  const initials = u.username.slice(0,2).toUpperCase();
+  overlay.querySelector('#loa-alert-pfp').innerHTML = u.pfp
+    ? `<img class="pfp" src="${u.pfp}" alt="${escapeHtml(u.username)}" onerror="this.outerHTML='<div class=&quot;pfp fallback&quot;>${escapeHtml(initials)}</div>'">`
+    : `<div class="pfp fallback">${escapeHtml(initials)}</div>`;
+  overlay.querySelector('#loa-alert-text').innerHTML = `<b>${escapeHtml(u.username)}</b>'s LOA has now ended. Please remove the user's LOA from the spreadsheet.`;
+  overlay.classList.remove('open');
+  void overlay.offsetWidth;
+  overlay.classList.add('open');
 }
 
 /* ---- Browser "save password" + return-visit autofill autologin ---- */
@@ -1510,7 +1611,7 @@ function renderPill(){
           <div class="tip-box">You need ${sr}+ logs to keep your rank</div>
         </div>
         <div class="pill-value ${pct>16?'':'on-track'}" id="pill-current-num">0</div>
-        <div class="pill-promo"><span class="tip" id="pill-promo-num">0</span><div class="tip-box">You need ${pr} logs to get promoted</div></div>
+        <div class="pill-promo${total>=pr?' met':''}"><span class="tip" id="pill-promo-num">0</span><div class="tip-box">You need ${pr} logs to get promoted</div></div>
       </div>
       <div class="pill-caption">${total>=pr ? 'Promoted this cycle' : total>=sr ? 'Rank held' : `${(pr-total).toFixed(1)} logs to promotion`}</div>
     </div>`;
@@ -1816,8 +1917,18 @@ function renderCards(){
     const isYou = CURRENT_USER && u.username.toLowerCase() === CURRENT_USER.username.toLowerCase();
     const { rank } = rankFor(u);
     const infoHtml = rank ? `<div class="card-info"><ul>${rank.info.map(x=>`<li>${x}</li>`).join('')}</ul><div class="card-hr"></div></div>` : '';
+    const warnRaw = (u.warnLabel||'').trim().toLowerCase();
+    const isSuspended = warnRaw === 'suspended';
+    const hasWarning = !!warnRaw && !isSuspended;
+    const cardFilters = [];
+    if(st.cls==='status-danger') cardFilters.push('failing');
+    if(st.cls==='status-hold') cardFilters.push('keeping');
+    if(st.cls==='status-promo') cardFilters.push('promotion');
+    if(u.loa) cardFilters.push('loa');
+    if(hasWarning) cardFilters.push('warning');
+    if(isSuspended) cardFilters.push('suspended');
     return `
-      <div class="card ${st.cls}${isYou?' is-you':''}" data-idx="${i}" data-rank="${rank ? rank.name : ''}" data-username="${u.username.toLowerCase()}" data-top="${isTop?'1':''}">
+      <div class="card ${st.cls}${isYou?' is-you':''}" data-idx="${i}" data-rank="${rank ? rank.name : ''}" data-username="${u.username.toLowerCase()}" data-top="${isTop?'1':''}" data-filters="${cardFilters.join(' ')}">
         <div class="card-top">
           ${pfpRingHtml(u)}
           <div><div class="card-name">${u.username}</div><div class="card-rank">${rank ? rank.name : 'Unranked'}</div></div>
@@ -1890,6 +2001,7 @@ function flipPlay(firstRects, items, duration=380){
   });
 }
 
+let ROSTER_FILTER = '';
 function applyRosterSearch(){
   const input = document.getElementById('roster-search');
   if(!input) return;
@@ -1909,7 +2021,10 @@ function applyRosterSearch(){
 
   cards.forEach(card=>{
     const gridItem = gridItemFor(card);
-    const hide = !!q && !card.dataset.username.includes(q);
+    const matchesSearch = !q || card.dataset.username.includes(q);
+    const cardFilters = (card.dataset.filters || '').split(' ').filter(Boolean);
+    const matchesFilter = !ROSTER_FILTER || cardFilters.includes(ROSTER_FILTER);
+    const hide = !(matchesSearch && matchesFilter);
     const wasHidden = gridItem.classList.contains('search-hidden');
     if(hide){
       if(!wasHidden){
@@ -1948,6 +2063,33 @@ function applyRosterSearch(){
   }
 }
 document.getElementById('roster-search').addEventListener('input', applyRosterSearch);
+
+const ROSTER_FILTER_LABELS = {
+  '':'Show all', promotion:'Meets promotion quota', keeping:'Keeping the rank',
+  failing:'Failing quota', loa:'On LOA', warning:'Has a warning', suspended:'Suspended'
+};
+(function(){
+  const dd = document.getElementById('roster-filter-dd');
+  const toggle = document.getElementById('roster-filter-toggle');
+  const label = document.getElementById('roster-filter-label');
+  if(!dd || !toggle) return;
+  toggle.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    const wasOpen = dd.classList.contains('open');
+    document.querySelectorAll('.dropdown.open').forEach(o=> o.classList.remove('open'));
+    if(!wasOpen) dd.classList.add('open');
+  });
+  dd.querySelectorAll('.dropdown-item').forEach(item=>{
+    item.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      dd.classList.remove('open');
+      ROSTER_FILTER = item.dataset.val;
+      label.textContent = ROSTER_FILTER_LABELS[ROSTER_FILTER] || 'Show all';
+      dd.querySelectorAll('.dropdown-item').forEach(it=> it.classList.toggle('selected', it===item));
+      applyRosterSearch();
+    });
+  });
+})();
 
 /* ---------------- RENDER: HOST OF THE MONTH ---------------- */
 function renderMotm(){
@@ -2296,9 +2438,21 @@ const BASIC_FORMATS = [
   { id:'exitea', label:'Exit EA', text:'Staff, public services, and early access members may now exit the dealership' },
   { id:'reinvites', label:'Reinvites', text:'Welcome back reinvites! Once you load in, you may leave the spawn.' },
   { id:'sgr', label:'SGR', text:'This is a Shadow Greenville Roleplay Session - Code: SGR' },
+  { id:'shops', label:'Shops', text:'Open some shops to enhance the roleplaying experience' },
+  { id:'services', label:'Services', multi:{
+      options:['DOT','FD','LE'],
+      build:(sel)=>{
+        const list = sel.length ? sel : ['DOT'];
+        const joined = list.length <= 1 ? list.join('')
+          : list.length === 2 ? list.join(' and ')
+          : list.slice(0,-1).join(', ') + ' and ' + list[list.length-1];
+        return `${joined} is online - RP crashes over 30mph, not doing so will result in a kick`;
+      }
+    } },
 ];
 const BASIC_ORDER_KEY = 'sgr_basic_order';
 const BASIC_PREFIX_KEY = 'sgr_basic_prefix';
+const BASIC_MULTI_KEY = 'sgr_basic_multi';
 function loadBasicOrder(){
   try{
     const saved = JSON.parse(localStorage.getItem(BASIC_ORDER_KEY) || 'null');
@@ -2314,7 +2468,10 @@ function loadBasicOrder(){
 function saveBasicOrder(order){ try{ localStorage.setItem(BASIC_ORDER_KEY, JSON.stringify(order)); }catch(e){} }
 function loadBasicPrefixes(){ try{ return JSON.parse(localStorage.getItem(BASIC_PREFIX_KEY) || '{}') || {}; }catch(e){ return {}; } }
 function saveBasicPrefixes(map){ try{ localStorage.setItem(BASIC_PREFIX_KEY, JSON.stringify(map)); }catch(e){} }
+function loadBasicMulti(){ try{ return JSON.parse(localStorage.getItem(BASIC_MULTI_KEY) || '{}') || {}; }catch(e){ return {}; } }
+function saveBasicMulti(map){ try{ localStorage.setItem(BASIC_MULTI_KEY, JSON.stringify(map)); }catch(e){} }
 let BASIC_PREFIXES = loadBasicPrefixes();
+let BASIC_MULTI = loadBasicMulti(); // { [id]: ['DOT','FD'] }
 
 function renderBasicFormats(){
   const order = loadBasicOrder();
@@ -2324,13 +2481,24 @@ function renderBasicFormats(){
   container.innerHTML = order.map(id=>{
     const f = byId[id];
     const prefix = BASIC_PREFIXES[id] || 'ha';
+    const selected = BASIC_MULTI[f.id] || (f.multi ? [f.multi.options[0]] : []);
+    const text = f.multi ? f.multi.build(selected) : f.text;
+    const labelHtml = f.multi
+      ? `<div class="format-label-row"><div class="format-label">${escapeHtml(f.label)}</div><div class="multi-toggle" data-id="${f.id}">${f.multi.options.map(o=>`<button type="button" data-val="${escapeHtml(o)}" class="${selected.includes(o)?'active':''}">${escapeHtml(o)}</button>`).join('')}</div></div>`
+      : `<div class="format-label">${escapeHtml(f.label)}</div>`;
     return `
     <div class="format-row" data-id="${f.id}">
-      <span class="format-drag" title="Drag to reorder"><span class="icon" data-icon="drag"></span></span>
-      <div class="format-prefix" data-id="${f.id}">${prefixButtonsHtml(prefix)}</div>
+      <div class="format-side">
+        <div class="format-label-spacer">&nbsp;</div>
+        <div class="format-side-content"><span class="format-drag" title="Drag to reorder"><span class="icon" data-icon="drag"></span></span></div>
+      </div>
+      <div class="format-side">
+        <div class="format-label-spacer">&nbsp;</div>
+        <div class="format-side-content"><div class="format-prefix" data-id="${f.id}">${prefixButtonsHtml(prefix)}</div></div>
+      </div>
       <div class="format-body">
-        <div class="format-label">${escapeHtml(f.label)}</div>
-        <div class="format-pill" data-id="${f.id}">${escapeHtml(f.text)}<span class="copied-flag">Copied!</span></div>
+        ${labelHtml}
+        <div class="format-pill" data-id="${f.id}">${escapeHtml(text)}<span class="copied-flag">Copied!</span></div>
       </div>
     </div>`;
   }).join('');
@@ -2346,12 +2514,34 @@ function renderBasicFormats(){
       positionIndicator(wrap);
     });
   });
+  container.querySelectorAll('.multi-toggle').forEach(wrap=>{
+    wrap.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const id = wrap.dataset.id;
+        const f = byId[id];
+        let sel = BASIC_MULTI[id] || [f.multi.options[0]];
+        const val = btn.dataset.val;
+        if(sel.includes(val)){
+          if(sel.length > 1) sel = sel.filter(v=>v!==val); // keep at least one selected
+        } else {
+          sel = f.multi.options.filter(o=> sel.includes(o) || o===val); // keep the option order consistent
+        }
+        BASIC_MULTI[id] = sel;
+        saveBasicMulti(BASIC_MULTI);
+        wrap.querySelectorAll('button').forEach(b=> b.classList.toggle('active', sel.includes(b.dataset.val)));
+        const pill = container.querySelector(`.format-pill[data-id="${id}"]`);
+        if(pill){ pill.innerHTML = `${escapeHtml(f.multi.build(sel))}<span class="copied-flag">Copied!</span>`; }
+      });
+    });
+  });
   container.querySelectorAll('.format-pill').forEach(pill=>{
     pill.addEventListener('click', ()=>{
       const id = pill.dataset.id;
-      const f = BASIC_FORMATS.find(x=>x.id===id);
+      const f = byId[id];
       const prefix = BASIC_PREFIXES[id] || 'ha';
-      copyFormatText(`:${prefix} ${f.text}`, pill);
+      const sel = BASIC_MULTI[id] || (f.multi ? [f.multi.options[0]] : []);
+      const text = f.multi ? f.multi.build(sel) : f.text;
+      copyFormatText(`:${prefix} ${text}`, pill);
     });
   });
   enableDragReorder(container, '.format-row', (newOrder)=> saveBasicOrder(newOrder));
@@ -2380,11 +2570,11 @@ const INTERACTIVE_RP_DATA = [
     { key:'fox_bank', label:'Fox Bank', frp:[65,75] },
     { key:'cats_park', label:'Cats Park', frp:[65,75] },
   ]},
-  { key:'highway', label:'Highway', uturns:'Off', noRpPrefix:'full', subOptions:[
-    { key:'greenville', label:'Highway RP Greenville', frp:[95] },
-    { key:'brookmere', label:'Highway RP Brookmere', frp:[95] },
+  { key:'highway', label:'Highway', uturns:'Off', subOptions:[
+    { key:'greenville', label:'Greenville', frp:[95] },
+    { key:'brookmere', label:'Brookmere', frp:[95] },
   ]},
-  { key:'dual', label:'Dual', frp:75, uturns:'On' },
+  { key:'dual', label:'Dual', frp:[75,65], uturns:'On' },
   { key:'y2000s', label:'2000s', frp:[65,75], uturns:'On' },
   { key:'y1990s', label:'1990s', frp:[65,75], uturns:'On' },
   { key:'uk', label:'UK', frp:75, uturns:'Off' },
@@ -2416,8 +2606,7 @@ function buildInteractiveText(state){
   const leo = rp.leo || '7+ Road Signs';
   const house = state.house === 'Off' ? 'Off' : 'On';
   let labelSegment;
-  if(rp.noRpPrefix === 'full') labelSegment = sub ? sub.label : rp.label;
-  else if(rp.noRpPrefix) labelSegment = rp.label;
+  if(rp.noRpPrefix) labelSegment = rp.label;
   else if(sub) labelSegment = `RP: ${rp.label} (${sub.label})`;
   else labelSegment = `RP: ${rp.label}`;
   return `:${state.prefix} ${labelSegment}, Cruising Speed: ${cruising} / FRP Speeds: ${frp}/ LEO Pullover: ${leo} / U-turns: ${rp.uturns} / House claiming: ${house} / PT: Normal`;
@@ -2478,9 +2667,7 @@ function buildInteractivePillHtml(state){
   const leo = rp.leo || '7+ Road Signs';
   const rpDropdown = inlineDropdown('rpKey', INTERACTIVE_RP_DATA.map(r=>({value:r.key,text:r.label})), rp.key);
   let labelHtml;
-  if(rp.noRpPrefix === 'full'){
-    labelHtml = `RP: ${inlineDropdown('subKey', rp.subOptions.map(s=>({value:s.key,text:s.label})), sub.key)}`;
-  } else if(rp.noRpPrefix){
+  if(rp.noRpPrefix){
     labelHtml = rpDropdown;
   } else if(rp.subOptions){
     labelHtml = `RP: ${rpDropdown} (${inlineDropdown('subKey', rp.subOptions.map(s=>({value:s.key,text:s.label})), sub.key)})`;
@@ -2504,7 +2691,6 @@ function buildStrictCopyText(state){
 function cardTitleFor(state){
   const rp = findRp(state.rpKey);
   const sub = rp.subOptions ? findSub(rp, state.subKey) : null;
-  if(rp.noRpPrefix === 'full') return sub.label;
   if(sub) return `${rp.label} (${sub.label})`;
   return rp.label;
 }
@@ -2545,7 +2731,7 @@ let JUST_ADDED_ID = null;
 /* ---------------- sliding :ha/:a/:m indicator ----------------
    One background pill slides + recolors between options instead of the
    color just appearing/disappearing on whichever button was clicked. */
-const PREFIX_COLORS = { ha:'var(--accent-danger)', a:'#e8973f', m:'var(--text-muted)' };
+const PREFIX_COLORS = { ha:'#d32b2b', a:'#d46e15', m:'#282828' };
 function initSlidingToggle(container){
   if(!container) return;
   if(!container.querySelector('.toggle-indicator')){
@@ -2554,6 +2740,13 @@ function initSlidingToggle(container){
     container.insertBefore(indicator, container.firstChild);
   }
   positionIndicator(container);
+  // Re-measure shortly after: on first load the button hasn't always
+  // finished its real layout yet (font/icon loading still settling),
+  // which was leaving the indicator at width 0 — invisible — until a
+  // click forced a re-position. This catches it without needing that click.
+  requestAnimationFrame(()=> positionIndicator(container));
+  setTimeout(()=> positionIndicator(container), 300);
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(()=> positionIndicator(container));
 }
 function positionIndicator(container){
   if(!container) return;
@@ -2567,34 +2760,43 @@ function positionIndicator(container){
 
 function renderInteractiveRow(kind, id, state){
   const isStrict = kind === 'strict';
-  const dragHtml = kind === 'added'
+  const dragInner = kind === 'added'
     ? `<span class="format-drag" title="Drag to reorder"><span class="icon" data-icon="drag"></span></span>`
     : `<span class="format-drag format-drag-spacer"></span>`;
-  const prefixHtml = isStrict
+  const prefixInner = isStrict
     ? `<div class="format-prefix format-prefix-fixed"><button type="button" class="active" data-key="ha">:ha</button></div>`
     : `<div class="format-prefix" data-field="prefix">${prefixButtonsHtml(state.prefix)}</div>`;
   let title;
   if(isStrict) title = 'Strict PT';
   else if(kind === 'creator') title = 'Announcement Creator';
   else title = cardTitleFor(state);
-  let actionsHtml;
+  let actionsInner;
   if(isStrict){
-    actionsHtml = `<button type="button" class="icon-btn" data-action="copy" title="Copy"><span class="icon" data-icon="copy"></span></button>`;
+    actionsInner = `<button type="button" class="icon-btn" data-action="copy" title="Copy"><span class="icon" data-icon="copy"></span></button>`;
   } else if(kind === 'creator'){
-    actionsHtml = `<button type="button" class="text-btn" data-action="add">+ Add</button><button type="button" class="icon-btn" data-action="reset" title="Reset to defaults"><span class="icon" data-icon="refresh"></span></button>`;
+    actionsInner = `<button type="button" class="text-btn" data-action="add"><span class="icon" data-icon="addbookmark"></span> Add</button><button type="button" class="icon-btn" data-action="reset" title="Reset to defaults"><span class="icon" data-icon="refresh"></span></button>`;
   } else {
-    actionsHtml = `<button type="button" class="icon-btn" data-action="copy" title="Copy"><span class="icon" data-icon="copy"></span></button><button type="button" class="icon-btn icon-btn-danger" data-action="delete" title="Delete"><span class="icon" data-icon="trash"></span></button>`;
+    actionsInner = `<button type="button" class="icon-btn" data-action="copy" title="Copy"><span class="icon" data-icon="copy"></span></button><button type="button" class="icon-btn icon-btn-danger" data-action="delete" title="Delete"><span class="icon" data-icon="trash"></span></button>`;
   }
   const pillBody = isStrict ? buildStrictPillHtml(state) : buildInteractivePillHtml(state);
   return `
     <div class="interactive-card format-row" data-kind="${kind}" data-id="${escapeHtml(id)}">
-      ${dragHtml}
-      ${prefixHtml}
+      <div class="format-side">
+        <div class="format-label-spacer">&nbsp;</div>
+        <div class="format-side-content">${dragInner}</div>
+      </div>
+      <div class="format-side">
+        <div class="format-label-spacer">&nbsp;</div>
+        <div class="format-side-content">${prefixInner}</div>
+      </div>
       <div class="format-body">
         <div class="format-label">${escapeHtml(title)}</div>
         <div class="format-pill interactive-pill">${pillBody}</div>
       </div>
-      <div class="interactive-card-actions">${actionsHtml}</div>
+      <div class="format-side">
+        <div class="format-label-spacer">&nbsp;</div>
+        <div class="format-side-content"><div class="interactive-card-actions">${actionsInner}</div></div>
+      </div>
     </div>`;
 }
 
