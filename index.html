@@ -645,7 +645,7 @@ section.section{ margin-bottom:40px; scroll-margin-top:100px; }
 .format-prefix button{ position:relative; z-index:1; border:none; background:transparent; padding:7px 10px; border-radius:8px; font-family:var(--font-body); font-size:11.5px; font-weight:700; letter-spacing:.02em; cursor:pointer; color:var(--text-dim); transition:color .18s ease; }
 .format-prefix button:hover{ color:var(--text); }
 .format-prefix button.active{ color:#fff; }
-.format-prefix-fixed{ opacity:.85; }
+.format-prefix-fixed{ background:transparent; border-color:transparent; opacity:1; }
 .format-prefix-fixed button{ cursor:default; }
 .format-prefix-fixed button:not(.active){ visibility:hidden; }
 .toggle-indicator{ position:absolute; top:3px; bottom:3px; left:0; width:0; border-radius:8px; background:var(--accent-danger); transition:transform .28s cubic-bezier(.22,1,.36,1), width .28s cubic-bezier(.22,1,.36,1), background .28s ease; z-index:0; }
@@ -681,6 +681,7 @@ section.section{ margin-bottom:40px; scroll-margin-top:100px; }
 .icon-btn.icon-btn-danger:hover{ color:var(--accent-danger); border-color:var(--accent-danger); }
 .icon-btn.icon-btn-accent{ background:var(--accent); border-color:var(--accent); color:#fff; }
 .icon-btn.icon-btn-accent:hover{ opacity:.88; color:#fff; border-color:var(--accent); }
+.icon-btn.icon-btn-invisible{ visibility:hidden; pointer-events:none; }
 .icon-btn .icon{ width:17px; height:17px; }
 .text-btn{ display:inline-flex; align-items:center; gap:6px; padding:0 14px; height:34px; border-radius:10px; background:var(--accent); border:1px solid var(--accent); color:#fff; font-family:var(--font-body); font-size:12px; font-weight:700; cursor:pointer; transition:.15s; white-space:nowrap; }
 .text-btn .icon{ width:16px; height:16px; }
@@ -2790,7 +2791,7 @@ function renderInteractiveRow(kind, id, state){
   else title = cardTitleFor(state);
   let actionsInner;
   if(isStrict){
-    actionsInner = `<button type="button" class="icon-btn" data-action="copy" title="Copy"><span class="icon" data-icon="copy"></span></button>`;
+    actionsInner = `<button type="button" class="icon-btn icon-btn-invisible" tabindex="-1" aria-hidden="true"></button><button type="button" class="icon-btn" data-action="copy" title="Copy"><span class="icon" data-icon="copy"></span></button>`;
   } else if(kind === 'creator'){
     actionsInner = `<button type="button" class="icon-btn icon-btn-accent" data-action="add" title="Save as a new card"><span class="icon" data-icon="addbookmark"></span></button><button type="button" class="icon-btn" data-action="reset" title="Reset to defaults"><span class="icon" data-icon="refresh"></span></button>`;
   } else {
