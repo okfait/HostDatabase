@@ -9,6 +9,15 @@
 <link rel="icon" href="https://github.com/okfait/okgarage-mini/blob/main/01%20(81).png?raw=true">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=book_2,bookmark,bookmarks,content_copy,delete,drag_indicator,refresh" />
+<style>
+.material-symbols-outlined{
+  font-family:'Material Symbols Outlined';
+  font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;
+  font-weight:normal; font-style:normal; display:inline-block; line-height:1;
+  white-space:nowrap; word-wrap:normal; direction:ltr; -webkit-font-smoothing:antialiased;
+}
+</style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" onerror="this.onerror=null;document.write('<script src=\'https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js\'><\/script>')"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/4.4.4/chart.umd.min.js" onerror="this.onerror=null;document.write('<script src=\'https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js\'><\/script>')"></script>
 <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js" onerror="this.onerror=null;document.write('<script src=\'https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js\'><\/script>')"></script>
@@ -60,13 +69,13 @@ const ICONS = {
   group: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
   crown: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7Z"/><path d="M5 20h14"/></svg>',
   car:   '<svg viewBox="0 -960 960 960" fill="currentColor"><path d="M160-240v-200 200ZM80-440l84-240q6-18 21.5-29t34.5-11h183q-3 20-3 40t3 40H234l-42 120h259q17 24 38 44.5t47 35.5H160v200h560v-163q21-3 41-9t39-15v307q0 17-11.5 28.5T760-80h-40q-17 0-28.5-11.5T680-120v-40H200v40q0 17-11.5 28.5T160-80h-40q-17 0-28.5-11.5T80-120v-320Zm540 160q25 0 42.5-17.5T680-340q0-25-17.5-42.5T620-400q-25 0-42.5 17.5T560-340q0 25 17.5 42.5T620-280Zm-360 0q25 0 42.5-17.5T320-340q0-25-17.5-42.5T260-400q-25 0-42.5 17.5T200-340q0 25 17.5 42.5T260-280Zm420-200q-83 0-141.5-58.5T480-680q0-82 58-141t142-59q83 0 141.5 58.5T880-680q0 83-58.5 141.5T680-480Zm-20-160h40v-160h-40v160Zm20 80q8 0 14-6t6-14q0-8-6-14t-14-6q-8 0-14 6t-6 14q0 8 6 14t14 6Z"/></svg>',
-  book2: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6c-2-1.5-5-2-8-1.3v13.6c3-.7 6-.2 8 1.3 2-1.5 5-2 8-1.3V4.7C17 4 14 4.5 12 6Z"/><path d="M12 6v13.6"/></svg>',
-  bookmark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v17l-6-4-6 4V4Z"/></svg>',
-  bookmarks: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v14l-5-3.3-5 3.3V6Z"/><path d="M13 4.3h3a2 2 0 0 1 2 2V19l-2.5-1.7"/></svg>',
-  copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V6a2 2 0 0 1 2-2h10"/></svg>',
-  trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>',
-  refresh: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>',
-  drag: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>'
+  book2: '<span class="material-symbols-outlined">book_2</span>',
+  bookmark: '<span class="material-symbols-outlined">bookmark</span>',
+  bookmarks: '<span class="material-symbols-outlined">bookmarks</span>',
+  copy: '<span class="material-symbols-outlined">content_copy</span>',
+  trash: '<span class="material-symbols-outlined">delete</span>',
+  refresh: '<span class="material-symbols-outlined">refresh</span>',
+  drag: '<span class="material-symbols-outlined">drag_indicator</span>'
 };
 
 const BANNED_VEHICLES = [
@@ -359,7 +368,11 @@ body::-webkit-scrollbar{ display:none; width:0; height:0; }
 .card.search-fade, .electric-wrap.search-fade, .banned-card.search-fade{ opacity:0; transform:scale(.94); pointer-events:none; }
 .search-hit{ background:rgba(232,184,75,0.32); color:inherit; border-radius:3px; padding:0 1px; }
 
-.icon{ display:inline-flex; width:18px; height:18px; flex-shrink:0; vertical-align:middle; }
+.icon{ display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; flex-shrink:0; vertical-align:middle; }
+.icon .material-symbols-outlined{ font-size:18px; line-height:1; }
+.icon-btn .icon .material-symbols-outlined{ font-size:17px; }
+.format-drag .icon .material-symbols-outlined{ font-size:20px; }
+.formats-subhead .icon .material-symbols-outlined{ font-size:19px; }
 .icon svg{ width:100%; height:100%; display:block; }
 
 /* ---------- shine sweep, used on a few key headings ---------- */
@@ -459,9 +472,14 @@ header.top .top-inner{ max-width:1180px; width:100%; margin:0 auto; display:flex
 .topnav a{ display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600; color:var(--text-muted); text-decoration:none; padding:7px 10px; border-radius:9px; transition:.15s; font-family:var(--font-body); white-space:nowrap; }
 .topnav a:hover{ color:var(--accent-bright); background:var(--bg-elevated); }
 
-/* Below full desktop width, tighten the nav further (icon-only) before
-   the mobile breakpoint stacks everything into rows. Keeps the sign-in
-   block on the same row as the brand/nav for as long as possible. */
+/* The nav goes icon-only whenever its content doesn't actually fit next
+   to the brand/sign-in text (checked in JS via ResizeObserver) — this
+   reacts to the REAL available space (which depends on username length,
+   how many nav links there are, etc.) instead of a fixed viewport-width
+   guess, so the brand and sign-in text never have to shrink or overlap. */
+.topnav.topnav-compact a{ padding:7px 8px; gap:0; font-size:0; }
+.topnav.topnav-compact a .icon{ font-size:initial; }
+
 @media (max-width:900px){
   .topnav a{ padding:7px 8px; gap:0; font-size:0; }
   .topnav a .icon{ font-size:initial; }
@@ -615,32 +633,42 @@ section.section{ margin-bottom:40px; scroll-margin-top:100px; }
 .formats-subhead-gap{ margin-top:36px; }
 .format-list{ display:flex; flex-direction:column; }
 
-.format-row{ display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+.format-row{ display:flex; align-items:flex-end; gap:12px; margin-bottom:12px; }
 .format-row.dragging{ z-index:5; }
-.format-drag{ flex-shrink:0; width:22px; height:22px; color:var(--text-dim); cursor:grab; display:flex; align-items:center; justify-content:center; touch-action:none; }
+.format-drag{ flex-shrink:0; width:22px; height:22px; margin-bottom:11px; color:var(--text-dim); cursor:grab; display:flex; align-items:center; justify-content:center; touch-action:none; }
 .format-drag:hover{ color:var(--accent-bright); }
 .format-drag:active{ cursor:grabbing; }
 .format-drag .icon{ width:20px; height:20px; }
+.format-drag-spacer{ cursor:default; visibility:hidden; }
 
-.format-prefix{ flex-shrink:0; display:flex; background:var(--bg-elevated); border:1px solid var(--line-bright); border-radius:11px; padding:3px; gap:2px; }
-.format-prefix button{ border:none; background:transparent; padding:7px 10px; border-radius:8px; font-family:var(--font-body); font-size:11.5px; font-weight:700; letter-spacing:.02em; cursor:pointer; color:var(--text-dim); transition:.12s; }
+/* :ha / :a / :m segmented control — a single indicator pill slides and
+   recolors between options instead of the color just swapping instantly. */
+.format-prefix{ position:relative; flex-shrink:0; margin-bottom:11px; display:flex; background:var(--bg-elevated); border:1px solid var(--line-bright); border-radius:11px; padding:3px; gap:2px; }
+.format-prefix button{ position:relative; z-index:1; border:none; background:transparent; padding:7px 10px; border-radius:8px; font-family:var(--font-body); font-size:11.5px; font-weight:700; letter-spacing:.02em; cursor:pointer; color:var(--text-dim); transition:color .18s ease; }
 .format-prefix button:hover{ color:var(--text); }
-.format-prefix button.active[data-key="ha"]{ background:var(--accent-danger); color:#fff; }
-.format-prefix button.active[data-key="a"]{ background:#e8973f; color:#1a1006; }
-.format-prefix button.active[data-key="m"]{ background:var(--text-muted); color:#0d1512; }
+.format-prefix button.active[data-key="ha"]{ color:#fff; }
+.format-prefix button.active[data-key="a"]{ color:#1a1006; }
+.format-prefix button.active[data-key="m"]{ color:#0d1512; }
+.format-prefix-fixed{ opacity:.85; }
+.format-prefix-fixed button{ cursor:default; }
+.toggle-indicator{ position:absolute; top:3px; bottom:3px; left:0; width:0; border-radius:8px; background:var(--accent-danger); transition:transform .28s cubic-bezier(.22,1,.36,1), width .28s cubic-bezier(.22,1,.36,1), background .28s ease; z-index:0; }
 
 .format-body{ flex:1; min-width:0; }
-.format-label{ font-family:var(--font-body); font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--text-dim); margin-bottom:5px; }
+.format-label{ font-family:var(--font-body); font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--text-dim); margin-bottom:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .format-pill{ position:relative; background:var(--bg-elevated); border:1px solid var(--line-bright); border-radius:999px; padding:11px 18px; font-family:var(--font-body); font-size:13px; color:var(--text); text-align:left; cursor:pointer; user-select:none; transition:border-color .15s, background .15s; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .format-pill:hover{ border-color:var(--accent-bright); }
 .format-pill .copied-flag{ position:absolute; right:14px; top:50%; transform:translateY(-50%); font-size:11px; font-weight:700; color:var(--accent-bright); opacity:0; transition:opacity .15s; pointer-events:none; background:var(--bg-elevated); padding-left:10px; }
 .format-pill.just-copied .copied-flag{ opacity:1; }
 
-/* Interactive format cards (creator / strict PT / added) */
-.interactive-card{ background:var(--bg-card); border:1px solid var(--line); border-radius:16px; padding:18px 20px; margin-bottom:16px; }
-.interactive-card-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px; }
-.interactive-card-title{ font-family:var(--font-display); font-weight:700; font-size:12.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); }
-.interactive-card-actions{ display:flex; align-items:center; gap:8px; }
+/* Interactive format rows — same skeleton as a basic format row (drag |
+   prefix | label+pill), plus an actions cluster on the right. The
+   dropdowns live INSIDE the pill text itself, so the pill needs to wrap
+   and stay clickable-through to its inner controls. */
+.interactive-card{ margin-bottom:14px; }
+.interactive-card.leaving{ opacity:0; transform:scale(.96); transition:opacity .22s ease, transform .22s ease; pointer-events:none; }
+@keyframes fmtFadeIn{ from{ opacity:0; transform:translateY(6px) scale(.97); } to{ opacity:1; transform:none; } }
+.interactive-card.just-added{ animation:fmtFadeIn .35s ease; }
+.interactive-card-actions{ display:flex; align-items:center; gap:8px; margin-bottom:11px; flex-shrink:0; }
 .icon-btn{ display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:10px; background:var(--bg-elevated); border:1px solid var(--line-bright); color:var(--text-muted); cursor:pointer; transition:.15s; flex-shrink:0; }
 .icon-btn:hover{ color:var(--accent-bright); border-color:var(--accent-bright); }
 .icon-btn.icon-btn-danger:hover{ color:var(--accent-danger); border-color:var(--accent-danger); }
@@ -648,18 +676,11 @@ section.section{ margin-bottom:40px; scroll-margin-top:100px; }
 .text-btn{ display:inline-flex; align-items:center; gap:6px; padding:0 16px; height:34px; border-radius:10px; background:var(--accent); border:1px solid var(--accent); color:#fff; font-family:var(--font-body); font-size:12px; font-weight:700; cursor:pointer; transition:.15s; white-space:nowrap; }
 .text-btn:hover{ opacity:.88; }
 
-.interactive-fields{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px; }
-.field-dropdown{ position:relative; }
-.field-dropdown-toggle{ display:flex; align-items:center; gap:8px; background:var(--bg-elevated); border:1px solid var(--line-bright); border-radius:11px; padding:9px 12px; font-family:var(--font-body); font-size:12.5px; font-weight:600; color:var(--text); cursor:pointer; transition:border-color .15s; white-space:nowrap; }
-.field-dropdown-toggle:hover{ border-color:var(--accent-bright); }
-.field-dropdown-label{ font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-dim); margin-right:2px; }
-.field-dropdown-caret{ color:var(--text-dim); font-size:10px; }
-.field-dropdown .dropdown-menu{ min-width:220px; }
-.house-toggle{ display:flex; background:var(--bg-elevated); border:1px solid var(--line-bright); border-radius:11px; padding:3px; gap:2px; }
-.house-toggle button{ border:none; background:transparent; padding:8px 14px; border-radius:8px; font-family:var(--font-body); font-size:12px; font-weight:700; cursor:pointer; color:var(--text-dim); transition:.12s; }
-.house-toggle button.active{ background:var(--accent); color:#fff; }
-
-.interactive-strict-note{ font-size:11.5px; color:var(--text-dim); margin-top:-8px; margin-bottom:12px; }
+.format-pill.interactive-pill{ white-space:normal; overflow:visible; text-overflow:clip; line-height:2; cursor:default; }
+.inline-dd{ position:relative; display:inline-flex; align-items:center; gap:3px; background:var(--bg-card); border:1px solid var(--line-bright); border-radius:7px; padding:2px 8px; margin:0 2px; font-weight:700; color:var(--accent-bright); cursor:pointer; vertical-align:baseline; transition:border-color .15s; }
+.inline-dd:hover{ border-color:var(--accent-bright); }
+.field-dropdown-caret{ color:var(--text-dim); font-size:9px; }
+.field-dropdown .dropdown-menu{ min-width:220px; top:calc(100% + 8px); }
 
 /* Confirm delete modal */
 .confirm-overlay{ position:fixed; inset:0; background:rgba(4,10,8,0.6); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; z-index:100; opacity:0; pointer-events:none; transition:opacity .18s ease; }
@@ -673,9 +694,13 @@ section.section{ margin-bottom:40px; scroll-margin-top:100px; }
 .confirm-actions button.confirm-yes{ background:var(--accent-danger); border-color:var(--accent-danger); color:#fff; }
 .confirm-actions button.confirm-yes:hover{ opacity:.88; }
 
+/* Extra breathing room below the last interactive row so its dropdowns
+   (especially AORP's long location list) have room to open fully
+   without being cut off by the page/section ending right underneath. */
+#formats-section{ padding-bottom:360px; }
+
 @media (max-width:640px){
   .format-row{ flex-wrap:wrap; }
-  .interactive-fields{ gap:8px; }
 }
 .motm-card-logs .unit{ font-size:11px; color:var(--text-dim); font-weight:500; margin-left:6px; }
 
@@ -857,6 +882,25 @@ function renderIconsIn(root){
   });
 }
 renderIconsIn();
+
+/* ---------------- keep the top bar from ever overlapping ----------------
+   The brand text and "Signed in as X" must never shrink or move — so
+   instead, the nav itself goes icon-only exactly when (and only when)
+   there genuinely isn't room for it, checked against the real rendered
+   widths rather than guessed from viewport size (which doesn't account
+   for how many nav links exist or how long the signed-in name is). */
+function updateTopnavFit(){
+  const inner = document.querySelector('header.top .top-inner');
+  const nav = document.querySelector('.topnav');
+  if(!inner || !nav) return;
+  nav.classList.remove('topnav-compact');
+  if(inner.scrollWidth > inner.clientWidth + 1) nav.classList.add('topnav-compact');
+}
+window.addEventListener('resize', updateTopnavFit);
+updateTopnavFit();
+setTimeout(updateTopnavFit, 200);
+setTimeout(updateTopnavFit, 800); // re-check once fonts/icons have fully settled
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(updateTopnavFit);
 
 /* ---------------- Drag-to-resize the graph, with a magnetic snap back
    to its default height when released close to it ---------------- */
@@ -1405,6 +1449,7 @@ function attemptLogin(silent){
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   document.getElementById('who-name').textContent = match.username;
+  updateTopnavFit();
   renderAll();
 }
 
@@ -2092,10 +2137,15 @@ renderBannedVehicles(); // static data — doesn't need to wait for the sheet or
   }
   box.addEventListener('scroll', updateFades);
   window.addEventListener('resize', updateFades);
-  // Re-check after the (async) render populates the list, since scrollHeight
-  // isn't known until the cards actually exist.
+  // Re-check repeatedly after render/load/fonts settle, since scrollHeight
+  // can keep changing (fonts loading in, icons rendering, etc.) after the
+  // first quick checks — without this, the bottom fade sometimes just
+  // didn't show up until the user scrolled once themselves.
   setTimeout(updateFades, 50);
   setTimeout(updateFades, 400);
+  setTimeout(updateFades, 1200);
+  window.addEventListener('load', updateFades);
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(updateFades);
 
   // Give the box its own Lenis instance scoped to just this element, so it
   // scrolls with the same smooth/inertial feel as the rest of the site
@@ -2133,7 +2183,6 @@ function enableDragReorder(container, rowSelector, onReorder){
 
       function move(ev){
         const dy = ev.clientY - startY;
-        dragEl.style.transform = `translateY(${dy}px)`;
         const others = Array.from(container.querySelectorAll(rowSelector)).filter(r=>r!==dragEl);
         const dragCenter = startTop + dy + dragHeight/2;
         let target = others.length;
@@ -2148,8 +2197,16 @@ function enableDragReorder(container, rowSelector, onReorder){
           if(desiredNeighbor) container.insertBefore(dragEl, desiredNeighbor);
           else container.appendChild(dragEl);
           flipPlay(before, others);
-          dragEl.style.transform = `translateY(${dy}px)`;
         }
+        // Whether or not it just hopped to a new slot, the dragged row's
+        // ON-SCREEN position should always be exactly "where it started"
+        // + "how far the pointer has moved" — recompute the transform
+        // against its CURRENT natural position each time, since hopping
+        // to a new slot changes that natural position and would
+        // otherwise make the row jump instead of tracking the cursor.
+        dragEl.style.transform = 'none';
+        const naturalTop = dragEl.getBoundingClientRect().top;
+        dragEl.style.transform = `translateY(${(startTop + dy) - naturalTop}px)`;
       }
       function up(){
         document.removeEventListener('pointermove', move);
@@ -2278,6 +2335,7 @@ function renderBasicFormats(){
     </div>`;
   }).join('');
   renderIconsIn(container);
+  container.querySelectorAll('.format-prefix').forEach(initSlidingToggle);
   container.querySelectorAll('.format-prefix button').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       const wrap = btn.closest('.format-prefix');
@@ -2285,6 +2343,7 @@ function renderBasicFormats(){
       BASIC_PREFIXES[id] = btn.dataset.key;
       saveBasicPrefixes(BASIC_PREFIXES);
       wrap.querySelectorAll('button').forEach(b=> b.classList.toggle('active', b===btn));
+      positionIndicator(wrap);
     });
   });
   container.querySelectorAll('.format-pill').forEach(pill=>{
@@ -2364,30 +2423,23 @@ function buildInteractiveText(state){
   return `:${state.prefix} ${labelSegment}, Cruising Speed: ${cruising} / FRP Speeds: ${frp}/ LEO Pullover: ${leo} / U-turns: ${rp.uturns} / House claiming: ${house} / PT: Normal`;
 }
 
-/* Reusable searchable dropdown field (RP type / sub-location / speed) —
-   built on the exact same .dropdown/.dropdown-menu/.dropdown-item markup
-   the graph's player picker already uses, so it looks & behaves the same. */
-function dropdownFieldHtml(fieldKey, options, selectedValue, labelText){
+/* Reusable searchable inline dropdown — sits right inside the announcement
+   text ("RP: [dropdown]"), built on the same .dropdown/.dropdown-menu/
+   .dropdown-item markup the graph's player picker already uses. */
+function inlineDropdown(fieldKey, options, selectedValue){
   const selectedOpt = options.find(o=>o.value===selectedValue) || options[0];
-  return `
-    <div class="dropdown field-dropdown" data-field="${escapeHtml(fieldKey)}">
-      <button type="button" class="field-dropdown-toggle">
-        ${labelText ? `<span class="field-dropdown-label">${escapeHtml(labelText)}</span>` : ''}
-        <span class="field-dropdown-value">${escapeHtml(selectedOpt.text)}</span>
-        <span class="field-dropdown-caret">▾</span>
-      </button>
-      <div class="dropdown-menu">
-        <input type="text" class="dropdown-search" placeholder="Search…">
-        ${options.map(o=>`<div class="dropdown-item${o.value===selectedOpt.value?' selected':''}" data-val="${escapeHtml(o.value)}">${escapeHtml(o.text)}</div>`).join('')}
-      </div>
-    </div>`;
+  return `<span class="dropdown field-dropdown inline-dd" data-field="${escapeHtml(fieldKey)}">${escapeHtml(selectedOpt.text)}<span class="field-dropdown-caret">▾</span><span class="dropdown-menu"><input type="text" class="dropdown-search" placeholder="Search…">${options.map(o=>`<div class="dropdown-item${o.value===selectedOpt.value?' selected':''}" data-val="${escapeHtml(o.value)}">${escapeHtml(o.text)}</div>`).join('')}</span></span>`;
 }
 function wireFieldDropdowns(root, onChange){
   if(!root) return;
   root.querySelectorAll('.field-dropdown').forEach(dd=>{
-    const toggle = dd.querySelector('.field-dropdown-toggle');
+    const menu = dd.querySelector('.dropdown-menu');
     const search = dd.querySelector('.dropdown-search');
-    toggle.addEventListener('click', (e)=>{
+    dd.addEventListener('click', (e)=>{
+      // Item clicks and search-box clicks each stop their own propagation
+      // (below), so they never actually reach this handler — this guard
+      // is just for clarity/safety in case that ever changes.
+      if(e.target.closest('.dropdown-item') || e.target.closest('.dropdown-search')) return;
       e.stopPropagation();
       const wasOpen = dd.classList.contains('open');
       document.querySelectorAll('.dropdown.open').forEach(o=> o.classList.remove('open'));
@@ -2414,48 +2466,52 @@ function wireFieldDropdowns(root, onChange){
 }
 document.addEventListener('click', ()=>{ document.querySelectorAll('.dropdown.open').forEach(o=> o.classList.remove('open')); });
 
-function renderInteractiveFields(state){
+/* Builds the announcement line with the dropdowns embedded right where
+   the variable parts go — no ":ha" shown here, that only gets added
+   when you copy it. */
+function buildInteractivePillHtml(state){
   const rp = findRp(state.rpKey);
   const sub = rp.subOptions ? findSub(rp, state.subKey) : null;
   const frpOpts = frpOptionsFor(rp, sub);
   const chosenSpeed = (state.speed !== null && frpOpts.includes(state.speed)) ? state.speed : frpOpts[0];
-  let html = '';
-  html += dropdownFieldHtml('rpKey', INTERACTIVE_RP_DATA.map(r=>({value:r.key,text:r.label})), rp.key, 'RP');
-  if(rp.subOptions) html += dropdownFieldHtml('subKey', rp.subOptions.map(s=>({value:s.key,text:s.label})), sub.key, rp.key==='highway' ? 'Highway' : 'Location');
-  if(frpOpts.length > 1) html += dropdownFieldHtml('speed', frpOpts.map(n=>({value:String(n),text:String(n)})), String(chosenSpeed), 'FRP Speed');
-  html += `<div class="house-toggle" data-field="house"><button type="button" class="${state.house!=='Off'?'active':''}" data-val="On">On</button><button type="button" class="${state.house==='Off'?'active':''}" data-val="Off">Off</button></div>`;
-  html += `<div class="format-prefix" data-field="prefix">${prefixButtonsHtml(state.prefix)}</div>`;
-  return html;
-}
-
-function renderInteractiveCard(kind, id, state){
-  const isStrict = kind === 'strict';
-  let actions;
-  if(isStrict){
-    actions = `<div class="interactive-card-actions"><button type="button" class="icon-btn" data-action="copy" title="Copy"><span class="icon" data-icon="copy"></span></button></div>`;
-  } else if(kind === 'creator'){
-    actions = `<div class="interactive-card-actions"><button type="button" class="text-btn" data-action="add">+ Add</button><button type="button" class="icon-btn" data-action="reset" title="Reset to defaults"><span class="icon" data-icon="refresh"></span></button></div>`;
+  const cruising = (sub && sub.cruising !== undefined) ? sub.cruising : (rp.cruising !== undefined ? rp.cruising : 'Road Signs');
+  const leo = rp.leo || '7+ Road Signs';
+  const rpDropdown = inlineDropdown('rpKey', INTERACTIVE_RP_DATA.map(r=>({value:r.key,text:r.label})), rp.key);
+  let labelHtml;
+  if(rp.noRpPrefix === 'full'){
+    labelHtml = `RP: ${inlineDropdown('subKey', rp.subOptions.map(s=>({value:s.key,text:s.label})), sub.key)}`;
+  } else if(rp.noRpPrefix){
+    labelHtml = rpDropdown;
+  } else if(rp.subOptions){
+    labelHtml = `RP: ${rpDropdown} (${inlineDropdown('subKey', rp.subOptions.map(s=>({value:s.key,text:s.label})), sub.key)})`;
   } else {
-    actions = `<div class="interactive-card-actions"><button type="button" class="icon-btn" data-action="copy" title="Copy"><span class="icon" data-icon="copy"></span></button><button type="button" class="icon-btn icon-btn-danger" data-action="delete" title="Delete"><span class="icon" data-icon="trash"></span></button></div>`;
+    labelHtml = `RP: ${rpDropdown}`;
   }
-  const title = isStrict ? 'Strict PT' : (kind==='creator' ? 'Announcement Creator' : 'Saved Announcement');
-  const note = isStrict ? `<div class="interactive-strict-note">This one's fixed — nothing here can be changed.</div>` : '';
-  const fieldsHtml = isStrict ? '' : `<div class="interactive-fields">${renderInteractiveFields(state)}</div>`;
-  const text = isStrict ? STRICT_PT_TEXT : buildInteractiveText(state);
-  return `
-    <div class="interactive-card" data-kind="${kind}" data-id="${escapeHtml(id)}">
-      <div class="interactive-card-head">
-        <div class="interactive-card-title">${escapeHtml(title)}</div>
-        ${actions}
-      </div>
-      ${note}
-      ${fieldsHtml}
-      <div class="format-pill" data-copy-pill>${escapeHtml(text)}<span class="copied-flag">Copied!</span></div>
-    </div>`;
+  const frpHtml = frpOpts.length > 1 ? inlineDropdown('speed', frpOpts.map(n=>({value:String(n),text:String(n)})), String(chosenSpeed)) : String(chosenSpeed);
+  const houseHtml = inlineDropdown('house', [{value:'On',text:'On'},{value:'Off',text:'Off'}], state.house);
+  return `${labelHtml}, Cruising Speed: ${cruising} / FRP Speeds: ${frpHtml}/ LEO Pullover: ${leo} / U-turns: ${rp.uturns} / House claiming: ${houseHtml} / PT: Normal`;
+}
+function buildStrictPillHtml(state){
+  const houseHtml = inlineDropdown('house', [{value:'On',text:'On'},{value:'Off',text:'Off'}], state.house);
+  return `RP: Normal, Cruising Speed: Road Signs / FRP Speeds: 65/ LEO Pullover: 7+ Road Signs / U-turns: Off / House claiming: ${houseHtml} / PT: STRICT`;
+}
+function buildStrictCopyText(state){
+  return `:ha RP: Normal, Cruising Speed: Road Signs / FRP Speeds: 65/ LEO Pullover: 7+ Road Signs / U-turns: Off / House claiming: ${state.house} / PT: STRICT`;
+}
+// What a saved card's own label shows — the RP it's actually set to,
+// e.g. "AORP (Horton)" or "Highway RP Brookmere" — so you can tell your
+// saved announcements apart at a glance.
+function cardTitleFor(state){
+  const rp = findRp(state.rpKey);
+  const sub = rp.subOptions ? findSub(rp, state.subKey) : null;
+  if(rp.noRpPrefix === 'full') return sub.label;
+  if(sub) return `${rp.label} (${sub.label})`;
+  return rp.label;
 }
 
 const INTERACTIVE_CREATOR_KEY = 'sgr_interactive_creator';
 const INTERACTIVE_CARDS_KEY = 'sgr_interactive_cards';
+const STRICT_STATE_KEY = 'sgr_strict_state';
 function loadCreatorState(){
   try{
     const saved = JSON.parse(localStorage.getItem(INTERACTIVE_CREATOR_KEY) || 'null');
@@ -2472,50 +2528,129 @@ function loadAddedCards(){
   return [];
 }
 function saveAddedCards(list){ try{ localStorage.setItem(INTERACTIVE_CARDS_KEY, JSON.stringify(list)); }catch(e){} }
+function loadStrictState(){
+  try{
+    const s = JSON.parse(localStorage.getItem(STRICT_STATE_KEY) || 'null');
+    if(s && (s.house === 'On' || s.house === 'Off')) return s;
+  }catch(e){}
+  return { house:'On' };
+}
+function saveStrictState(s){ try{ localStorage.setItem(STRICT_STATE_KEY, JSON.stringify(s)); }catch(e){} }
 
 let CREATOR_STATE = loadCreatorState();
 let ADDED_CARDS = loadAddedCards(); // [{id, state}, ...]
+let STRICT_STATE = loadStrictState();
+let JUST_ADDED_ID = null;
 
-function wireInteractiveCard(cardEl, state, kind){
+/* ---------------- sliding :ha/:a/:m indicator ----------------
+   One background pill slides + recolors between options instead of the
+   color just appearing/disappearing on whichever button was clicked. */
+const PREFIX_COLORS = { ha:'var(--accent-danger)', a:'#e8973f', m:'var(--text-muted)' };
+function initSlidingToggle(container){
+  if(!container) return;
+  if(!container.querySelector('.toggle-indicator')){
+    const indicator = document.createElement('div');
+    indicator.className = 'toggle-indicator';
+    container.insertBefore(indicator, container.firstChild);
+  }
+  positionIndicator(container);
+}
+function positionIndicator(container){
+  if(!container) return;
+  const indicator = container.querySelector('.toggle-indicator');
+  const active = container.querySelector('button.active');
+  if(!indicator || !active) return;
+  indicator.style.width = active.offsetWidth + 'px';
+  indicator.style.transform = `translateX(${active.offsetLeft}px)`;
+  indicator.style.background = PREFIX_COLORS[active.dataset.key] || 'var(--accent)';
+}
+
+function renderInteractiveRow(kind, id, state){
+  const isStrict = kind === 'strict';
+  const dragHtml = kind === 'added'
+    ? `<span class="format-drag" title="Drag to reorder"><span class="icon" data-icon="drag"></span></span>`
+    : `<span class="format-drag format-drag-spacer"></span>`;
+  const prefixHtml = isStrict
+    ? `<div class="format-prefix format-prefix-fixed"><button type="button" class="active" data-key="ha">:ha</button></div>`
+    : `<div class="format-prefix" data-field="prefix">${prefixButtonsHtml(state.prefix)}</div>`;
+  let title;
+  if(isStrict) title = 'Strict PT';
+  else if(kind === 'creator') title = 'Announcement Creator';
+  else title = cardTitleFor(state);
+  let actionsHtml;
+  if(isStrict){
+    actionsHtml = `<button type="button" class="icon-btn" data-action="copy" title="Copy"><span class="icon" data-icon="copy"></span></button>`;
+  } else if(kind === 'creator'){
+    actionsHtml = `<button type="button" class="text-btn" data-action="add">+ Add</button><button type="button" class="icon-btn" data-action="reset" title="Reset to defaults"><span class="icon" data-icon="refresh"></span></button>`;
+  } else {
+    actionsHtml = `<button type="button" class="icon-btn" data-action="copy" title="Copy"><span class="icon" data-icon="copy"></span></button><button type="button" class="icon-btn icon-btn-danger" data-action="delete" title="Delete"><span class="icon" data-icon="trash"></span></button>`;
+  }
+  const pillBody = isStrict ? buildStrictPillHtml(state) : buildInteractivePillHtml(state);
+  return `
+    <div class="interactive-card format-row" data-kind="${kind}" data-id="${escapeHtml(id)}">
+      ${dragHtml}
+      ${prefixHtml}
+      <div class="format-body">
+        <div class="format-label">${escapeHtml(title)}</div>
+        <div class="format-pill interactive-pill">${pillBody}</div>
+      </div>
+      <div class="interactive-card-actions">${actionsHtml}</div>
+    </div>`;
+}
+
+function wireInteractiveRow(cardEl, state, kind){
   if(!cardEl) return;
-  // Copy uses delegation so it keeps working after the fields/pill get
-  // re-rendered (innerHTML swap below discards the old pill node).
+  const isStrict = kind === 'strict';
+
   cardEl.addEventListener('click', (e)=>{
-    if(e.target.closest('[data-copy-pill]') || e.target.closest('[data-action="copy"]')){
-      const text = kind === 'strict' ? STRICT_PT_TEXT : buildInteractiveText(state);
-      copyFormatText(text, cardEl.querySelector('[data-copy-pill]'));
+    if(e.target.closest('.field-dropdown')) return; // let the dropdown handle its own click
+    if(e.target.closest('[data-action="copy"]') || e.target.closest('.interactive-pill')){
+      const text = isStrict ? buildStrictCopyText(state) : buildInteractiveText(state);
+      copyFormatText(text, cardEl.querySelector('.format-pill'));
     }
   });
-  if(kind === 'strict') return;
 
   function persist(){
-    if(kind === 'creator') saveCreatorState(CREATOR_STATE);
+    if(isStrict) saveStrictState(state);
+    else if(kind === 'creator') saveCreatorState(CREATOR_STATE);
     else saveAddedCards(ADDED_CARDS);
   }
-  function refresh(){
-    const fieldsWrap = cardEl.querySelector('.interactive-fields');
-    fieldsWrap.innerHTML = renderInteractiveFields(state);
-    const pill = cardEl.querySelector('[data-copy-pill]');
-    pill.innerHTML = `${escapeHtml(buildInteractiveText(state))}<span class="copied-flag">Copied!</span>`;
-    renderIconsIn(cardEl);
-    bindFields();
-  }
-  function bindFields(){
-    const fieldsWrap = cardEl.querySelector('.interactive-fields');
-    wireFieldDropdowns(fieldsWrap, (field, val)=>{
+  function bindDropdowns(){
+    const pill = cardEl.querySelector('.interactive-pill');
+    wireFieldDropdowns(pill, (field, val)=>{
       if(field === 'rpKey'){ state.rpKey = val; state.subKey = null; state.speed = null; }
       else if(field === 'subKey'){ state.subKey = val; state.speed = null; }
       else if(field === 'speed'){ state.speed = Number(val); }
-      persist(); refresh();
-    });
-    fieldsWrap.querySelectorAll('.house-toggle button').forEach(btn=>{
-      btn.addEventListener('click', ()=>{ state.house = btn.dataset.val; persist(); refresh(); });
-    });
-    fieldsWrap.querySelectorAll('.format-prefix button').forEach(btn=>{
-      btn.addEventListener('click', ()=>{ state.prefix = btn.dataset.key; persist(); refresh(); });
+      else if(field === 'house'){ state.house = val; }
+      persist();
+      refresh();
     });
   }
-  bindFields();
+  function refresh(){
+    const pill = cardEl.querySelector('.interactive-pill');
+    pill.innerHTML = isStrict ? buildStrictPillHtml(state) : buildInteractivePillHtml(state);
+    if(kind === 'added'){
+      const labelEl = cardEl.querySelector('.format-label');
+      if(labelEl) labelEl.textContent = cardTitleFor(state);
+    }
+    renderIconsIn(cardEl);
+    bindDropdowns();
+  }
+  bindDropdowns();
+
+  if(!isStrict){
+    const prefixWrap = cardEl.querySelector('.format-prefix[data-field="prefix"]');
+    if(prefixWrap){
+      prefixWrap.querySelectorAll('button').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          state.prefix = btn.dataset.key;
+          persist();
+          prefixWrap.querySelectorAll('button').forEach(b=> b.classList.toggle('active', b===btn));
+          positionIndicator(prefixWrap);
+        });
+      });
+    }
+  }
 
   if(kind === 'creator'){
     cardEl.querySelector('[data-action="reset"]').addEventListener('click', ()=>{
@@ -2524,16 +2659,21 @@ function wireInteractiveCard(cardEl, state, kind){
       renderInteractiveAll();
     });
     cardEl.querySelector('[data-action="add"]').addEventListener('click', ()=>{
-      ADDED_CARDS.push({ id:'ic_'+Date.now()+'_'+Math.floor(Math.random()*1000), state: JSON.parse(JSON.stringify(CREATOR_STATE)) });
+      const newId = 'ic_' + Date.now() + '_' + Math.floor(Math.random()*1000);
+      ADDED_CARDS.push({ id:newId, state: JSON.parse(JSON.stringify(CREATOR_STATE)) });
       saveAddedCards(ADDED_CARDS);
+      JUST_ADDED_ID = newId;
       renderInteractiveAll();
     });
-  } else {
+  } else if(kind === 'added'){
     cardEl.querySelector('[data-action="delete"]').addEventListener('click', ()=>{
       showConfirm("Delete this saved announcement? This can't be undone.", ()=>{
-        ADDED_CARDS = ADDED_CARDS.filter(c=>c.id !== cardEl.dataset.id);
-        saveAddedCards(ADDED_CARDS);
-        renderInteractiveAll();
+        cardEl.classList.add('leaving');
+        setTimeout(()=>{
+          ADDED_CARDS = ADDED_CARDS.filter(c=>c.id !== cardEl.dataset.id);
+          saveAddedCards(ADDED_CARDS);
+          renderInteractiveAll();
+        }, 220);
       });
     });
   }
@@ -2544,15 +2684,29 @@ function renderInteractiveAll(){
   const strictWrap = document.getElementById('interactive-strict-wrap');
   const addedWrap = document.getElementById('interactive-added-list');
   if(!creatorWrap || !strictWrap || !addedWrap) return;
-  creatorWrap.innerHTML = renderInteractiveCard('creator', 'creator', CREATOR_STATE);
-  strictWrap.innerHTML = renderInteractiveCard('strict', 'strict', null);
-  addedWrap.innerHTML = ADDED_CARDS.map(c=> renderInteractiveCard('added', c.id, c.state)).join('');
+  creatorWrap.innerHTML = renderInteractiveRow('creator', 'creator', CREATOR_STATE);
+  strictWrap.innerHTML = renderInteractiveRow('strict', 'strict', STRICT_STATE);
+  addedWrap.innerHTML = ADDED_CARDS.map(c=> renderInteractiveRow('added', c.id, c.state)).join('');
   renderIconsIn(document.getElementById('formats-section'));
-  wireInteractiveCard(creatorWrap.querySelector('.interactive-card'), CREATOR_STATE, 'creator');
-  wireInteractiveCard(strictWrap.querySelector('.interactive-card'), null, 'strict');
+
+  wireInteractiveRow(creatorWrap.querySelector('.interactive-card'), CREATOR_STATE, 'creator');
+  wireInteractiveRow(strictWrap.querySelector('.interactive-card'), STRICT_STATE, 'strict');
   Array.from(addedWrap.querySelectorAll('.interactive-card')).forEach((cardEl, i)=>{
-    wireInteractiveCard(cardEl, ADDED_CARDS[i].state, 'added');
+    wireInteractiveRow(cardEl, ADDED_CARDS[i].state, 'added');
   });
+
+  document.querySelectorAll('#formats-section .format-prefix').forEach(initSlidingToggle);
+
+  enableDragReorder(addedWrap, '.interactive-card', (newOrder)=>{
+    ADDED_CARDS = newOrder.map(id=> ADDED_CARDS.find(c=>c.id===id)).filter(Boolean);
+    saveAddedCards(ADDED_CARDS);
+  });
+
+  if(JUST_ADDED_ID){
+    const el = Array.from(addedWrap.querySelectorAll('.interactive-card')).find(c=>c.dataset.id===JUST_ADDED_ID);
+    if(el) el.classList.add('just-added');
+    JUST_ADDED_ID = null;
+  }
 }
 
 renderBasicFormats();
