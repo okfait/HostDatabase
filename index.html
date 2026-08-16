@@ -658,6 +658,12 @@ section.section{ margin-bottom:40px; scroll-margin-top:100px; }
 
 .format-body{ flex:1; min-width:0; }
 .format-label{ font-family:var(--font-body); font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--text-dim); line-height:1.2; margin-bottom:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.format-label-input{ display:block; width:100%; background:transparent; border:none; outline:none; font-family:var(--font-body); font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--text-dim); line-height:1.2; margin-bottom:5px; padding:0; }
+.format-label-input::placeholder{ color:var(--text-dim); opacity:.55; text-transform:none; letter-spacing:normal; font-weight:600; }
+.format-pill-input{ display:block; width:100%; background:var(--bg-elevated); border:1px solid var(--line-bright); border-radius:999px; padding:11px 18px; font-family:var(--font-body); font-size:13px; color:var(--text); outline:none; transition:border-color .15s; }
+.format-pill-input:focus{ border-color:var(--accent-bright); }
+.format-pill-input::placeholder{ color:var(--text-dim); }
+.basic-creator-row{ margin-bottom:22px; }
 .format-label-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:5px; }
 .format-label-row .format-label{ margin-bottom:0; }
 .format-pill{ position:relative; background:var(--bg-elevated); border:1px solid var(--line-bright); border-radius:999px; padding:11px 18px; font-family:var(--font-body); font-size:13px; color:var(--text); text-align:left; cursor:pointer; user-select:none; transition:border-color .15s, background .15s; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -678,9 +684,9 @@ section.section{ margin-bottom:40px; scroll-margin-top:100px; }
    dropdowns live INSIDE the pill text itself, so the pill needs to wrap
    and stay clickable-through to its inner controls. */
 .interactive-card{ margin-bottom:14px; }
-.interactive-card.leaving{ opacity:0; transform:scale(.96); transition:opacity .22s ease, transform .22s ease; pointer-events:none; }
+.interactive-card.leaving, .format-row.leaving{ opacity:0; transform:scale(.96); transition:opacity .22s ease, transform .22s ease; pointer-events:none; }
 @keyframes fmtFadeIn{ from{ opacity:0; transform:translateY(6px) scale(.97); } to{ opacity:1; transform:none; } }
-.interactive-card.just-added{ animation:fmtFadeIn .35s ease; }
+.interactive-card.just-added, .format-row.just-added{ animation:fmtFadeIn .35s ease; }
 .interactive-card-actions{ display:flex; align-items:center; gap:8px; flex-shrink:0; }
 .icon-btn{ display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:10px; background:var(--bg-elevated); border:1px solid var(--line-bright); color:var(--text-muted); cursor:pointer; transition:.15s; flex-shrink:0; }
 .icon-btn:hover{ color:var(--accent-bright); border-color:var(--accent-bright); }
@@ -884,6 +890,7 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
       <div class="formats-subhead">
         <span class="icon" data-icon="bookmark"></span> Basic Formats
       </div>
+      <div id="basic-creator-wrap"></div>
       <div id="basic-formats-list" class="format-list"></div>
 
       <div class="formats-subhead formats-subhead-gap">
@@ -2521,40 +2528,52 @@ const BASIC_FORMATS = [
 const BASIC_ORDER_KEY = 'sgr_basic_order';
 const BASIC_PREFIX_KEY = 'sgr_basic_prefix';
 const BASIC_MULTI_KEY = 'sgr_basic_multi';
+const BASIC_CUSTOM_KEY = 'sgr_basic_custom';
 function loadBasicOrder(){
   try{
     const saved = JSON.parse(localStorage.getItem(BASIC_ORDER_KEY) || 'null');
     if(Array.isArray(saved)){
-      const known = new Set(BASIC_FORMATS.map(f=>f.id));
+      const known = new Set(basicAllFormats().map(f=>f.id));
       const ordered = saved.filter(id=>known.has(id));
-      BASIC_FORMATS.forEach(f=>{ if(!ordered.includes(f.id)) ordered.push(f.id); });
+      basicAllFormats().forEach(f=>{ if(!ordered.includes(f.id)) ordered.push(f.id); });
       return ordered;
     }
   }catch(e){}
-  return BASIC_FORMATS.map(f=>f.id);
+  return basicAllFormats().map(f=>f.id);
 }
 function saveBasicOrder(order){ try{ localStorage.setItem(BASIC_ORDER_KEY, JSON.stringify(order)); }catch(e){} }
 function loadBasicPrefixes(){ try{ return JSON.parse(localStorage.getItem(BASIC_PREFIX_KEY) || '{}') || {}; }catch(e){ return {}; } }
 function saveBasicPrefixes(map){ try{ localStorage.setItem(BASIC_PREFIX_KEY, JSON.stringify(map)); }catch(e){} }
 function loadBasicMulti(){ try{ return JSON.parse(localStorage.getItem(BASIC_MULTI_KEY) || '{}') || {}; }catch(e){ return {}; } }
 function saveBasicMulti(map){ try{ localStorage.setItem(BASIC_MULTI_KEY, JSON.stringify(map)); }catch(e){} }
+function loadBasicCustom(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(BASIC_CUSTOM_KEY) || 'null');
+    if(Array.isArray(saved)) return saved;
+  }catch(e){}
+  return [];
+}
+function saveBasicCustom(list){ try{ localStorage.setItem(BASIC_CUSTOM_KEY, JSON.stringify(list)); }catch(e){} }
 let BASIC_PREFIXES = loadBasicPrefixes();
 let BASIC_MULTI = loadBasicMulti(); // { [id]: ['DOT','FD'] }
+let BASIC_CUSTOM = loadBasicCustom(); // [{id, label, text}]
+function basicAllFormats(){ return BASIC_FORMATS.concat(BASIC_CUSTOM); }
+function basicFindFormat(id){ return basicAllFormats().find(f=>f.id===id); }
 
-function renderBasicFormats(){
-  const order = loadBasicOrder();
-  const byId = Object.fromEntries(BASIC_FORMATS.map(f=>[f.id,f]));
-  const container = document.getElementById('basic-formats-list');
-  if(!container) return;
-  container.innerHTML = order.map(id=>{
-    const f = byId[id];
-    const prefix = BASIC_PREFIXES[id] || 'ha';
-    const selected = BASIC_MULTI[f.id] || (f.multi ? [f.multi.options[0]] : []);
-    const pillHtml = f.multi
-      ? `<div class="multi-toggle" data-id="${f.id}">${f.multi.options.map(o=>`<button type="button" data-val="${escapeHtml(o)}" class="${selected.includes(o)?'active':''}">${escapeHtml(o)}</button>`).join('')}</div> ${escapeHtml(f.multi.suffix)}`
-      : escapeHtml(f.text);
-    return `
-    <div class="format-row" data-id="${f.id}">
+function basicRowHtml(f, isCustom){
+  const prefix = BASIC_PREFIXES[f.id] || 'ha';
+  const selected = BASIC_MULTI[f.id] || (f.multi ? [f.multi.options[0]] : []);
+  const pillHtml = f.multi
+    ? `<div class="multi-toggle" data-id="${f.id}">${f.multi.options.map(o=>`<button type="button" data-val="${escapeHtml(o)}" class="${selected.includes(o)?'active':''}">${escapeHtml(o)}</button>`).join('')}</div> ${escapeHtml(f.multi.suffix)}`
+    : escapeHtml(f.text);
+  const deleteHtml = isCustom
+    ? `<div class="format-side">
+        <div class="format-label-spacer">&nbsp;</div>
+        <div class="format-side-content"><button type="button" class="icon-btn icon-btn-danger" data-action="delete-basic" title="Delete"><span class="icon" data-icon="trash"></span></button></div>
+      </div>`
+    : '';
+  return `
+    <div class="format-row" data-id="${f.id}"${isCustom?' data-custom="1"':''}>
       <div class="format-side">
         <div class="format-label-spacer">&nbsp;</div>
         <div class="format-side-content"><span class="format-drag" title="Drag to reorder"><span class="icon" data-icon="drag"></span></span></div>
@@ -2567,51 +2586,153 @@ function renderBasicFormats(){
         <div class="format-label">${escapeHtml(f.label)}</div>
         <div class="format-pill${f.multi?' has-inline-controls':''}" data-id="${f.id}">${pillHtml}<span class="copied-flag">Copied!</span></div>
       </div>
+      ${deleteHtml}
     </div>`;
-  }).join('');
-  renderIconsIn(container);
-  container.querySelectorAll('.format-prefix').forEach(initSlidingToggle);
-  container.querySelectorAll('.format-prefix button').forEach(btn=>{
+}
+function wireBasicRow(row){
+  const id = row.dataset.id;
+  const f = basicFindFormat(id);
+  if(!f) return;
+  const prefixWrap = row.querySelector('.format-prefix');
+  initSlidingToggle(prefixWrap);
+  prefixWrap.querySelectorAll('button').forEach(btn=>{
     btn.addEventListener('click', ()=>{
-      const wrap = btn.closest('.format-prefix');
-      const id = wrap.dataset.id;
       BASIC_PREFIXES[id] = btn.dataset.key;
       saveBasicPrefixes(BASIC_PREFIXES);
-      wrap.querySelectorAll('button').forEach(b=> b.classList.toggle('active', b===btn));
-      positionIndicator(wrap);
+      prefixWrap.querySelectorAll('button').forEach(b=> b.classList.toggle('active', b===btn));
+      positionIndicator(prefixWrap);
     });
   });
-  container.querySelectorAll('.multi-toggle').forEach(wrap=>{
-    wrap.querySelectorAll('button').forEach(btn=>{
+  const multiWrap = row.querySelector('.multi-toggle');
+  if(multiWrap){
+    multiWrap.querySelectorAll('button').forEach(btn=>{
       btn.addEventListener('click', (e)=>{
-        e.stopPropagation(); // don't let this bubble up into the pill's click-to-copy
-        const id = wrap.dataset.id;
-        const f = byId[id];
+        e.stopPropagation();
         let sel = BASIC_MULTI[id] || [f.multi.options[0]];
         const val = btn.dataset.val;
         if(sel.includes(val)){
-          if(sel.length > 1) sel = sel.filter(v=>v!==val); // keep at least one selected
+          if(sel.length > 1) sel = sel.filter(v=>v!==val);
         } else {
-          sel = f.multi.options.filter(o=> sel.includes(o) || o===val); // keep the option order consistent
+          sel = f.multi.options.filter(o=> sel.includes(o) || o===val);
         }
         BASIC_MULTI[id] = sel;
         saveBasicMulti(BASIC_MULTI);
-        wrap.querySelectorAll('button').forEach(b=> b.classList.toggle('active', sel.includes(b.dataset.val)));
+        multiWrap.querySelectorAll('button').forEach(b=> b.classList.toggle('active', sel.includes(b.dataset.val)));
       });
     });
+  }
+  const pill = row.querySelector('.format-pill');
+  pill.addEventListener('click', (e)=>{
+    if(e.target.closest('.multi-toggle')) return;
+    const prefix = BASIC_PREFIXES[id] || 'ha';
+    const sel = BASIC_MULTI[id] || (f.multi ? [f.multi.options[0]] : []);
+    const text = f.multi ? f.multi.build(sel) : f.text;
+    copyFormatText(`:${prefix} ${text}`, pill);
   });
-  container.querySelectorAll('.format-pill').forEach(pill=>{
-    pill.addEventListener('click', (e)=>{
-      if(e.target.closest('.multi-toggle')) return; // that's a chip click, not a copy click
-      const id = pill.dataset.id;
-      const f = byId[id];
-      const prefix = BASIC_PREFIXES[id] || 'ha';
-      const sel = BASIC_MULTI[id] || (f.multi ? [f.multi.options[0]] : []);
-      const text = f.multi ? f.multi.build(sel) : f.text;
-      copyFormatText(`:${prefix} ${text}`, pill);
+  const deleteBtn = row.querySelector('[data-action="delete-basic"]');
+  if(deleteBtn){
+    deleteBtn.addEventListener('click', ()=>{
+      showConfirm("Delete this basic format? This can't be undone.", ()=>{
+        row.classList.add('leaving');
+        setTimeout(()=>{
+          BASIC_CUSTOM = BASIC_CUSTOM.filter(c=>c.id !== id);
+          saveBasicCustom(BASIC_CUSTOM);
+          saveBasicOrder(loadBasicOrder().filter(oid=>oid!==id));
+          delete BASIC_PREFIXES[id]; saveBasicPrefixes(BASIC_PREFIXES);
+          row.remove();
+        }, 220);
+      });
+    });
+  }
+}
+
+function renderBasicFormats(){
+  const order = loadBasicOrder();
+  const container = document.getElementById('basic-formats-list');
+  if(!container) return;
+  container.innerHTML = order.map(id=>{
+    const f = basicFindFormat(id);
+    return f ? basicRowHtml(f, BASIC_CUSTOM.some(c=>c.id===id)) : '';
+  }).join('');
+  renderIconsIn(container);
+  container.querySelectorAll('.format-row').forEach(wireBasicRow);
+  enableDragReorder(container, '.format-row', (newOrder)=> saveBasicOrder(newOrder));
+  renderBasicCreator();
+}
+
+/* ---- "create your own basic format" maker ---- */
+function renderBasicCreator(){
+  const wrap = document.getElementById('basic-creator-wrap');
+  if(!wrap) return;
+  wrap.innerHTML = `
+    <div class="format-row basic-creator-row">
+      <div class="format-side">
+        <div class="format-label-spacer">&nbsp;</div>
+        <div class="format-side-content"><span class="format-drag format-drag-spacer"></span></div>
+      </div>
+      <div class="format-side">
+        <div class="format-label-spacer">&nbsp;</div>
+        <div class="format-side-content"><div class="format-prefix" id="basic-creator-prefix">${prefixButtonsHtml('ha')}</div></div>
+      </div>
+      <div class="format-body">
+        <input type="text" class="format-label-input" id="basic-creator-label" placeholder="LABEL (e.g. WELCOME)" maxlength="28">
+        <input type="text" class="format-pill-input" id="basic-creator-text" placeholder="Type the announcement text…" maxlength="300">
+      </div>
+      <div class="format-side">
+        <div class="format-label-spacer">&nbsp;</div>
+        <div class="format-side-content">
+          <div class="interactive-card-actions">
+            <button type="button" class="icon-btn icon-btn-accent" id="basic-creator-save" title="Save as a new card"><span class="icon" data-icon="addbookmark"></span></button>
+            <button type="button" class="icon-btn" id="basic-creator-reset" title="Reset"><span class="icon" data-icon="refresh"></span></button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  renderIconsIn(wrap);
+  const prefixWrap = document.getElementById('basic-creator-prefix');
+  initSlidingToggle(prefixWrap);
+  let creatorPrefix = 'ha';
+  prefixWrap.querySelectorAll('button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      creatorPrefix = btn.dataset.key;
+      prefixWrap.querySelectorAll('button').forEach(b=> b.classList.toggle('active', b===btn));
+      positionIndicator(prefixWrap);
     });
   });
-  enableDragReorder(container, '.format-row', (newOrder)=> saveBasicOrder(newOrder));
+  const labelInput = document.getElementById('basic-creator-label');
+  const textInput = document.getElementById('basic-creator-text');
+  function resetCreator(){
+    labelInput.value = '';
+    textInput.value = '';
+    creatorPrefix = 'ha';
+    prefixWrap.querySelectorAll('button').forEach(b=> b.classList.toggle('active', b.dataset.key==='ha'));
+    positionIndicator(prefixWrap);
+  }
+  document.getElementById('basic-creator-reset').addEventListener('click', resetCreator);
+  document.getElementById('basic-creator-save').addEventListener('click', ()=>{
+    const text = textInput.value.trim();
+    if(!text){ textInput.focus(); return; }
+    const label = (labelInput.value.trim() || 'Custom').toUpperCase();
+    const newId = 'custom_' + Date.now() + '_' + Math.floor(Math.random()*1000);
+    const newFormat = { id:newId, label, text };
+    BASIC_CUSTOM.push(newFormat);
+    saveBasicCustom(BASIC_CUSTOM);
+    BASIC_PREFIXES[newId] = creatorPrefix;
+    saveBasicPrefixes(BASIC_PREFIXES);
+    const order = loadBasicOrder();
+    order.push(newId);
+    saveBasicOrder(order);
+
+    const container = document.getElementById('basic-formats-list');
+    container.insertAdjacentHTML('beforeend', basicRowHtml(newFormat, true));
+    const newRow = container.lastElementChild;
+    newRow.classList.add('just-added');
+    renderIconsIn(newRow);
+    wireBasicRow(newRow);
+    wireDragHandle(newRow.querySelector('.format-drag'), container, '.format-row', (newOrder)=> saveBasicOrder(newOrder));
+
+    resetCreator();
+  });
 }
 
 /* ================= INTERACTIVE FORMATS =================
