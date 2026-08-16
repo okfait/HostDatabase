@@ -2110,6 +2110,17 @@ const ROSTER_FILTER_LABELS = {
   });
 })();
 
+const MOTM_MONTHS = ['january','february','march','april','may','june','july','august','september','october','november','december'];
+function parseMotmDate(str){
+  if(!str) return null;
+  const s = String(str).trim();
+  const named = s.toLowerCase().match(/^([a-z]+)\s+of\s+(\d{4})$/);
+  if(named){
+    const monthIdx = MOTM_MONTHS.indexOf(named[1]);
+    if(monthIdx !== -1) return new Date(parseInt(named[2],10), monthIdx, 1);
+  }
+  return parseDate(s); // falls back to the numeric d/m/yyyy format used elsewhere
+}
 /* ---------------- RENDER: HOST OF THE MONTH ---------------- */
 function renderMotm(){
   const el = document.getElementById('motm-list');
@@ -2117,7 +2128,16 @@ function renderMotm(){
   const cs = getComputedStyle(document.documentElement);
   const gold = cs.getPropertyValue('--accent-gold').trim() || '#e8b84b';
   const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-  el.innerHTML = SHEET.motm.map((m)=>{
+  // Newest month first, regardless of what order the rows happen to sit
+  // in on the sheet — entries with a date we can't parse just keep their
+  // original relative order and sink to the bottom.
+  const sortedMotm = SHEET.motm.map((m,i)=>({ m, i, d:parseMotmDate(m.date) })).sort((a,b)=>{
+    if(a.d && b.d) return b.d - a.d;
+    if(a.d && !b.d) return -1;
+    if(!a.d && b.d) return 1;
+    return a.i - b.i;
+  }).map(x=>x.m);
+  el.innerHTML = sortedMotm.map((m)=>{
     const initials = m.username.slice(0,2).toUpperCase();
     const pfpHtml = m.pfp ? `<img class="pfp" src="${m.pfp}" alt="${m.username}">` : `<div class="pfp fallback">${initials}</div>`;
     return `
