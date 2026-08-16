@@ -2165,12 +2165,12 @@ function fuzzyFindMatch(text, query){
   if(!query) return null;
   const t = text.toLowerCase(), q = query.toLowerCase();
   const exact = t.indexOf(q);
-  if(exact !== -1) return { start:exact, end:exact+q.length };
+  if(exact !== -1) return { start:exact, end:exact+q.length, fuzzy:false };
   if(q.length < 3) return null; // too short to fuzzy-match without false positives
   for(const winLen of [q.length, q.length-1, q.length+1]){
     if(winLen <= 0) continue;
     for(let start=0; start+winLen<=t.length; start++){
-      if(editDistanceLE1(t.slice(start, start+winLen), q)) return { start, end:start+winLen };
+      if(editDistanceLE1(t.slice(start, start+winLen), q)) return { start, end:start+winLen, fuzzy:true };
     }
   }
   return null;
@@ -2221,6 +2221,7 @@ function applyBannedSearch(){
   clearTimeout(applyBannedSearch._fadeTimer);
   const leaving = [];
   const entering = [];
+  const rankByCard = new Map();
 
   allCards.forEach(card=>{
     const v = BANNED_VEHICLES[card.dataset.vid];
@@ -2234,6 +2235,12 @@ function applyBannedSearch(){
     const noteEl = card.querySelector('.banned-note');
     if(noteEl) noteEl.innerHTML = highlightMatch(v.note, noteMatch);
 
+    // Exact matches always list before "close enough" fuzzy ones — so
+    // typing "ford" doesn't bury the actual Ford results underneath
+    // one-letter-off matches like "Ferdinand" or "Performance".
+    const isExact = (nameMatch && !nameMatch.fuzzy) || (noteMatch && !noteMatch.fuzzy);
+    rankByCard.set(card, !q ? Number(card.dataset.vid) : (hide ? 999 : (isExact ? 0 : 1)));
+
     const wasHidden = card.classList.contains('search-hidden');
     if(hide){
       if(!wasHidden){
@@ -2245,6 +2252,20 @@ function applyBannedSearch(){
     } else {
       card.classList.remove('search-fade');
     }
+  });
+
+  // Reorder each level's own grid by that rank (ties keep their original
+  // listed order), with a smooth slide rather than an instant jump.
+  document.querySelectorAll('.banned-grid').forEach(grid=>{
+    const cards = Array.from(grid.querySelectorAll('.banned-card'));
+    const before = flipSnapshot(cards);
+    const sorted = cards.slice().sort((a,b)=>{
+      const ra = rankByCard.get(a), rb = rankByCard.get(b);
+      if(ra !== rb) return ra - rb;
+      return Number(a.dataset.vid) - Number(b.dataset.vid);
+    });
+    sorted.forEach(card=> grid.appendChild(card));
+    flipPlay(before, cards);
   });
 
   entering.forEach(card=>{ card.classList.remove('search-hidden'); card.classList.add('search-fade'); });
