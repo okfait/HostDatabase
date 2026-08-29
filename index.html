@@ -67,7 +67,13 @@ const ICONS = {
   copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V6a2 2 0 0 1 2-2h10"/></svg>',
   trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>',
   refresh: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>',
-  drag: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>'
+  drag: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>',
+  scale: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M5 8h14"/><path d="M5 8 2 15a3 3 0 0 0 6 0L5 8Z"/><path d="M19 8l-3 7a3 3 0 0 0 6 0l-3-7Z"/></svg>',
+  terminal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 3 3-3 3"/><path d="M13 15h4"/></svg>',
+  shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z"/></svg>',
+  clipboard: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><path d="M9 11h6M9 15h6M9 19h3"/></svg>',
+  expand: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>',
+  layout: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>'
 };
 
 const BANNED_VEHICLES = [
@@ -631,6 +637,58 @@ section.section{ margin-bottom:40px; scroll-margin-top:100px; }
 .formats-subhead{ display:flex; align-items:center; gap:9px; font-family:var(--font-display); font-weight:700; font-size:15px; letter-spacing:.02em; color:var(--text); margin:0 0 16px; }
 .formats-subhead .icon{ width:19px; height:19px; color:var(--accent-bright); }
 .formats-subhead-gap{ margin-top:36px; }
+
+/* ---------- Dashboard / Handbook view switch ---------- */
+.view-switch{ display:flex; align-items:center; gap:2px; background:var(--bg-elevated); border:1px solid var(--line-bright); border-radius:999px; padding:3px; }
+.view-switch-btn{ display:inline-flex; align-items:center; gap:6px; border:none; background:transparent; color:var(--text-muted); font-size:12.5px; font-weight:600; font-family:var(--font-body); padding:8px 14px; border-radius:999px; cursor:pointer; transition:.15s; }
+.view-switch-btn .icon{ width:15px; height:15px; }
+.view-switch-btn:hover{ color:var(--text); }
+.view-switch-btn.active{ background:linear-gradient(135deg, var(--accent-bright), var(--accent)); color:#04140d; }
+
+/* ---------- Handbook: shared bits ---------- */
+.handbook-note{ background:rgba(232,184,75,0.10); border:1px solid rgba(232,184,75,0.3); color:var(--accent-gold); font-size:13px; font-weight:500; line-height:1.6; padding:13px 16px; border-radius:12px; margin-bottom:26px; }
+.handbook-prose{ background:var(--bg-card); border:1px solid var(--line); border-radius:16px; padding:22px 24px; }
+.handbook-prose p{ font-size:14px; line-height:1.85; color:var(--text-muted); margin:0 0 18px; }
+.handbook-prose p:last-child{ margin-bottom:0; }
+.hex-chip{ display:inline-flex; align-items:center; gap:7px; background:var(--bg-elevated); border:1px solid var(--line-bright); border-radius:8px; padding:3px 10px 3px 6px; font-family:monospace; font-size:12.5px; font-weight:600; color:var(--text); }
+.hex-swatch{ width:14px; height:14px; border-radius:50%; border:1px solid var(--line-bright); flex-shrink:0; }
+.cmd-inline{ font-family:monospace; font-size:13px; font-weight:600; background:var(--bg-elevated); border:1px solid var(--line-bright); border-radius:6px; padding:1px 7px; color:var(--accent-bright); }
+.inline-link{ color:var(--accent-bright); font-weight:600; text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
+.inline-link:hover{ color:var(--text); }
+
+/* ---------- Punishment tiers ---------- */
+.ptier{ background:var(--bg-card); border:1px solid var(--line); border-left:3px solid var(--line-bright); border-radius:14px; padding:18px 22px; margin-bottom:16px; }
+.ptier-head{ display:flex; align-items:center; gap:10px; font-family:var(--font-display); font-weight:700; font-size:14.5px; color:var(--text); margin-bottom:10px; }
+.ptier-badge{ font-size:10.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; padding:4px 10px; border-radius:999px; }
+.ptier-sub{ font-size:11.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--text-dim); margin:14px 0 8px; }
+.ptier-sub:first-of-type{ margin-top:4px; }
+.plist{ margin:0; padding-left:18px; font-size:13.5px; color:var(--text-muted); line-height:1.75; }
+.plist li{ margin-bottom:2px; }
+.prow{ display:flex; align-items:center; justify-content:space-between; gap:14px; padding:9px 0; border-bottom:1px solid var(--line); }
+.prow:last-of-type{ border-bottom:none; }
+.poffense{ font-size:13.5px; font-weight:600; color:var(--text); }
+.ppenalty{ font-size:12.5px; font-weight:700; color:var(--text-muted); text-align:right; white-space:nowrap; }
+.pnote{ font-size:12px; color:var(--text-dim); font-style:italic; padding:0 0 9px; margin-top:-4px; }
+.ptier-green{ border-left-color:var(--accent-bright); }
+.ptier-green .ptier-badge{ background:rgba(61,220,151,0.15); color:var(--accent-bright); }
+.ptier-yellow{ border-left-color:var(--accent-gold); }
+.ptier-yellow .ptier-badge{ background:rgba(232,184,75,0.15); color:var(--accent-gold); }
+.ptier-red{ border-left-color:var(--accent-danger); }
+.ptier-red .ptier-badge{ background:rgba(217,96,90,0.15); color:var(--accent-danger); }
+.ptier-blue{ border-left-color:#7db8ff; }
+.ptier-blue .ptier-badge{ background:rgba(125,184,255,0.15); color:#7db8ff; }
+.ptier-purple{ border-left-color:#c99bff; }
+.ptier-purple .ptier-badge{ background:rgba(201,155,255,0.15); color:#c99bff; }
+.ptier-perm{ border-left-color:#ff5c5c; }
+.ptier-perm .ptier-badge{ background:rgba(255,92,92,0.18); color:#ff5c5c; }
+
+/* ---------- Commands ---------- */
+.cmd-grid, .cmd-shorthand-grid{ display:grid; gap:2px; margin-bottom:8px; }
+.cmd-row{ display:grid; grid-template-columns:minmax(160px,240px) 1fr; gap:16px; align-items:center; padding:11px 16px; border-radius:10px; background:var(--bg-card); border:1px solid var(--line); }
+.cmd-row + .cmd-row{ margin-top:6px; }
+.cmd-name{ font-family:monospace; font-size:13px; font-weight:700; color:var(--accent-bright); }
+.cmd-desc{ font-size:13px; color:var(--text-muted); line-height:1.5; }
+@media (max-width:640px){ .cmd-row{ grid-template-columns:1fr; gap:4px; } }
 .format-list{ display:flex; flex-direction:column; }
 
 .format-row{ display:flex; align-items:stretch; gap:12px; margin-bottom:12px; }
@@ -791,12 +849,23 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
           <div class="name" id="team-name-display">Shadow Greenville Roleplay</div>
         </div>
       </div>
-      <nav class="topnav">
+      <div class="view-switch" id="view-switch">
+        <button type="button" class="view-switch-btn" data-view="dashboard"><span class="icon" data-icon="layout"></span>Dashboard</button>
+        <button type="button" class="view-switch-btn" data-view="handbook"><span class="icon" data-icon="book2"></span>Handbook</button>
+      </div>
+      <nav class="topnav" id="nav-dashboard">
         <a href="#graph-section"><span class="icon" data-icon="chart"></span>Logs Graph</a>
         <a href="#roster-section"><span class="icon" data-icon="group"></span>Roster</a>
         <a href="#motm-section"><span class="icon" data-icon="crown"></span>Host Of The Month</a>
         <a href="#banned-section"><span class="icon" data-icon="car"></span>Banned Vehicles</a>
         <a href="#formats-section"><span class="icon" data-icon="book2"></span>Session Formats</a>
+      </nav>
+      <nav class="topnav" id="nav-handbook" style="display:none">
+        <a href="#punishments-section"><span class="icon" data-icon="scale"></span>Punishments</a>
+        <a href="#commands-section"><span class="icon" data-icon="terminal"></span>Commands</a>
+        <a href="#standards-section"><span class="icon" data-icon="shield"></span>Host Standards</a>
+        <a href="#procedures-section"><span class="icon" data-icon="clipboard"></span>Session Procedures</a>
+        <a href="#capacity-section"><span class="icon" data-icon="expand"></span>Capacity &amp; Reinvites</a>
       </nav>
       <div class="who">
         <div class="name">Signed in as <b id="who-name" class="shiny-text">—</b></div>
@@ -807,6 +876,7 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
   </header>
 
   <div class="app-content">
+   <div id="view-dashboard">
     <section class="section" id="pill-section">
       <div class="logs-label shiny-text">LOGS</div>
       <div id="pill-region"></div>
@@ -900,6 +970,300 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
       <div id="interactive-strict-wrap"></div>
       <div id="interactive-added-list" class="format-list"></div>
     </section>
+   </div>
+
+   <div id="view-handbook" style="display:none">
+    <section class="section" id="punishments-section">
+      <div class="section-head">
+        <div class="section-title shiny-text"><span class="icon" data-icon="scale"></span> Punishments</div>
+      </div>
+
+      <div class="handbook-note">Staff don't need to issue a warning for unpaid citations by hand — the GRTL bot handles it automatically. If a citation goes unpaid for 30 days, the bot issues the warning on its own.</div>
+
+      <div class="formats-subhead"><span class="icon" data-icon="car"></span> In-Game Punishments</div>
+
+      <div class="ptier ptier-green">
+        <div class="ptier-head"><span class="ptier-badge">0 Day Bar</span>Warning-Only Offenses</div>
+        <div class="ptier-sub">Verbal warning first</div>
+        <ul class="plist">
+          <li>Hit and Run</li>
+          <li>Unauthorized U-turns (only when roleplay U-turns are off)</li>
+          <li>Vehicle horn / alarm abuse</li>
+          <li>Failure to exchange properly (saying "exc" instead of "exchanges")</li>
+          <li>Unrealistic tool use</li>
+          <li>Failure to follow RP rules (SRPs only, not FRP)</li>
+          <li>Starting events without permission</li>
+          <li>Light skipping</li>
+        </ul>
+        <div class="ptier-sub">Instant warning</div>
+        <ul class="plist">
+          <li>Off-roading (cutting across the map counts as Mass FRP; applies everywhere except dirt pathways)</li>
+          <li>Bypassing the chat filter</li>
+          <li>Reckless driving (red lights, curbs, under 5 car distance — a minor case can be a verbal warning)</li>
+          <li>Blocking / obstructing traffic</li>
+          <li>Violating peacetime rules</li>
+          <li>Failure to yield for staff / PS</li>
+          <li>Ignoring LEO commands</li>
+          <li>Using department roles without the matching server role</li>
+          <li>Unrealistic avatar</li>
+          <li>Citizen disrespect</li>
+          <li>Staff / LEO baiting</li>
+          <li>Driving banned vehicles (needs valid proof; banned tires are only a verbal warning)</li>
+          <li>Bypassing, hidden, or blank plate</li>
+          <li>NSFW (roleplays, actions, or chat)</li>
+          <li>Failure to call public services</li>
+          <li>Violating trailer guidelines (rules 7, 34–37, and restricted trailers)</li>
+          <li>Glitching / squatting a vehicle (using a glitch — actual exploiting is a permanent ban)</li>
+        </ul>
+      </div>
+
+      <div class="ptier ptier-yellow">
+        <div class="ptier-head"><span class="ptier-badge">1–3 Day Bars</span>Minor Bars</div>
+        <div class="prow"><div class="poffense">Rejoining after a kick</div><div class="ppenalty">+1 day bar extension</div></div>
+        <div class="pnote">Example: a 2-day bar from FRP plus 1 day from rejoining stacks to 3 days total.</div>
+        <div class="prow"><div class="poffense">Repeatedly ignoring staff commands</div><div class="ppenalty">1 day bar + instant warning</div></div>
+        <div class="prow"><div class="poffense">Unpaid citations</div><div class="ppenalty">1 day bar + instant warning</div></div>
+        <div class="pnote">Only comes up once a host has 3 prior warnings already — swap all citation roles for a single warning. Handled automatically by the GRTL bot as noted above.</div>
+        <div class="prow"><div class="poffense">FRP speeding (3–19 MPH over)</div><div class="ppenalty">2 day bar + instant warning</div></div>
+        <div class="pnote">Can be a verbal warning if it's clearly a brief, accidental cruise that slows back down fast. A second offense escalates to a removal, warning, and bar.</div>
+        <div class="prow"><div class="poffense">FRP (fail roleplay)</div><div class="ppenalty">2 day bar + instant warning</div></div>
+        <div class="pnote">Covers unrealistic actions like driving backwards on a main road.</div>
+        <div class="prow"><div class="poffense">Racism</div><div class="ppenalty">3 day bar + instant warning</div></div>
+      </div>
+
+      <div class="ptier ptier-red">
+        <div class="ptier-head"><span class="ptier-badge">5–14 Day Bars</span>Major Bars</div>
+        <div class="prow"><div class="poffense">Evading a bar</div><div class="ppenalty">5 days + bar extension + warning</div></div>
+        <div class="prow"><div class="poffense">LEO impersonation</div><div class="ppenalty">5 day bar + instant warning</div></div>
+        <div class="prow"><div class="poffense">Combat logging</div><div class="ppenalty">7 day bar + instant warning</div></div>
+        <div class="prow"><div class="poffense">Staff evasion</div><div class="ppenalty">7 day bar + instant warning</div></div>
+        <div class="prow"><div class="poffense">LE evasion</div><div class="ppenalty">7 day bar + instant warning</div></div>
+        <div class="prow"><div class="poffense">Staff impersonation</div><div class="ppenalty">7 day bar + instant warning</div></div>
+        <div class="pnote">Driving staff cars, wearing a staff uniform, or stopping people while acting like staff.</div>
+        <div class="prow"><div class="poffense">Mass FRP (20+ MPH over)</div><div class="ppenalty">10 day bar + instant warning</div></div>
+        <div class="prow"><div class="poffense">Leaker association (minor)</div><div class="ppenalty">14 day bar + instant warning</div></div>
+      </div>
+
+      <div class="formats-subhead formats-subhead-gap"><span class="icon" data-icon="scale"></span> Post-3-Warns Ban &amp; Kick Guide</div>
+
+      <div class="ptier ptier-green">
+        <div class="ptier-head"><span class="ptier-badge">3 Day Ban</span></div>
+        <div class="ptier-sub">Verbal warning first</div>
+        <ul class="plist"><li>Unrealistic tool use</li><li>Failure to exchange properly</li></ul>
+        <div class="ptier-sub">Instant kick + ban</div>
+        <ul class="plist">
+          <li>Glitching / squatting a vehicle (exploiting is a permanent ban)</li>
+          <li>Banned vehicle use</li>
+          <li>Using department roles without the matching server role</li>
+          <li>Unrealistic avatar</li>
+          <li>Citizen disrespect</li>
+          <li>Failure to call public services</li>
+          <li>Bypassing, hidden, or blank plate</li>
+        </ul>
+      </div>
+
+      <div class="ptier ptier-yellow">
+        <div class="ptier-head"><span class="ptier-badge">7 Day Ban</span></div>
+        <div class="ptier-sub">Verbal warning first</div>
+        <ul class="plist"><li>Hit and Run</li><li>Unauthorized U-turns</li><li>Vehicle horn / alarm abuse</li><li>Light skipping</li></ul>
+        <div class="ptier-sub">Instant kick + ban</div>
+        <ul class="plist">
+          <li>Off-roading (cutting the map counts as Mass FRP)</li>
+          <li>Bypassing the chat filter</li>
+          <li>Reckless driving (red lights, curbs, under 5 car distance — a minor case can get a verbal)</li>
+          <li>Blocking / obstructing traffic</li>
+          <li>Violating peacetime rules</li>
+          <li>Failure to yield for staff / PS</li>
+          <li>Starting events without permission</li>
+          <li>Ignoring LEO commands</li>
+          <li>Staff / LEO baiting</li>
+          <li>LEO impersonation (driving LEO cars, pulling people over)</li>
+          <li>Staff impersonation (staff cars, uniforms, acting like staff)</li>
+          <li>Failure to follow RP rules (Special RPs)</li>
+          <li>FRP (3–19 MPH over, or unrealistic actions)</li>
+          <li>NSFW / offensive remarks (chat, actions, RP)</li>
+        </ul>
+      </div>
+
+      <div class="ptier ptier-red">
+        <div class="ptier-head"><span class="ptier-badge">10 Day Ban</span></div>
+        <div class="ptier-sub">Instant kick + ban</div>
+        <ul class="plist"><li>Combat logging</li><li>Staff evasion</li><li>LE evasion</li><li>Mass FRP (20+ MPH over)</li></ul>
+      </div>
+
+      <div class="formats-subhead formats-subhead-gap"><span class="icon" data-icon="terminal"></span> In-Server Punishments (Discord)</div>
+
+      <div class="ptier ptier-green">
+        <div class="ptier-head"><span class="ptier-badge">1–60 Min</span>Short Timeouts</div>
+        <div class="prow"><div class="poffense">Pinging hosts</div><div class="ppenalty">1 minute</div></div>
+        <div class="pnote">Also covers pinging for re-invites.</div>
+        <div class="prow"><div class="poffense">Spamming after a first timeout</div><div class="ppenalty">5 minutes</div></div>
+        <div class="prow"><div class="poffense">Arguing</div><div class="ppenalty">10 minutes + issue a warning</div></div>
+        <div class="prow"><div class="poffense">Mass pinging</div><div class="ppenalty">60 minutes</div></div>
+      </div>
+
+      <div class="ptier ptier-yellow">
+        <div class="ptier-head"><span class="ptier-badge">1–7 Days</span>Long Timeouts</div>
+        <div class="prow"><div class="poffense">Offensive comments</div><div class="ppenalty">1 day timeout</div></div>
+        <div class="pnote">Racial, homophobic, sexist, or similar remarks.</div>
+        <div class="prow"><div class="poffense">NSFW</div><div class="ppenalty">7 day timeout + issue a warning</div></div>
+        <div class="pnote">Pictures, images, or links.</div>
+      </div>
+
+      <div class="ptier ptier-blue">
+        <div class="ptier-head"><span class="ptier-badge">Warning</span>Timeout / Warning-Only Offenses</div>
+        <ul class="plist">
+          <li>Political comments</li><li>Self-promotion</li><li>Threats / death threats</li><li>Citizen disrespect</li>
+          <li>Staff disrespect</li><li>Major harassment / extreme bullying</li><li>Offensive remarks</li>
+          <li>Inappropriate conversations</li><li>Bypassing chat (including sending images of bypassed words)</li>
+          <li>Pinging Greenville staff / devs</li><li>Spamming (first offense)</li>
+        </ul>
+      </div>
+
+      <div class="formats-subhead formats-subhead-gap"><span class="icon" data-icon="scale"></span> Discord Ban Guide (After 3 Warnings)</div>
+
+      <div class="ptier ptier-green">
+        <div class="ptier-head"><span class="ptier-badge">3 Days</span></div>
+        <ul class="plist">
+          <li>Bypassing the chat filter (including images of bypassed words)</li><li>Inappropriate conversations</li>
+          <li>Self-promotion</li><li>Fighting</li><li>Civilian disrespect</li><li>Staff disrespect</li>
+          <li>Ignoring staff orders</li><li>Excessive cursing</li><li>Political comments (politics, elections, etc.)</li>
+        </ul>
+      </div>
+      <div class="ptier ptier-yellow">
+        <div class="ptier-head"><span class="ptier-badge">7 Days</span></div>
+        <ul class="plist"><li>Harassment</li><li>Threats</li><li>Bullying</li></ul>
+      </div>
+      <div class="ptier ptier-red">
+        <div class="ptier-head"><span class="ptier-badge">15 Days</span></div>
+        <ul class="plist"><li>Offensive remarks (racism, homophobia, sexism, etc.)</li><li>NSFW (pictures, images, links)</li></ul>
+      </div>
+      <div class="ptier ptier-purple">
+        <div class="ptier-head"><span class="ptier-badge">25 Days</span></div>
+        <ul class="plist"><li>Leaving the server to avoid punishment</li></ul>
+        <div class="pnote">This upgrades the overall ban to 25 days total — it doesn't stack on top of an existing ban.</div>
+      </div>
+      <div class="ptier ptier-perm">
+        <div class="ptier-head"><span class="ptier-badge">Permanent</span></div>
+        <ul class="plist"><li>Threats of raids or threats to the server</li><li>Underage (solid evidence required)</li><li>Mass scam / NSFW links</li></ul>
+      </div>
+    </section>
+
+    <section class="section" id="commands-section">
+      <div class="section-head">
+        <div class="section-title shiny-text"><span class="icon" data-icon="terminal"></span> Server Commands</div>
+      </div>
+      <div class="handbook-note">Commands are typed straight into the Cmdr window — no colon or prefix needed. Use Tab to autocomplete, and arguments follow the shorthand below.</div>
+
+      <div class="formats-subhead"><span class="icon" data-icon="bookmark"></span> Argument Shorthands</div>
+      <div class="cmd-shorthand-grid">
+        <div class="cmd-row"><span class="cmd-name">.</span><span class="cmd-desc">Me / self</span></div>
+        <div class="cmd-row"><span class="cmd-name">*</span><span class="cmd-desc">All / everyone</span></div>
+        <div class="cmd-row"><span class="cmd-name">**</span><span class="cmd-desc">Others</span></div>
+        <div class="cmd-row"><span class="cmd-name">?</span><span class="cmd-desc">Random</span></div>
+        <div class="cmd-row"><span class="cmd-name">?N</span><span class="cmd-desc">A list of N random values</span></div>
+      </div>
+
+      <div class="formats-subhead formats-subhead-gap"><span class="icon" data-icon="group"></span> Server Moderation &amp; Permissions</div>
+      <div class="cmd-grid">
+        <div class="cmd-row"><span class="cmd-name">admin [target]</span><span class="cmd-desc">Grants session admin powers to the target player.</span></div>
+        <div class="cmd-row"><span class="cmd-name">unadmin [target]</span><span class="cmd-desc">Revokes session admin powers from the target player.</span></div>
+        <div class="cmd-row"><span class="cmd-name">sban [target]</span><span class="cmd-desc">Session-bans the target player from the server.</span></div>
+        <div class="cmd-row"><span class="cmd-name">unsban [UserId]</span><span class="cmd-desc">Removes a session ban from a player using their Roblox UserId.</span></div>
+        <div class="cmd-row"><span class="cmd-name">kick [target]</span><span class="cmd-desc">Kicks the target player from the server.</span></div>
+      </div>
+
+      <div class="formats-subhead formats-subhead-gap"><span class="icon" data-icon="expand"></span> Player Manipulation &amp; Teleportation</div>
+      <div class="cmd-grid">
+        <div class="cmd-row"><span class="cmd-name">bring [target]</span><span class="cmd-desc">Teleports the target player to your position.</span></div>
+        <div class="cmd-row"><span class="cmd-name">to [target]</span><span class="cmd-desc">Teleports your character directly to the target player.</span></div>
+        <div class="cmd-row"><span class="cmd-name">tp [target] [destination]</span><span class="cmd-desc">Teleports a target player or group to another target or location.</span></div>
+        <div class="cmd-row"><span class="cmd-name">freeze [target]</span><span class="cmd-desc">Freezes the target player in place.</span></div>
+        <div class="cmd-row"><span class="cmd-name">unfreeze [target]</span><span class="cmd-desc">Unfreezes the target player.</span></div>
+        <div class="cmd-row"><span class="cmd-name">respawn [target]</span><span class="cmd-desc">Respawns the target player.</span></div>
+        <div class="cmd-row"><span class="cmd-name">speed [target] [number]</span><span class="cmd-desc">Sets the walkspeed of the target player.</span></div>
+        <div class="cmd-row"><span class="cmd-name">sit [target]</span><span class="cmd-desc">Forces the target player into a sitting state.</span></div>
+        <div class="cmd-row"><span class="cmd-name">jump [target]</span><span class="cmd-desc">Forces the target player to jump.</span></div>
+      </div>
+
+      <div class="formats-subhead formats-subhead-gap"><span class="icon" data-icon="crown"></span> Announcements &amp; Alerts</div>
+      <div class="cmd-grid">
+        <div class="cmd-row"><span class="cmd-name">ha [message]</span><span class="cmd-desc">Broadcasts a high-priority global red alert to all players.</span></div>
+        <div class="cmd-row"><span class="cmd-name">a [message]</span><span class="cmd-desc">Broadcasts a global orange alert to all players.</span></div>
+        <div class="cmd-row"><span class="cmd-name">m [message]</span><span class="cmd-desc">Displays a global gray message on screen for all players.</span></div>
+        <div class="cmd-row"><span class="cmd-name">pa [message]</span><span class="cmd-desc">Displays a persistent announcement banner at the top of the screen until removed.</span></div>
+        <div class="cmd-row"><span class="cmd-name">paremove / removepa</span><span class="cmd-desc">Removes the active persistent announcement banner.</span></div>
+        <div class="cmd-row"><span class="cmd-name">cd / countdown [seconds]</span><span class="cmd-desc">Starts a visual countdown for the specified number of seconds.</span></div>
+        <div class="cmd-row"><span class="cmd-name">stopcd</span><span class="cmd-desc">Cancels any active countdown.</span></div>
+      </div>
+
+      <div class="formats-subhead formats-subhead-gap"><span class="icon" data-icon="chart"></span> Player Tracking &amp; Display</div>
+      <div class="cmd-grid">
+        <div class="cmd-row"><span class="cmd-name">watch [target]</span><span class="cmd-desc">Spectates and locks the camera onto the target player.</span></div>
+        <div class="cmd-row"><span class="cmd-name">unwatch</span><span class="cmd-desc">Stops spectating and returns the camera to your character.</span></div>
+        <div class="cmd-row"><span class="cmd-name">ntags / nametags</span><span class="cmd-desc">Toggles or manages custom nametags for players.</span></div>
+      </div>
+
+      <div class="formats-subhead formats-subhead-gap"><span class="icon" data-icon="refresh"></span> Environment Controls</div>
+      <div class="cmd-grid">
+        <div class="cmd-row"><span class="cmd-name">time [0-24]</span><span class="cmd-desc">Sets the in-game time of day.</span></div>
+        <div class="cmd-row"><span class="cmd-name">timefreeze</span><span class="cmd-desc">Freezes the in-game day/night cycle.</span></div>
+        <div class="cmd-row"><span class="cmd-name">timeunfreeze</span><span class="cmd-desc">Resumes the in-game day/night cycle.</span></div>
+        <div class="cmd-row"><span class="cmd-name">weather</span><span class="cmd-desc">Opens the weather administration panel.</span></div>
+        <div class="cmd-row"><span class="cmd-name">weatherfreeze</span><span class="cmd-desc">Freezes current weather conditions.</span></div>
+        <div class="cmd-row"><span class="cmd-name">weatherunfreeze</span><span class="cmd-desc">Resumes dynamic weather changes.</span></div>
+      </div>
+
+      <div class="formats-subhead formats-subhead-gap"><span class="icon" data-icon="terminal"></span> Cmdr Utility</div>
+      <div class="cmd-grid">
+        <div class="cmd-row"><span class="cmd-name">help [command]</span><span class="cmd-desc">Displays a list of available commands or details about a specific command.</span></div>
+        <div class="cmd-row"><span class="cmd-name">bind [key] [command]</span><span class="cmd-desc">Binds a specific command string to a keyboard key or mouse input.</span></div>
+        <div class="cmd-row"><span class="cmd-name">alias [name] [command]</span><span class="cmd-desc">Creates a custom shortcut command combining arguments.</span></div>
+        <div class="cmd-row"><span class="cmd-name">clear</span><span class="cmd-desc">Clears all previous command logs above the entry line in the Cmdr window.</span></div>
+        <div class="cmd-row"><span class="cmd-name">exit / escape</span><span class="cmd-desc">Closes the Cmdr terminal window.</span></div>
+      </div>
+    </section>
+
+    <section class="section" id="standards-section">
+      <div class="section-head">
+        <div class="section-title shiny-text"><span class="icon" data-icon="shield"></span> Host Standards</div>
+      </div>
+      <div class="handbook-prose">
+        <p>Presentation is part of the job. While hosting, you're expected to wear a realistic outfit and use a realistic avatar at all times — it's one of the first things civilians notice, and it sets the tone for how seriously the session gets taken.</p>
+        <p>Reaching Host Of The Month comes with a real reward: whoever earns the title that month receives a Diamond Pass for the following month.</p>
+        <p>Your vehicle while hosting should be an undercover LEO vehicle in white, using the hex code <span class="hex-chip"><span class="hex-swatch" style="background:#D0D0D0"></span>#D0D0D0</span>. A small clearcoat metallic flake finish is a nice touch, but it's optional — the color itself is the only hard requirement.</p>
+        <p>If you're staff inside someone else's session, your vehicle should instead be an undercover LEO vehicle in black. A glossy metallic iridescent finish is optional here too, same as with the host vehicle.</p>
+      </div>
+    </section>
+
+    <section class="section" id="procedures-section">
+      <div class="section-head">
+        <div class="section-title shiny-text"><span class="icon" data-icon="clipboard"></span> Session Procedures</div>
+      </div>
+      <div class="handbook-prose">
+        <p>Give it 15 minutes between sessions. If you've just ended one and want to start another, that's the minimum wait before hosting again.</p>
+        <p>FRP is not tolerated during early access, full stop. Keep all civilians at spawn until everyone's been verified — the one exception is during reinvites, where civilians are free to leave as soon as they've rejoined. Verification itself is done with the <span class="cmd-inline">/whois</span> command in the bot channels.</p>
+        <p>Follow the server numbering system: if Server B has a session running, Server A needs one running too.</p>
+        <p>Announcements are for players who might not know the format — you're welcome to point people toward <a href="#" class="inline-link" data-goto="formats-section" data-goto-view="dashboard">session formats</a> whenever it's useful, and it'll take you straight there.</p>
+        <p>When a session ends, announce the FRP time and let every ongoing scene continue rather than cutting it short. If you spot a leaker, remove them with <span class="cmd-inline">sban [user]</span> in the Cmdr window.</p>
+        <p>Civilians can only be kicked for violating RP guidelines, and no announcement is needed when it happens. If a kicked civilian asks why, explain it in Discord or point them to open a ticket — there's no obligation to justify it in the session itself.</p>
+        <p>Going AFK is fine, just notify the other staff members in the Moderator chat first — civilians don't need to know. Make sure at least one staff member is present in the session at all times, and regenerate the session code whenever it's warranted.</p>
+        <p>In-game announcements are reserved for important information and for answering questions — respond to chat questions with something like "!example" rather than a full announcement. Lighter engagement prompts are fair game too, things like "how was your day" or "cats or dogs" to get civilians talking.</p>
+        <p>A few tips for keeping the roleplay engaging: encourage civilians to open their shops, use special perms where it fits, and announce whenever FD, DOT, or LEO are active in the session. Larger set-piece RPs — drag races, rooftop derby, hide and seek — are reserved for the end of the session only.</p>
+      </div>
+    </section>
+
+    <section class="section" id="capacity-section">
+      <div class="section-head">
+        <div class="section-title shiny-text"><span class="icon" data-icon="expand"></span> Capacity &amp; Reinvites</div>
+      </div>
+      <div class="handbook-prose">
+        <p>Once a session reaches full capacity — or gets close, or has multiple leakers inside it — regenerate the code using the <span class="cmd-inline">/regen</span> command in the Discord server.</p>
+        <p>Once the link's been regenerated and there's open space again, use the <span class="cmd-inline">/reinvites</span> command in the Discord server to create reinvites.</p>
+        <p>When those reinvites go out, make sure to announce the RP information in-game so anyone joining fresh is caught up.</p>
+      </div>
+    </section>
+   </div>
 
     <footer>
       <div class="footer-text">Website made by Geo to be used in the Shadow GVRP community.<br>© <span id="year"></span> Shadow Greenville Roleplay.</div>
@@ -931,6 +1295,35 @@ document.querySelectorAll('.topnav a[href^="#"]').forEach(a=>{
     if(!el) return;
     if(LENIS) LENIS.scrollTo(el, { offset:-90 });
     else el.scrollIntoView({ behavior:'smooth', block:'start' });
+  });
+});
+
+/* ---------------- Dashboard / Handbook view switch ---------------- */
+const VIEW_KEY = 'sgr-view';
+function setView(view){
+  document.getElementById('view-dashboard').style.display = view === 'handbook' ? 'none' : '';
+  document.getElementById('view-handbook').style.display = view === 'handbook' ? '' : 'none';
+  document.getElementById('nav-dashboard').style.display = view === 'handbook' ? 'none' : '';
+  document.getElementById('nav-handbook').style.display = view === 'handbook' ? '' : 'none';
+  document.querySelectorAll('.view-switch-btn').forEach(b=> b.classList.toggle('active', b.dataset.view === view));
+  try{ localStorage.setItem(VIEW_KEY, view); }catch(e){}
+}
+document.querySelectorAll('.view-switch-btn').forEach(b=>{
+  b.addEventListener('click', ()=> setView(b.dataset.view));
+});
+setView((()=>{ try{ return localStorage.getItem(VIEW_KEY) === 'handbook' ? 'handbook' : 'dashboard'; }catch(e){ return 'dashboard'; } })());
+
+// Inline links inside Handbook prose that jump to a section in the other view.
+document.querySelectorAll('[data-goto]').forEach(el=>{
+  el.addEventListener('click', (e)=>{
+    e.preventDefault();
+    setView(el.dataset.gotoView || 'dashboard');
+    setTimeout(()=>{
+      const target = document.getElementById(el.dataset.goto);
+      if(!target) return;
+      if(LENIS) LENIS.scrollTo(target, { offset:-90 });
+      else target.scrollIntoView({ behavior:'smooth', block:'start' });
+    }, 60);
   });
 });
 
@@ -2497,7 +2890,7 @@ function fallbackCopy(text, done){
    selected sticks around across refreshes/rejoins. */
 const PREFIX_KEYS = ['ha','a','m'];
 function prefixButtonsHtml(current){
-  return PREFIX_KEYS.map(k=>`<button type="button" class="${k===current?'active':''}" data-key="${k}">:${k}</button>`).join('');
+  return PREFIX_KEYS.map(k=>`<button type="button" class="${k===current?'active':''}" data-key="${k}">${k}</button>`).join('');
 }
 
 /* ================= BASIC FORMATS ================= */
@@ -2627,7 +3020,7 @@ function wireBasicRow(row){
     const prefix = BASIC_PREFIXES[id] || 'ha';
     const sel = BASIC_MULTI[id] || (f.multi ? [f.multi.options[0]] : []);
     const text = f.multi ? f.multi.build(sel) : f.text;
-    copyFormatText(`:${prefix} ${text}`, pill);
+    copyFormatText(`${prefix} ${text}`, pill);
   });
   const deleteBtn = row.querySelector('[data-action="delete-basic"]');
   if(deleteBtn){
@@ -2797,7 +3190,7 @@ function buildInteractiveText(state){
   if(rp.noRpPrefix) labelSegment = rp.label;
   else if(sub) labelSegment = `RP: ${rp.label} (${sub.label})`;
   else labelSegment = `RP: ${rp.label}`;
-  return `:${state.prefix} ${labelSegment}, Cruising Speed: ${cruising} / FRP Speeds: ${frp}/ LEO Pullover: ${leo} / U-turns: ${rp.uturns} / House claiming: ${house} / PT: Normal`;
+  return `${state.prefix} ${labelSegment}, Cruising Speed: ${cruising} / FRP Speeds: ${frp}/ LEO Pullover: ${leo} / U-turns: ${rp.uturns} / House claiming: ${house} / PT: Normal`;
 }
 
 /* Reusable searchable inline dropdown — sits right inside the announcement
@@ -2871,7 +3264,7 @@ function buildStrictPillHtml(state){
   return `RP: Normal, Cruising Speed: Road Signs / FRP Speeds: 65/ LEO Pullover: 7+ Road Signs / U-turns: Off / House claiming: ${houseHtml} / PT: STRICT`;
 }
 function buildStrictCopyText(state){
-  return `:ha RP: Normal, Cruising Speed: Road Signs / FRP Speeds: 65/ LEO Pullover: 7+ Road Signs / U-turns: Off / House claiming: ${state.house} / PT: STRICT`;
+  return `ha RP: Normal, Cruising Speed: Road Signs / FRP Speeds: 65/ LEO Pullover: 7+ Road Signs / U-turns: Off / House claiming: ${state.house} / PT: STRICT`;
 }
 // What a saved card's own label shows — the RP it's actually set to,
 // e.g. "AORP (Horton)" or "Highway RP Brookmere" — so you can tell your
