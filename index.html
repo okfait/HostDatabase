@@ -25,7 +25,7 @@ const CONFIG = {
   // If you add more tabs and need a different one, grab its gid from the
   // tab's URL (…#gid=123456) and swap it in below.
   SHEET_CSV_URL: "https://docs.google.com/spreadsheets/d/1Xv5az4DrAtOV8zyeSAkpjZVTWWB8QWJI1DJybvPY7HM/export?format=csv&gid=0",
-  TEAM_NAME: "Shadow Greenville Roleplay",
+  TEAM_NAME: "Host Database & Info",
   BRAND_COLOR: "#258162",
   LOGO_URL: "https://github.com/okfait/HostDatabase/blob/main/GRTL%20Logo%20Smooth.png?raw=true"
 };
@@ -73,7 +73,10 @@ const ICONS = {
   shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z"/></svg>',
   clipboard: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><path d="M9 11h6M9 15h6M9 19h3"/></svg>',
   expand: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>',
-  layout: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>'
+  layout: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>',
+  megaphone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v3a1 1 0 0 0 1 1h2l4 5V6l-4 5H4a1 1 0 0 0-1 1Z"/><path d="M14 8a4 4 0 0 1 0 8"/><path d="M17.5 5.5a8 8 0 0 1 0 13"/></svg>',
+  lightbulb: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2Z"/></svg>'
 };
 
 const BANNED_VEHICLES = [
@@ -666,9 +669,11 @@ mark.find-hl-current{ background:var(--accent-bright); color:#04140d; }
 
 /* ---------- Handbook: shared bits ---------- */
 .handbook-note{ background:rgba(232,184,75,0.10); border:1px solid rgba(232,184,75,0.3); color:var(--accent-gold); font-size:13px; font-weight:500; line-height:1.6; padding:13px 16px; border-radius:12px; margin-bottom:26px; }
-.handbook-prose{ background:var(--bg-card); border:1px solid var(--line); border-radius:16px; padding:22px 24px; }
-.handbook-prose p{ font-size:14px; line-height:1.85; color:var(--text-muted); margin:0 0 18px; }
-.handbook-prose p:last-child{ margin-bottom:0; }
+.handbook-prose{ display:flex; flex-direction:column; gap:12px; }
+.hb-item{ background:var(--bg-card); border:1px solid var(--line); border-left:3px solid var(--accent-bright); border-radius:14px; padding:16px 20px; }
+.hb-item-title{ display:flex; align-items:center; gap:8px; font-family:var(--font-display); font-weight:700; font-size:12px; letter-spacing:.05em; text-transform:uppercase; color:var(--accent-bright); margin-bottom:9px; }
+.hb-item-title .icon{ width:16px; height:16px; }
+.hb-item p{ margin:0; font-size:14px; line-height:1.75; color:var(--text-muted); }
 .hex-chip{ display:inline-flex; align-items:center; gap:7px; background:var(--bg-elevated); border:1px solid var(--line-bright); border-radius:8px; padding:3px 10px 3px 6px; font-family:monospace; font-size:12.5px; font-weight:600; color:var(--text); }
 .hex-swatch{ width:14px; height:14px; border-radius:50%; border:1px solid var(--line-bright); flex-shrink:0; }
 .cmd-inline{ font-family:monospace; font-size:13px; font-weight:600; background:var(--bg-elevated); border:1px solid var(--line-bright); border-radius:6px; padding:1px 7px; color:var(--accent-bright); }
@@ -823,8 +828,8 @@ mark.find-hl-current{ background:var(--accent-bright); color:#04140d; }
 footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px; }
 .footer-text{ font-size:12px; color:var(--text-dim); line-height:1.6; }
 .footer-logos{ display:flex; align-items:center; gap:10px; }
-.logo-box{ background:#fff; border-radius:12px; padding:8px 10px; display:flex; align-items:center; box-shadow:0 6px 20px rgba(0,0,0,0.3); }
-.logo-box img{ height:26px; display:block; }
+.logo-box{ background:transparent; display:flex; align-items:center; }
+.logo-box img{ height:30px; display:block; }
 
 @media (max-width:640px){
   header.top .top-inner{ flex-direction:column; align-items:flex-start; gap:12px; }
@@ -848,7 +853,7 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
 <div id="login-screen">
   <div class="login-card">
     <div class="login-badge"><img src="" id="login-logo-img" class="logo-img" alt="Server logo" onload="this.classList.add('loaded')"></div>
-    <div class="login-title" id="login-team-name">Shadow Greenville Roleplay</div>
+    <div class="login-title" id="login-team-name">Host Database &amp; Info</div>
     <form id="login-form" autocomplete="on">
       <div class="field"><label for="login-user">Username</label><input id="login-user" name="username" type="text" autocomplete="username" placeholder="RobloxUsername"></div>
       <div class="field"><label for="login-pass">Password</label><input id="login-pass" name="password" type="password" autocomplete="current-password" placeholder="••••••••"></div>
@@ -865,7 +870,7 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
       <div class="brand">
         <div class="brand-mark"><img src="" id="brand-logo-img" class="logo-img" alt="Server logo" onload="this.classList.add('loaded')"></div>
         <div class="brand-text">
-          <div class="name" id="team-name-display">Shadow Greenville Roleplay</div>
+          <div class="name" id="team-name-display">Host Database &amp; Info</div>
         </div>
       </div>
       <div class="view-switch" id="view-switch">
@@ -1249,10 +1254,22 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
         <div class="section-title shiny-text"><span class="icon" data-icon="shield"></span> Host Standards</div>
       </div>
       <div class="handbook-prose">
-        <p>Presentation is part of the job. While hosting, you're expected to wear a realistic outfit and use a realistic avatar at all times. It's one of the first things civilians notice, and it sets the tone for how seriously the session gets taken.</p>
-        <p>Reaching Host Of The Month comes with a real reward: whoever earns the title that month receives a Diamond Pass for the following month.</p>
-        <p>Your vehicle while hosting should be an undercover LEO vehicle in white, using the hex code <span class="hex-chip"><span class="hex-swatch" style="background:#D0D0D0"></span>#D0D0D0</span>. A small clearcoat metallic flake finish is a nice touch, but it's optional. The color itself is the only hard requirement.</p>
-        <p>If you're staff inside someone else's session, your vehicle should instead be an undercover LEO vehicle in black. A glossy metallic iridescent finish is optional here too, same as with the host vehicle.</p>
+        <div class="hb-item">
+          <div class="hb-item-title"><span class="icon" data-icon="shield"></span>Dress Code</div>
+          <p>Presentation is part of the job. While hosting, you're expected to wear a realistic outfit and use a realistic avatar at all times. It's one of the first things civilians notice, and it sets the tone for how seriously the session gets taken.</p>
+        </div>
+        <div class="hb-item">
+          <div class="hb-item-title"><span class="icon" data-icon="crown"></span>Host Of The Month Reward</div>
+          <p>Reaching Host Of The Month comes with a real reward: whoever earns the title that month receives a Diamond Pass for the following month.</p>
+        </div>
+        <div class="hb-item">
+          <div class="hb-item-title"><span class="icon" data-icon="car"></span>Host Vehicle</div>
+          <p>Your vehicle while hosting should be an undercover LEO vehicle in white, using the hex code <span class="hex-chip"><span class="hex-swatch" style="background:#D0D0D0"></span>#D0D0D0</span>. A small clearcoat metallic flake finish is a nice touch, but it's optional. The color itself is the only hard requirement.</p>
+        </div>
+        <div class="hb-item">
+          <div class="hb-item-title"><span class="icon" data-icon="car"></span>Staff Vehicle</div>
+          <p>If you're staff inside someone else's session, your vehicle should instead be an undercover LEO vehicle in black. A glossy metallic iridescent finish is optional here too, same as with the host vehicle.</p>
+        </div>
       </div>
     </section>
 
@@ -1261,15 +1278,42 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
         <div class="section-title shiny-text"><span class="icon" data-icon="clipboard"></span> Session Procedures</div>
       </div>
       <div class="handbook-prose">
-        <p>Give it 15 minutes between sessions. If you've just ended one and want to start another, that's the minimum wait before hosting again.</p>
-        <p>FRP is not tolerated during early access, full stop. Keep all civilians at spawn until everyone's been verified. The one exception is during reinvites, where civilians are free to leave as soon as they've rejoined. Verification itself is done with the <span class="cmd-inline">/whois</span> command in the bot channels.</p>
-        <p>Follow the server numbering system: if Server B has a session running, Server A needs one running too.</p>
-        <p>Announcements are for players who might not know the format. You're welcome to point people toward <a href="#" class="inline-link" data-goto="formats-section" data-goto-view="dashboard">session formats</a> whenever it's useful, and clicking it will take you straight there.</p>
-        <p>When a session ends, announce the FRP time and let every ongoing scene continue rather than cutting it short. If you spot a leaker, remove them with <span class="cmd-inline">sban [user]</span> in the Cmdr window.</p>
-        <p>Civilians can only be kicked for violating RP guidelines, and no announcement is needed when it happens. If a kicked civilian asks why, explain it in Discord or point them to open a ticket. There's no obligation to justify it in the session itself.</p>
-        <p>Going AFK is fine, just notify the other staff members in the Moderator chat first. Civilians don't need to know. Make sure at least one staff member is present in the session at all times, and regenerate the session code whenever it's warranted.</p>
-        <p>In-game announcements are reserved for important information and for answering questions. Respond to chat questions with something like "!example" rather than a full announcement. Lighter engagement prompts are fair game too, things like "how was your day" or "cats or dogs" to get civilians talking.</p>
-        <p>A few tips for keeping the roleplay engaging: encourage civilians to open their shops, use special perms where it fits, and announce whenever FD, DOT, or LEO are active in the session. Larger set piece RPs such as drag races, rooftop derby, and hide and seek are reserved for the end of the session only.</p>
+        <div class="hb-item">
+          <div class="hb-item-title"><span class="icon" data-icon="clock"></span>Session Cooldown</div>
+          <p>Give it 15 minutes between sessions. If you've just ended one and want to start another, that's the minimum wait before hosting again.</p>
+        </div>
+        <div class="hb-item">
+          <div class="hb-item-title"><span class="icon" data-icon="group"></span>Early Access &amp; Verification</div>
+          <p>FRP is not tolerated during early access, full stop. Keep all civilians at spawn until everyone's been verified. The one exception is during reinvites, where civilians are free to leave as soon as they've rejoined. Verification itself is done with the <span class="cmd-inline">/whois</span> command in the bot channels.</p>
+        </div>
+        <div class="hb-item">
+          <div class="hb-item-title"><span class="icon" data-icon="layout"></span>Numbering System</div>
+          <p>Follow the server numbering system: if Server B has a session running, Server A needs one running too.</p>
+        </div>
+        <div class="hb-item">
+          <div class="hb-item-title"><span class="icon" data-icon="book2"></span>Pointing To Formats</div>
+          <p>Announcements are for players who might not know the format. You're welcome to point people toward <a href="#" class="inline-link" data-goto="formats-section" data-goto-view="dashboard">session formats</a> whenever it's useful, and clicking it will take you straight there.</p>
+        </div>
+        <div class="hb-item">
+          <div class="hb-item-title"><span class="icon" data-icon="terminal"></span>Ending A Session &amp; Leakers</div>
+          <p>When a session ends, announce the FRP time and let every ongoing scene continue rather than cutting it short. If you spot a leaker, remove them with <span class="cmd-inline">sban [user]</span> in the Cmdr window.</p>
+        </div>
+        <div class="hb-item">
+          <div class="hb-item-title"><span class="icon" data-icon="group"></span>Kicking Civilians</div>
+          <p>Civilians can only be kicked for violating RP guidelines, and no announcement is needed when it happens. If a kicked civilian asks why, explain it in Discord or point them to open a ticket. There's no obligation to justify it in the session itself.</p>
+        </div>
+        <div class="hb-item">
+          <div class="hb-item-title"><span class="icon" data-icon="shield"></span>Going AFK &amp; Staff Presence</div>
+          <p>Going AFK is fine, just notify the other staff members in the Moderator chat first. Civilians don't need to know. Make sure at least one staff member is present in the session at all times, and regenerate the session code whenever it's warranted.</p>
+        </div>
+        <div class="hb-item">
+          <div class="hb-item-title"><span class="icon" data-icon="megaphone"></span>In-Game Announcements</div>
+          <p>In-game announcements are reserved for important information and for answering questions. Respond to chat questions with something like "!example" rather than a full announcement. Lighter engagement prompts are fair game too, things like "how was your day" or "cats or dogs" to get civilians talking.</p>
+        </div>
+        <div class="hb-item">
+          <div class="hb-item-title"><span class="icon" data-icon="lightbulb"></span>Engagement Tips</div>
+          <p>A few tips for keeping the roleplay engaging: encourage civilians to open their shops, use special perms where it fits, and announce whenever FD, DOT, or LEO are active in the session. Larger set piece RPs such as drag races, rooftop derby, and hide and seek are reserved for the end of the session only.</p>
+        </div>
       </div>
     </section>
 
@@ -1278,9 +1322,18 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
         <div class="section-title shiny-text"><span class="icon" data-icon="expand"></span> Capacity &amp; Reinvites</div>
       </div>
       <div class="handbook-prose">
-        <p>Once a session reaches full capacity, or gets close, or has multiple leakers inside it, regenerate the code using the <span class="cmd-inline">/regen</span> command in the Discord server.</p>
-        <p>Once the link's been regenerated and there's open space again, use the <span class="cmd-inline">/reinvites</span> command in the Discord server to create reinvites.</p>
-        <p>When those reinvites go out, make sure to announce the RP information in-game so anyone joining fresh is caught up.</p>
+        <div class="hb-item">
+          <div class="hb-item-title"><span class="icon" data-icon="refresh"></span>Regenerating The Code</div>
+          <p>Once a session reaches full capacity, or gets close, or has multiple leakers inside it, regenerate the code using the <span class="cmd-inline">/regen</span> command in the Discord server.</p>
+        </div>
+        <div class="hb-item">
+          <div class="hb-item-title"><span class="icon" data-icon="expand"></span>Creating Reinvites</div>
+          <p>Once the link's been regenerated and there's open space again, use the <span class="cmd-inline">/reinvites</span> command in the Discord server to create reinvites.</p>
+        </div>
+        <div class="hb-item">
+          <div class="hb-item-title"><span class="icon" data-icon="megaphone"></span>Announcing Reinvites</div>
+          <p>When those reinvites go out, make sure to announce the RP information in-game so anyone joining fresh is caught up.</p>
+        </div>
       </div>
     </section>
    </div>
@@ -1479,11 +1532,16 @@ function attachElectricBorder(target, { color = '#3ddc97', speed = 1, chaos = 0.
   target.parentNode.insertBefore(wrap, target);
   const canvas = document.createElement('canvas');
   canvas.className = 'electric-canvas';
+  // A static CSS glow instead of a per-frame canvas shadowBlur — shadowBlur
+  // is one of the most expensive things a 2D canvas can do every frame, and
+  // this looks the same without paying that cost on every draw call.
+  canvas.style.filter = `drop-shadow(0 0 ${(5*opacity).toFixed(1)}px ${color})`;
   wrap.appendChild(canvas);
   wrap.appendChild(target);
 
   const ctx = canvas.getContext('2d');
-  let width = 0, height = 0, timeVal = 0, lastTime = 0, rafId = 0;
+  let width = 0, height = 0, timeVal = 0, lastTime = 0, rafId = 0, frameCount = 0;
+  let running = false, isVisible = true;
 
   function random(x){ return (Math.sin(x * 12.9898) * 43758.5453) % 1; }
   function noise2D(x, y){
@@ -1527,37 +1585,58 @@ function attachElectricBorder(target, { color = '#3ddc97', speed = 1, chaos = 0.
   updateSize();
 
   function draw(now){
+    if(!running) return;
     rafId = requestAnimationFrame(draw);
+    // Redraw on every other frame only — the drift is slow enough that this
+    // is invisible, and it roughly halves the cost of every card doing this.
+    frameCount++;
+    if(frameCount % 2 !== 0) return;
     if(!lastTime) lastTime = now;
     const dt = (now - lastTime) / 1000; lastTime = now;
     timeVal += dt * speed;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.globalAlpha = opacity;
     ctx.strokeStyle = color; ctx.lineWidth = 1.4; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    ctx.shadowColor = color; ctx.shadowBlur = 7 * opacity;
     const left = borderOffset, top = borderOffset, bw = width - 2 * borderOffset, bh = height - 2 * borderOffset;
     if(bw <= 0 || bh <= 0) return;
     const maxR = Math.min(bw, bh) / 2, r = Math.min(borderRadius, maxR);
     const perim = 2 * (bw + bh) + 2 * Math.PI * r;
-    const samples = Math.max(24, Math.floor(perim / 3));
+    const samples = Math.max(18, Math.floor(perim / 4));
     ctx.beginPath();
     for(let i = 0; i <= samples; i++){
       const p = i / samples;
       const pt = roundRectPt(p, left, top, bw, bh, r);
-      const xn = octavedNoise(p * 8, 6, 1.6, 0.7, chaos, 10, timeVal, 0);
-      const yn = octavedNoise(p * 8, 6, 1.6, 0.7, chaos, 10, timeVal, 1);
+      const xn = octavedNoise(p * 8, 4, 1.6, 0.7, chaos, 10, timeVal, 0);
+      const yn = octavedNoise(p * 8, 4, 1.6, 0.7, chaos, 10, timeVal, 1);
       const dx = pt.x + xn * 60, dy = pt.y + yn * 60;
       if(i === 0) ctx.moveTo(dx, dy); else ctx.lineTo(dx, dy);
     }
     ctx.closePath(); ctx.stroke();
   }
-  rafId = requestAnimationFrame(draw);
+  function start(){ if(running) return; running = true; lastTime = 0; rafId = requestAnimationFrame(draw); }
+  function stop(){ running = false; cancelAnimationFrame(rafId); }
+
+  // Only animate cards that are actually on screen and the tab is in front —
+  // a long roster or Host Of The Month history had every card's canvas
+  // running full-time even scrolled far out of view, which is the main
+  // thing that was making the dashboard feel laggy.
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      isVisible = entry.isIntersecting;
+      if(isVisible && !document.hidden) start(); else stop();
+    });
+  });
+  io.observe(canvas);
+  function onVisibilityChange(){ if(document.hidden) stop(); else if(isVisible) start(); }
+  document.addEventListener('visibilitychange', onVisibilityChange);
+
   const ro = new ResizeObserver(updateSize);
   ro.observe(target);
 
   return {
     destroy(){
-      cancelAnimationFrame(rafId); ro.disconnect();
+      stop(); ro.disconnect(); io.disconnect();
+      document.removeEventListener('visibilitychange', onVisibilityChange);
       if(wrap.parentNode){ wrap.parentNode.insertBefore(target, wrap); wrap.remove(); }
     }
   };
