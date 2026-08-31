@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SGR Host Database</title>
-<link rel="icon" href="https://github.com/okfait/okgarage-mini/blob/main/01%20(81).png?raw=true">
+<link rel="icon" href="https://github.com/okfait/HostDatabase/blob/main/GRTL%20Logo%20Smooth.png?raw=true">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" onerror="this.onerror=null;document.write('<script src=\'https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js\'><\/script>')"></script>
@@ -27,7 +27,7 @@ const CONFIG = {
   SHEET_CSV_URL: "https://docs.google.com/spreadsheets/d/1Xv5az4DrAtOV8zyeSAkpjZVTWWB8QWJI1DJybvPY7HM/export?format=csv&gid=0",
   TEAM_NAME: "Shadow Greenville Roleplay",
   BRAND_COLOR: "#258162",
-  LOGO_URL: "https://github.com/okfait/okgarage-mini/blob/main/01%20(81).png?raw=true"
+  LOGO_URL: "https://github.com/okfait/HostDatabase/blob/main/GRTL%20Logo%20Smooth.png?raw=true"
 };
 // Fetches the "LogHistory" tab by NAME instead of by gid, so it keeps
 // working even though that tab was created later and its gid is unknown.
@@ -639,11 +639,30 @@ section.section{ margin-bottom:40px; scroll-margin-top:100px; }
 .formats-subhead-gap{ margin-top:36px; }
 
 /* ---------- Dashboard / Handbook view switch ---------- */
-.view-switch{ display:flex; align-items:center; gap:2px; background:var(--bg-elevated); border:1px solid var(--line-bright); border-radius:999px; padding:3px; }
-.view-switch-btn{ display:inline-flex; align-items:center; gap:6px; border:none; background:transparent; color:var(--text-muted); font-size:12.5px; font-weight:600; font-family:var(--font-body); padding:8px 14px; border-radius:999px; cursor:pointer; transition:.15s; }
+.view-switch{ position:relative; display:flex; align-items:center; gap:2px; background:var(--bg-elevated); border:1px solid var(--line-bright); border-radius:999px; padding:3px; }
+.view-switch-thumb{ position:absolute; top:3px; bottom:3px; left:3px; width:0; border-radius:999px; background:linear-gradient(135deg, var(--accent-bright), var(--accent)); z-index:0; transition:transform .32s cubic-bezier(.22,.8,.2,1), width .32s cubic-bezier(.22,.8,.2,1); }
+.view-switch-btn{ position:relative; z-index:1; display:inline-flex; align-items:center; gap:6px; border:none; background:transparent; color:var(--text-muted); font-size:12.5px; font-weight:600; font-family:var(--font-body); padding:8px 14px; border-radius:999px; cursor:pointer; transition:color .2s; }
 .view-switch-btn .icon{ width:15px; height:15px; }
 .view-switch-btn:hover{ color:var(--text); }
-.view-switch-btn.active{ background:linear-gradient(135deg, var(--accent-bright), var(--accent)); color:#04140d; }
+.view-switch-btn.active{ color:#04140d; }
+
+/* ---------- Dashboard / Handbook crossfade (no teleporting) ---------- */
+.view-pane{ transition:opacity .26s ease, transform .26s ease; opacity:1; transform:translateY(0); }
+.view-pane-hidden{ opacity:0; transform:translateY(10px); }
+.view-pane-instant{ transition:none !important; }
+
+/* ---------- In-page find (Ctrl/Cmd+F) ---------- */
+#find-bar{ position:fixed; top:14px; left:50%; transform:translateX(-50%) translateY(-14px); z-index:60; display:flex; align-items:center; gap:8px; background:var(--bg-card); border:1px solid var(--line-bright); border-radius:14px; padding:8px 10px; box-shadow:0 20px 50px rgba(0,0,0,0.45); opacity:0; pointer-events:none; transition:opacity .18s, transform .18s; }
+#find-bar.open{ opacity:1; pointer-events:auto; transform:translateX(-50%) translateY(0); }
+#find-bar .icon{ width:16px; height:16px; color:var(--text-dim); flex-shrink:0; }
+#find-input{ width:200px; background:transparent; border:none; outline:none; color:var(--text); font-size:13.5px; font-family:var(--font-body); }
+#find-input::placeholder{ color:var(--text-dim); }
+.find-count{ font-size:11.5px; color:var(--text-dim); font-family:monospace; min-width:44px; text-align:center; }
+.find-btn{ display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; background:var(--bg-elevated); border:1px solid var(--line-bright); color:var(--text-muted); border-radius:8px; cursor:pointer; transition:.15s; font-size:12px; }
+.find-btn:hover{ border-color:var(--accent-bright); color:var(--accent-bright); }
+mark.find-hl{ background:rgba(232,184,75,0.35); color:inherit; border-radius:3px; padding:0 1px; }
+mark.find-hl-current{ background:var(--accent-bright); color:#04140d; }
+@media (max-width:640px){ #find-input{ width:120px; } }
 
 /* ---------- Handbook: shared bits ---------- */
 .handbook-note{ background:rgba(232,184,75,0.10); border:1px solid rgba(232,184,75,0.3); color:var(--accent-gold); font-size:13px; font-weight:500; line-height:1.6; padding:13px 16px; border-radius:12px; margin-bottom:26px; }
@@ -850,6 +869,7 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
         </div>
       </div>
       <div class="view-switch" id="view-switch">
+        <span class="view-switch-thumb" id="view-switch-thumb"></span>
         <button type="button" class="view-switch-btn" data-view="dashboard"><span class="icon" data-icon="layout"></span>Dashboard</button>
         <button type="button" class="view-switch-btn" data-view="handbook"><span class="icon" data-icon="book2"></span>Handbook</button>
       </div>
@@ -876,7 +896,7 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
   </header>
 
   <div class="app-content">
-   <div id="view-dashboard">
+   <div id="view-dashboard" class="view-pane">
     <section class="section" id="pill-section">
       <div class="logs-label shiny-text">LOGS</div>
       <div id="pill-region"></div>
@@ -972,13 +992,13 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
     </section>
    </div>
 
-   <div id="view-handbook" style="display:none">
+   <div id="view-handbook" class="view-pane" style="display:none">
     <section class="section" id="punishments-section">
       <div class="section-head">
         <div class="section-title shiny-text"><span class="icon" data-icon="scale"></span> Punishments</div>
       </div>
 
-      <div class="handbook-note">Staff don't need to issue a warning for unpaid citations by hand — the GRTL bot handles it automatically. If a citation goes unpaid for 30 days, the bot issues the warning on its own.</div>
+      <div class="handbook-note">Staff don't need to issue a warning for unpaid citations by hand. The GRTL bot handles it automatically: if a citation goes unpaid for 30 days, the bot issues the warning on its own.</div>
 
       <div class="formats-subhead"><span class="icon" data-icon="car"></span> In-Game Punishments</div>
 
@@ -999,7 +1019,7 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
         <ul class="plist">
           <li>Off-roading (cutting across the map counts as Mass FRP; applies everywhere except dirt pathways)</li>
           <li>Bypassing the chat filter</li>
-          <li>Reckless driving (red lights, curbs, under 5 car distance — a minor case can be a verbal warning)</li>
+          <li>Reckless driving (red lights, curbs, under 5 car distance; a minor case can be a verbal warning)</li>
           <li>Blocking / obstructing traffic</li>
           <li>Violating peacetime rules</li>
           <li>Failure to yield for staff / PS</li>
@@ -1012,19 +1032,19 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
           <li>Bypassing, hidden, or blank plate</li>
           <li>NSFW (roleplays, actions, or chat)</li>
           <li>Failure to call public services</li>
-          <li>Violating trailer guidelines (rules 7, 34–37, and restricted trailers)</li>
-          <li>Glitching / squatting a vehicle (using a glitch — actual exploiting is a permanent ban)</li>
+          <li>Violating trailer guidelines (rules 7, 34 to 37, and restricted trailers)</li>
+          <li>Glitching / squatting a vehicle (using a glitch; actual exploiting is a permanent ban)</li>
         </ul>
       </div>
 
       <div class="ptier ptier-yellow">
-        <div class="ptier-head"><span class="ptier-badge">1–3 Day Bars</span>Minor Bars</div>
+        <div class="ptier-head"><span class="ptier-badge">1 to 3 Day Bars</span>Minor Bars</div>
         <div class="prow"><div class="poffense">Rejoining after a kick</div><div class="ppenalty">+1 day bar extension</div></div>
         <div class="pnote">Example: a 2-day bar from FRP plus 1 day from rejoining stacks to 3 days total.</div>
         <div class="prow"><div class="poffense">Repeatedly ignoring staff commands</div><div class="ppenalty">1 day bar + instant warning</div></div>
         <div class="prow"><div class="poffense">Unpaid citations</div><div class="ppenalty">1 day bar + instant warning</div></div>
-        <div class="pnote">Only comes up once a host has 3 prior warnings already — swap all citation roles for a single warning. Handled automatically by the GRTL bot as noted above.</div>
-        <div class="prow"><div class="poffense">FRP speeding (3–19 MPH over)</div><div class="ppenalty">2 day bar + instant warning</div></div>
+        <div class="pnote">Only comes up once a host has 3 prior warnings already. Swap all citation roles for a single warning, and remember this one is handled automatically by the GRTL bot as noted above.</div>
+        <div class="prow"><div class="poffense">FRP speeding (3 to 19 MPH over)</div><div class="ppenalty">2 day bar + instant warning</div></div>
         <div class="pnote">Can be a verbal warning if it's clearly a brief, accidental cruise that slows back down fast. A second offense escalates to a removal, warning, and bar.</div>
         <div class="prow"><div class="poffense">FRP (fail roleplay)</div><div class="ppenalty">2 day bar + instant warning</div></div>
         <div class="pnote">Covers unrealistic actions like driving backwards on a main road.</div>
@@ -1032,7 +1052,7 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
       </div>
 
       <div class="ptier ptier-red">
-        <div class="ptier-head"><span class="ptier-badge">5–14 Day Bars</span>Major Bars</div>
+        <div class="ptier-head"><span class="ptier-badge">5 to 14 Day Bars</span>Major Bars</div>
         <div class="prow"><div class="poffense">Evading a bar</div><div class="ppenalty">5 days + bar extension + warning</div></div>
         <div class="prow"><div class="poffense">LEO impersonation</div><div class="ppenalty">5 day bar + instant warning</div></div>
         <div class="prow"><div class="poffense">Combat logging</div><div class="ppenalty">7 day bar + instant warning</div></div>
@@ -1070,7 +1090,7 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
         <ul class="plist">
           <li>Off-roading (cutting the map counts as Mass FRP)</li>
           <li>Bypassing the chat filter</li>
-          <li>Reckless driving (red lights, curbs, under 5 car distance — a minor case can get a verbal)</li>
+          <li>Reckless driving (red lights, curbs, under 5 car distance; a minor case can get a verbal)</li>
           <li>Blocking / obstructing traffic</li>
           <li>Violating peacetime rules</li>
           <li>Failure to yield for staff / PS</li>
@@ -1080,7 +1100,7 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
           <li>LEO impersonation (driving LEO cars, pulling people over)</li>
           <li>Staff impersonation (staff cars, uniforms, acting like staff)</li>
           <li>Failure to follow RP rules (Special RPs)</li>
-          <li>FRP (3–19 MPH over, or unrealistic actions)</li>
+          <li>FRP (3 to 19 MPH over, or unrealistic actions)</li>
           <li>NSFW / offensive remarks (chat, actions, RP)</li>
         </ul>
       </div>
@@ -1094,7 +1114,7 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
       <div class="formats-subhead formats-subhead-gap"><span class="icon" data-icon="terminal"></span> In-Server Punishments (Discord)</div>
 
       <div class="ptier ptier-green">
-        <div class="ptier-head"><span class="ptier-badge">1–60 Min</span>Short Timeouts</div>
+        <div class="ptier-head"><span class="ptier-badge">1 to 60 Min</span>Short Timeouts</div>
         <div class="prow"><div class="poffense">Pinging hosts</div><div class="ppenalty">1 minute</div></div>
         <div class="pnote">Also covers pinging for re-invites.</div>
         <div class="prow"><div class="poffense">Spamming after a first timeout</div><div class="ppenalty">5 minutes</div></div>
@@ -1103,7 +1123,7 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
       </div>
 
       <div class="ptier ptier-yellow">
-        <div class="ptier-head"><span class="ptier-badge">1–7 Days</span>Long Timeouts</div>
+        <div class="ptier-head"><span class="ptier-badge">1 to 7 Days</span>Long Timeouts</div>
         <div class="prow"><div class="poffense">Offensive comments</div><div class="ppenalty">1 day timeout</div></div>
         <div class="pnote">Racial, homophobic, sexist, or similar remarks.</div>
         <div class="prow"><div class="poffense">NSFW</div><div class="ppenalty">7 day timeout + issue a warning</div></div>
@@ -1141,7 +1161,7 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
       <div class="ptier ptier-purple">
         <div class="ptier-head"><span class="ptier-badge">25 Days</span></div>
         <ul class="plist"><li>Leaving the server to avoid punishment</li></ul>
-        <div class="pnote">This upgrades the overall ban to 25 days total — it doesn't stack on top of an existing ban.</div>
+        <div class="pnote">This upgrades the overall ban to 25 days total; it doesn't stack on top of an existing ban.</div>
       </div>
       <div class="ptier ptier-perm">
         <div class="ptier-head"><span class="ptier-badge">Permanent</span></div>
@@ -1153,7 +1173,7 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
       <div class="section-head">
         <div class="section-title shiny-text"><span class="icon" data-icon="terminal"></span> Server Commands</div>
       </div>
-      <div class="handbook-note">Commands are typed straight into the Cmdr window — no colon or prefix needed. Use Tab to autocomplete, and arguments follow the shorthand below.</div>
+      <div class="handbook-note">Commands are typed straight into the Cmdr window, no colon or prefix needed. Use Tab to autocomplete, and arguments follow the shorthand below.</div>
 
       <div class="formats-subhead"><span class="icon" data-icon="bookmark"></span> Argument Shorthands</div>
       <div class="cmd-shorthand-grid">
@@ -1229,9 +1249,9 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
         <div class="section-title shiny-text"><span class="icon" data-icon="shield"></span> Host Standards</div>
       </div>
       <div class="handbook-prose">
-        <p>Presentation is part of the job. While hosting, you're expected to wear a realistic outfit and use a realistic avatar at all times — it's one of the first things civilians notice, and it sets the tone for how seriously the session gets taken.</p>
+        <p>Presentation is part of the job. While hosting, you're expected to wear a realistic outfit and use a realistic avatar at all times. It's one of the first things civilians notice, and it sets the tone for how seriously the session gets taken.</p>
         <p>Reaching Host Of The Month comes with a real reward: whoever earns the title that month receives a Diamond Pass for the following month.</p>
-        <p>Your vehicle while hosting should be an undercover LEO vehicle in white, using the hex code <span class="hex-chip"><span class="hex-swatch" style="background:#D0D0D0"></span>#D0D0D0</span>. A small clearcoat metallic flake finish is a nice touch, but it's optional — the color itself is the only hard requirement.</p>
+        <p>Your vehicle while hosting should be an undercover LEO vehicle in white, using the hex code <span class="hex-chip"><span class="hex-swatch" style="background:#D0D0D0"></span>#D0D0D0</span>. A small clearcoat metallic flake finish is a nice touch, but it's optional. The color itself is the only hard requirement.</p>
         <p>If you're staff inside someone else's session, your vehicle should instead be an undercover LEO vehicle in black. A glossy metallic iridescent finish is optional here too, same as with the host vehicle.</p>
       </div>
     </section>
@@ -1242,14 +1262,14 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
       </div>
       <div class="handbook-prose">
         <p>Give it 15 minutes between sessions. If you've just ended one and want to start another, that's the minimum wait before hosting again.</p>
-        <p>FRP is not tolerated during early access, full stop. Keep all civilians at spawn until everyone's been verified — the one exception is during reinvites, where civilians are free to leave as soon as they've rejoined. Verification itself is done with the <span class="cmd-inline">/whois</span> command in the bot channels.</p>
+        <p>FRP is not tolerated during early access, full stop. Keep all civilians at spawn until everyone's been verified. The one exception is during reinvites, where civilians are free to leave as soon as they've rejoined. Verification itself is done with the <span class="cmd-inline">/whois</span> command in the bot channels.</p>
         <p>Follow the server numbering system: if Server B has a session running, Server A needs one running too.</p>
-        <p>Announcements are for players who might not know the format — you're welcome to point people toward <a href="#" class="inline-link" data-goto="formats-section" data-goto-view="dashboard">session formats</a> whenever it's useful, and it'll take you straight there.</p>
+        <p>Announcements are for players who might not know the format. You're welcome to point people toward <a href="#" class="inline-link" data-goto="formats-section" data-goto-view="dashboard">session formats</a> whenever it's useful, and clicking it will take you straight there.</p>
         <p>When a session ends, announce the FRP time and let every ongoing scene continue rather than cutting it short. If you spot a leaker, remove them with <span class="cmd-inline">sban [user]</span> in the Cmdr window.</p>
-        <p>Civilians can only be kicked for violating RP guidelines, and no announcement is needed when it happens. If a kicked civilian asks why, explain it in Discord or point them to open a ticket — there's no obligation to justify it in the session itself.</p>
-        <p>Going AFK is fine, just notify the other staff members in the Moderator chat first — civilians don't need to know. Make sure at least one staff member is present in the session at all times, and regenerate the session code whenever it's warranted.</p>
-        <p>In-game announcements are reserved for important information and for answering questions — respond to chat questions with something like "!example" rather than a full announcement. Lighter engagement prompts are fair game too, things like "how was your day" or "cats or dogs" to get civilians talking.</p>
-        <p>A few tips for keeping the roleplay engaging: encourage civilians to open their shops, use special perms where it fits, and announce whenever FD, DOT, or LEO are active in the session. Larger set-piece RPs — drag races, rooftop derby, hide and seek — are reserved for the end of the session only.</p>
+        <p>Civilians can only be kicked for violating RP guidelines, and no announcement is needed when it happens. If a kicked civilian asks why, explain it in Discord or point them to open a ticket. There's no obligation to justify it in the session itself.</p>
+        <p>Going AFK is fine, just notify the other staff members in the Moderator chat first. Civilians don't need to know. Make sure at least one staff member is present in the session at all times, and regenerate the session code whenever it's warranted.</p>
+        <p>In-game announcements are reserved for important information and for answering questions. Respond to chat questions with something like "!example" rather than a full announcement. Lighter engagement prompts are fair game too, things like "how was your day" or "cats or dogs" to get civilians talking.</p>
+        <p>A few tips for keeping the roleplay engaging: encourage civilians to open their shops, use special perms where it fits, and announce whenever FD, DOT, or LEO are active in the session. Larger set piece RPs such as drag races, rooftop derby, and hide and seek are reserved for the end of the session only.</p>
       </div>
     </section>
 
@@ -1258,7 +1278,7 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
         <div class="section-title shiny-text"><span class="icon" data-icon="expand"></span> Capacity &amp; Reinvites</div>
       </div>
       <div class="handbook-prose">
-        <p>Once a session reaches full capacity — or gets close, or has multiple leakers inside it — regenerate the code using the <span class="cmd-inline">/regen</span> command in the Discord server.</p>
+        <p>Once a session reaches full capacity, or gets close, or has multiple leakers inside it, regenerate the code using the <span class="cmd-inline">/regen</span> command in the Discord server.</p>
         <p>Once the link's been regenerated and there's open space again, use the <span class="cmd-inline">/reinvites</span> command in the Discord server to create reinvites.</p>
         <p>When those reinvites go out, make sure to announce the RP information in-game so anyone joining fresh is caught up.</p>
       </div>
@@ -1269,7 +1289,7 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
       <div class="footer-text">Website made by Geo to be used in the Shadow GVRP community.<br>© <span id="year"></span> Shadow Greenville Roleplay.</div>
       <div class="footer-logos">
         <div class="logo-box"><img src="" id="footer-server-logo" class="logo-img" alt="Server logo" onload="this.classList.add('loaded')"></div>
-        <div class="logo-box"><img src="https://github.com/okfait/okgarage-mini/blob/main/01%20(80).png?raw=true" alt="OK Fait Club logo"></div>
+        <div class="logo-box"><img src="https://github.com/okfait/HostDatabase/blob/main/oklogo%20new.png?raw=true" alt="OK Fait Club logo"></div>
       </div>
     </footer>
   </div>
@@ -1300,17 +1320,57 @@ document.querySelectorAll('.topnav a[href^="#"]').forEach(a=>{
 
 /* ---------------- Dashboard / Handbook view switch ---------------- */
 const VIEW_KEY = 'sgr-view';
+const CROSSFADE_MS = 260;
+let currentView = null;
+
+function positionSwitchThumb(){
+  const activeBtn = document.querySelector('.view-switch-btn.active');
+  const thumb = document.getElementById('view-switch-thumb');
+  if(!activeBtn || !thumb) return;
+  thumb.style.width = activeBtn.offsetWidth + 'px';
+  thumb.style.transform = `translateX(${activeBtn.offsetLeft - 3}px)`;
+}
+
 function setView(view){
-  document.getElementById('view-dashboard').style.display = view === 'handbook' ? 'none' : '';
-  document.getElementById('view-handbook').style.display = view === 'handbook' ? '' : 'none';
+  const dash = document.getElementById('view-dashboard');
+  const hb = document.getElementById('view-handbook');
+  const showEl = view === 'handbook' ? hb : dash;
+  const hideEl = view === 'handbook' ? dash : hb;
+
   document.getElementById('nav-dashboard').style.display = view === 'handbook' ? 'none' : '';
   document.getElementById('nav-handbook').style.display = view === 'handbook' ? '' : 'none';
   document.querySelectorAll('.view-switch-btn').forEach(b=> b.classList.toggle('active', b.dataset.view === view));
+  positionSwitchThumb();
   try{ localStorage.setItem(VIEW_KEY, view); }catch(e){}
+
+  if(currentView === view) return;
+  const firstPaint = currentView === null;
+  currentView = view;
+
+  if(firstPaint){
+    hideEl.style.display = 'none';
+    showEl.style.display = '';
+    return;
+  }
+
+  // Fade + slide the old pane out, then swap display and fade + slide the
+  // new one in — nothing ever just teleports into place.
+  hideEl.classList.add('view-pane-hidden');
+  setTimeout(()=>{
+    hideEl.style.display = 'none';
+    showEl.style.display = '';
+    showEl.classList.add('view-pane-instant', 'view-pane-hidden');
+    void showEl.offsetWidth; // force reflow so the instant hidden state is applied
+    showEl.classList.remove('view-pane-instant');
+    requestAnimationFrame(()=> showEl.classList.remove('view-pane-hidden'));
+  }, CROSSFADE_MS);
 }
 document.querySelectorAll('.view-switch-btn').forEach(b=>{
   b.addEventListener('click', ()=> setView(b.dataset.view));
 });
+window.addEventListener('resize', positionSwitchThumb);
+window.addEventListener('load', positionSwitchThumb);
+setTimeout(positionSwitchThumb, 300);
 setView((()=>{ try{ return localStorage.getItem(VIEW_KEY) === 'handbook' ? 'handbook' : 'dashboard'; }catch(e){ return 'dashboard'; } })());
 
 // Inline links inside Handbook prose that jump to a section in the other view.
@@ -1323,7 +1383,7 @@ document.querySelectorAll('[data-goto]').forEach(el=>{
       if(!target) return;
       if(LENIS) LENIS.scrollTo(target, { offset:-90 });
       else target.scrollIntoView({ behavior:'smooth', block:'start' });
-    }, 60);
+    }, CROSSFADE_MS + 40);
   });
 });
 
@@ -3543,6 +3603,116 @@ function hideLoadingScreen(){
   el.style.opacity = '0';
   setTimeout(()=>{ el.style.display = 'none'; }, 350);
 }
+
+/* ---------------- In-page find (Ctrl/Cmd+F), scoped to the active view ---------------- */
+(function(){
+  const bar = document.createElement('div');
+  bar.id = 'find-bar';
+  bar.innerHTML = `
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input type="text" id="find-input" placeholder="Find in page">
+    <span class="find-count" id="find-count"></span>
+    <button type="button" class="find-btn" id="find-prev" title="Previous (Shift+Enter)">&#9650;</button>
+    <button type="button" class="find-btn" id="find-next" title="Next (Enter)">&#9660;</button>
+    <button type="button" class="find-btn" id="find-close" title="Close (Esc)">&#10005;</button>
+  `;
+  document.body.appendChild(bar);
+
+  const input = bar.querySelector('#find-input');
+  let matches = [], currentIndex = -1, activeQuery = '';
+
+  function activeScope(){
+    const hb = document.getElementById('view-handbook');
+    const inHandbook = hb && hb.style.display !== 'none';
+    return inHandbook ? hb : document.getElementById('view-dashboard');
+  }
+  function escapeReg(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+  function clearHighlights(){
+    document.querySelectorAll('mark.find-hl').forEach(m=>{
+      const parent = m.parentNode; if(!parent) return;
+      parent.replaceChild(document.createTextNode(m.textContent), m);
+      parent.normalize();
+    });
+    matches = []; currentIndex = -1;
+  }
+  function updateCount(){
+    bar.querySelector('#find-count').textContent = matches.length ? `${currentIndex+1}/${matches.length}` : (activeQuery ? '0/0' : '');
+  }
+  function goToCurrent(){
+    matches.forEach((m,i)=> m.classList.toggle('find-hl-current', i===currentIndex));
+    if(currentIndex>=0){
+      const el = matches[currentIndex];
+      if(LENIS) LENIS.scrollTo(el, { offset:-120 });
+      else el.scrollIntoView({ behavior:'smooth', block:'center' });
+    }
+    updateCount();
+  }
+  function highlightMatches(query){
+    clearHighlights();
+    activeQuery = query;
+    if(!query){ updateCount(); return; }
+    const scope = activeScope();
+    if(!scope) return;
+    const re = new RegExp(escapeReg(query), 'gi');
+    const walker = document.createTreeWalker(scope, NodeFilter.SHOW_TEXT, {
+      acceptNode(node){
+        if(!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        const p = node.parentElement;
+        if(!p || p.closest('script, style, #find-bar')) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    const textNodes = [];
+    let n; while((n = walker.nextNode())) textNodes.push(n);
+    textNodes.forEach(node=>{
+      const text = node.nodeValue;
+      re.lastIndex = 0;
+      let m, last = 0, found = false;
+      const frag = document.createDocumentFragment();
+      while((m = re.exec(text))){
+        found = true;
+        frag.appendChild(document.createTextNode(text.slice(last, m.index)));
+        const mark = document.createElement('mark');
+        mark.className = 'find-hl';
+        mark.textContent = m[0];
+        frag.appendChild(mark);
+        last = m.index + m[0].length;
+        if(re.lastIndex === m.index) re.lastIndex++;
+      }
+      if(!found) return;
+      frag.appendChild(document.createTextNode(text.slice(last)));
+      node.parentNode.replaceChild(frag, node);
+    });
+    matches = Array.from(scope.querySelectorAll('mark.find-hl'));
+    currentIndex = matches.length ? 0 : -1;
+    goToCurrent();
+  }
+  function next(){ if(!matches.length) return; currentIndex = (currentIndex+1) % matches.length; goToCurrent(); }
+  function prev(){ if(!matches.length) return; currentIndex = (currentIndex-1+matches.length) % matches.length; goToCurrent(); }
+  function openBar(){ bar.classList.add('open'); input.focus(); input.select(); }
+  function closeBar(){ bar.classList.remove('open'); clearHighlights(); activeQuery=''; input.value=''; updateCount(); }
+
+  document.addEventListener('keydown', (e)=>{
+    if((e.ctrlKey || e.metaKey) && !e.altKey && (e.key === 'f' || e.key === 'F')){
+      e.preventDefault();
+      openBar();
+    } else if(e.key === 'Escape' && bar.classList.contains('open')){
+      closeBar();
+    }
+  });
+  input.addEventListener('input', (e)=> highlightMatches(e.target.value));
+  input.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){ e.preventDefault(); e.shiftKey ? prev() : next(); }
+  });
+  bar.querySelector('#find-next').addEventListener('click', next);
+  bar.querySelector('#find-prev').addEventListener('click', prev);
+  bar.querySelector('#find-close').addEventListener('click', closeBar);
+
+  // Re-run the same search against the newly-active view when switching.
+  document.querySelectorAll('.view-switch-btn').forEach(b=>{
+    b.addEventListener('click', ()=>{ if(bar.classList.contains('open') && activeQuery) setTimeout(()=>highlightMatches(activeQuery), CROSSFADE_MS + 50); });
+  });
+})();
 
 if(CONFIG.SHEET_CSV_URL && CONFIG.SHEET_CSV_URL.indexOf('http') === 0){
   Papa.parse(CONFIG.SHEET_CSV_URL, {
