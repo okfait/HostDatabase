@@ -5,7 +5,7 @@
 <script>(function(){ try{ var t = localStorage.getItem('sgr-theme'); if(t === 'light') document.documentElement.setAttribute('data-theme','light'); }catch(e){} })();</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SGR Host Database</title>
+<title>GRTL Host Database</title>
 <link rel="icon" href="https://github.com/okfait/HostDatabase/blob/main/GRTL%20Logo%20Smooth.png?raw=true">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1339,7 +1339,7 @@ footer{ max-width:1180px; margin:0 auto; padding-top:26px; border-top:1px solid 
    </div>
 
     <footer>
-      <div class="footer-text">Website made by Geo to be used in the Shadow GVRP community.<br>© <span id="year"></span> Shadow Greenville Roleplay.</div>
+      <div class="footer-text">Website made by Geo to be used in the GRTL community.<br>© <span id="year"></span> Greenville Roleplay Test Lab.</div>
       <div class="footer-logos">
         <div class="logo-box"><img src="" id="footer-server-logo" class="logo-img" alt="Server logo" onload="this.classList.add('loaded')"></div>
         <div class="logo-box"><img src="https://github.com/okfait/HostDatabase/blob/main/oklogo%20new.png?raw=true" alt="OK Fait Club logo"></div>
@@ -1902,7 +1902,7 @@ function parseNewFormat(rows){
     if(rc!==-1){ headerPos = { r, colUsername:uc, colRank:rc }; break; }
   }
   if(!headerPos){
-    console.warn('SGR Host Database: could not find a "Username"+"Rank" header row anywhere in the sheet — New-format parsing failed.');
+    console.warn('GRTL Host Database: could not find a "Username"+"Rank" header row anywhere in the sheet — New-format parsing failed.');
     return out; // new layout not found — caller falls back to Old
   }
 
@@ -1919,7 +1919,7 @@ function parseNewFormat(rows){
   const colLOA = colOnHeader('LOA');
   const colWarn = colOnHeader('Amount of warnings');
   // "Eligible for payment" is intentionally never read — not used anywhere.
-  console.log(`SGR Host Database: found roster header at row ${headerPos.r+1}, columns — username:${headerPos.colUsername} rank:${headerPos.colRank} password:${colPassword} pfp:${colPfp} loa:${colLOA} warn:${colWarn}`);
+  console.log(`GRTL Host Database: found roster header at row ${headerPos.r+1}, columns — username:${headerPos.colUsername} rank:${headerPos.colRank} password:${colPassword} pfp:${colPfp} loa:${colLOA} warn:${colWarn}`);
 
   for(let r=headerPos.r+1; r<rows.length; r++){
     const row = rows[r]||[];
@@ -1943,7 +1943,7 @@ function parseNewFormat(rows){
       entries: [] // filled in by applyLogHistory() once the LogHistory tab loads
     });
   }
-  console.log(`SGR Host Database: parsed ${out.users.length} host(s):`,
+  console.log(`GRTL Host Database: parsed ${out.users.length} host(s):`,
     out.users.map(u => `${u.username} (rank: ${u.rankName || 'none'}, password ${u.password ? 'set' : 'MISSING'})`));
 
   // New-layout Host Of The Month table has its own Logs/Username/Date
@@ -2049,6 +2049,9 @@ function attemptLogin(silent){
   // width/position back then and stayed invisible. Now that #app is
   // actually visible, re-measure them for real.
   document.querySelectorAll('#formats-section .format-prefix').forEach(positionIndicator);
+  // Same root cause for the Dashboard/Handbook pill thumb — it was first
+  // positioned while #app was still hidden, so it measured 0 too.
+  positionSwitchThumb();
 }
 
 /* ---------------- LOA-ended alert (for hosts who manage the sheet) ----------------
@@ -2213,7 +2216,7 @@ function renderChart(){
   const box = document.querySelector('#graph-section .chart-box');
   if(typeof Chart === 'undefined'){
     box.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-dim);font-size:13px;text-align:center;padding:20px;">Chart library failed to load — check your ad blocker / extensions, or your connection, then refresh.</div>';
-    console.error('SGR Host Database: Chart.js is not defined — both CDN sources failed to load.');
+    console.error('GRTL Host Database: Chart.js is not defined — both CDN sources failed to load.');
     return;
   }
   if(!document.getElementById('logs-chart')){
@@ -3043,7 +3046,7 @@ const BASIC_FORMATS = [
   { id:'exitcivs', label:'Exit Civs', text:'All civilians may now exit the dealership slowly' },
   { id:'exitea', label:'Exit EA', text:'Staff, public services, and early access members may now exit the dealership' },
   { id:'reinvites', label:'Reinvites', text:'Welcome back reinvites! Once you load in, you may leave the spawn.' },
-  { id:'sgr', label:'SGR', text:'This is a Shadow Greenville Roleplay Session - Code: SGR' },
+  { id:'sgr', label:'GRTL', text:'This is a GRTL Session. Code: GRTL' },
   { id:'shops', label:'Shops', text:'Open some shops to enhance the roleplaying experience' },
   { id:'services', label:'Services', multi:{
       options:['DOT','FD','LE'],
@@ -3660,13 +3663,13 @@ function boot(rows, isDemo){
   // Layout couldn't be found at all (e.g. header text got renamed) — fall
   // back to the old parser rather than showing a blank site, though this
   // shouldn't come up in normal use anymore since the Old sheet is gone.
-  console.warn('SGR Host Database: New-format parsing found 0 users — falling back to the Old parser, which will likely also find nothing now that the Old sheet section is gone. This is almost certainly why logins are failing.');
+  console.warn('GRTL Host Database: New-format parsing found 0 users — falling back to the Old parser, which will likely also find nothing now that the Old sheet section is gone. This is almost certainly why logins are failing.');
   SHEET = parseSheetRows(rows);
   finishBoot(isDemo);
 }
 function finishBoot(isDemo){
   if(isDemo){
-    console.warn('SGR Host Database: live sheet fetch failed, showing demo data. Check CONFIG.SHEET_CSV_URL.');
+    console.warn('GRTL Host Database: live sheet fetch failed, showing demo data. Check CONFIG.SHEET_CSV_URL.');
   }
   const remembered = loadRemembered();
   if(remembered && remembered.u && remembered.p){
